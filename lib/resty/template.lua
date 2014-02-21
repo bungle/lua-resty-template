@@ -26,19 +26,15 @@ function template.new(file)
     return self
 end
 
-function template.escape(s)
+function template.escape(s, code)
     if s == nil then
         return ""
     else
-        return s:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
-    end
-end
-
-function template.tescape(s)
-    if s == nil then
-        return ""
-    else
-        return escape(s:gsub("{", "&#123;"):gsub("}", "&#125;"))
+        if code then
+            return template.escape(s:gsub("{", "&#123;"):gsub("}", "&#125;"))
+        else
+            return s:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+        end
     end
 end
 
