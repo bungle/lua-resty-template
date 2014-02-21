@@ -39,7 +39,7 @@ function template.escape(s, code)
         return ""
     else
         if code then
-            return escape(s:gsub("{", "&#123;"):gsub("}", "&#125;"))
+            return template.escape(s:gsub("{", "&#123;"):gsub("}", "&#125;"))
         else
             return s:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
         end
