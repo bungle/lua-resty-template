@@ -1,3 +1,11 @@
+local assert = assert
+local setmetatable = setmetatable
+local gmatch = string.gmatch
+local print = print
+local load = load
+local concat = table.concat
+local open = io.open
+
 local VIEW_ACTIONS = {
     ["{%"] = function(code)
         return code
@@ -43,11 +51,11 @@ function template:compile(file)
     if (template.__c[file]) then
         return template.__c[file]
     end
-    local f = assert(io.open(file, "r"))
+    local f = assert(open(file, "r"))
     local t = f:read("*a") .. "{}"
     f:close()
     local c = {[[local __r = {}]]}
-    for t, b in string.gmatch(t, "([^{]-)(%b{})") do
+    for t, b in gmatch(t, "([^{]-)(%b{})") do
         local act = VIEW_ACTIONS[b:sub(1,2)]
         if act then
             c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
@@ -59,7 +67,7 @@ function template:compile(file)
         end
     end
     c[#c + 1] = "return table.concat(__r)"
-    c = table.concat(c, "\n")
+    c = concat(c, "\n")
     local func = assert(load(c, file, "t", self))
     template.__c[file] = func
     return func, c
