@@ -27,15 +27,19 @@ function template.new(file)
 end
 
 function template.escape(s)
-    if s == nil then return "" end
-    local esc, i = s:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
-    return esc
+    if s == nil then
+        return ""
+    else
+        return s:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+    end
 end
 
 function template.tirescape(s)
-    if s == nil then return "" end
-    local esc, i = s:gsub("{", "&#123;"):gsub("}", "&#125;")
-    return escape(esc)
+    if s == nil then
+        return ""
+    else
+        return escape(s:gsub("{", "&#123;"):gsub("}", "&#125;"))
+    end
 end
 
 function template:compile(file)
