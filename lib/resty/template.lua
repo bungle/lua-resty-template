@@ -7,17 +7,17 @@ local VIEW_ACTIONS = {
     end,
     ["{("] = function(file)
         return ([[
-if not __c["%s"] then
-    __c["%s"] = compile(self, "%s")
+if not self.__c["%s"] then
+    self.__c["%s"] = compile(self, "%s")
 end
-__r[#__r + 1] = __c["%s"]()]]):format(file, file, file, file)
+__r[#__r + 1] = self.__c["%s"]()]]):format(file, file, file, file)
     end,
     ["{<"] = function(code)
         return ([[__r[#__r + 1] = escape(%s)]]):format(code)
     end,
 }
 
-local template = setmetatable({}, { __index = _G })
+local template = setmetatable({ __c = {} }, { __index = _G })
 template.__index = template
 
 function template.new(file)
@@ -34,7 +34,7 @@ function template.escape(s)
     end
 end
 
-function template.tirescape(s)
+function template.tescape(s)
     if s == nil then
         return ""
     else
@@ -44,10 +44,13 @@ end
 
 function template:compile(file)
     file = file or self.file
+    if (template.__c[file]) then
+        return template.__c[file]
+    end
     local f = assert(io.open(file, "r"))
     local t = f:read("*a") .. "{}"
     f:close()
-    local c = {[[local __r, __c = {}, {}]]}
+    local c = {[[local __r = {}]]}
     for t, b in string.gmatch(t, "([^{]-)(%b{})") do
         local act = VIEW_ACTIONS[b:sub(1,2)]
         if act then
@@ -61,7 +64,10 @@ function template:compile(file)
     end
     c[#c + 1] = "return table.concat(__r)"
     c = table.concat(c, "\n")
-    return assert(load(c, file, "t", self)), c
+    local func = assert(load(c, file, "t", self))
+    template.__c[file] = func
+    return func, c
+
 end
 
 function template:render()
