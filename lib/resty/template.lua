@@ -15,10 +15,10 @@ local VIEW_ACTIONS = {
     end,
     ["{("] = function(file)
         return ([[
-if not self.__c["%s"] then
-    self.__c["%s"] = compile(self, "%s")
+if not __c["%s"] then
+    __c["%s"] = compile(self, "%s")
 end
-__r[#__r + 1] = self.__c["%s"]()]]):format(file, file, file, file)
+__r[#__r + 1] = __c["%s"]()]]):format(file, file, file, file)
     end,
     ["{<"] = function(code)
         return ([[__r[#__r + 1] = escape(%s)]]):format(code)
