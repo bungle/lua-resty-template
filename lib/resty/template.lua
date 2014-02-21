@@ -22,7 +22,7 @@ __r[#__r + 1] = self.__c["%s"]()]]):format(file, file, file, file)
     end,
     ["{<"] = function(code)
         return ([[__r[#__r + 1] = escape(%s)]]):format(code)
-    end,
+    end
 }
 
 local template = setmetatable({ __c = {} }, { __index = _G })
