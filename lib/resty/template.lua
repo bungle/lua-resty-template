@@ -63,11 +63,17 @@ function template.compile(file)
     c = concat(c, "\n")
     local func = function(context)
         if context then
-            local tb, mt = context, getmetatable(context)
+            local nm, tb, mt = true, context, getmetatable(context)
             while mt do
+                if mt.__index == template then
+                    nm = false
+                    break
+                end
                 tb, mt = mt, getmetatable(mt)
             end
-            setmetatable(tb, { __index = template })
+            if nm then
+                setmetatable(tb, { __index = template })
+            end
         else
             context = template
         end
