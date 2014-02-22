@@ -6,6 +6,11 @@ local print = print
 local load = load
 local concat = table.concat
 local open = io.open
+local echo = print
+
+if ngx then
+    echo = ngx.print
+end
 
 local VIEW_ACTIONS = {
     ["{%"] = function(code)
@@ -84,12 +89,7 @@ function template.compile(file)
 end
 
 function template.render(file, context)
-    local func = template.compile(file)
-    if (ngx) then
-        return ngx.print(func(context))
-    else
-        return print(func(context))
-    end
+    echo(template.compile(file)(context))
 end
 
 return template
