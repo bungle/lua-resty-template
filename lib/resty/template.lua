@@ -53,9 +53,9 @@ end
 function template.compile(file)
     assert(file, "file was not provided for template.compile(file).")
     if (template.__c[file]) then return template.__c[file] end
-    local f = assert(open(file, "r"))
-    local t = f:read("*a") .. "{}"
-    f:close()
+    local i = assert(open(file, "r"))
+    local t = i:read("*a") .. "{}"
+    i:close()
     local c = {[[local __r = {}]]}
     for t, b in gmatch(t, "([^{]-)(%b{})") do
         local act = VIEW_ACTIONS[b:sub(1,2)]
@@ -70,7 +70,7 @@ function template.compile(file)
     end
     c[#c + 1] = "return table.concat(__r)"
     c = concat(c, "\n")
-    local func = function(context)
+    local f = function(context)
         if context then
             local nm, tb, mt = true, context, getmetatable(context)
             while mt do
@@ -85,8 +85,8 @@ function template.compile(file)
         end
         return assert(load(c, file, "t", context or template))()
     end
-    template.__c[file] = func
-    return func, c
+    template.__c[file] = f
+    return f, c
 end
 
 function template.render(file, context)
