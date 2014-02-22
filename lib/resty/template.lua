@@ -7,8 +7,23 @@ local concat = table.concat
 local open = io.open
 local echo = print
 
-if ngx then
-    echo = ngx.print
+if ngx then echo = ngx.print end
+
+local function setcontext(context, index)
+    if not context then return index end
+    local nm, tb, mt = true, context, getmetatable(context)
+    while mt do
+        if mt.__index == index then
+            nm = false
+            break
+        end
+        tb, mt = mt, getmetatable(mt)
+    end
+    if nm then
+        setmetatable(tb, { __index = index })
+        context.self = context
+    end
+    return context
 end
 
 local VIEW_ACTIONS = {
@@ -23,7 +38,7 @@ local VIEW_ACTIONS = {
 if not __c["%s"] then
     __c["%s"] = compile("%s")
 end
-__r[#__r + 1] = __c["%s"](__ctx)]]):format(file, file, file, file)
+__r[#__r + 1] = __c["%s"](self)]]):format(file, file, file, file)
     end,
     ["{<"] = function(code)
         return ([[__r[#__r + 1] = escape(%s)]]):format(code)
@@ -31,7 +46,6 @@ __r[#__r + 1] = __c["%s"](__ctx)]]):format(file, file, file, file)
 }
 
 local template = setmetatable({ __c = {} }, { __index = _G })
-template.__ctx = template
 
 function template.escape(s, code)
     if s == nil then
@@ -47,7 +61,9 @@ end
 
 function template.new(file)
     assert(file, "file was not provided for template.new(file).")
-    return { render = function(self) template.render(file, self) end }
+    return setcontext({ render = function(self, context)
+        template.render(file, setcontext(context, self))
+    end }, template)
 end
 
 function template.compile(file)
@@ -71,19 +87,7 @@ function template.compile(file)
     c[#c + 1] = "return table.concat(__r)"
     c = concat(c, "\n")
     local f = function(context)
-        if context then
-            local nm, tb, mt = true, context, getmetatable(context)
-            while mt do
-                if mt.__index == template then
-                    nm = false
-                    break
-                end
-                tb, mt = mt, getmetatable(mt)
-            end
-            if nm then setmetatable(tb, { __index = template }) end
-            context.__ctx = context
-        end
-        return assert(load(c, file, "t", context or template))()
+        return assert(load(c, file, "t", setcontext(context, template)))()
     end
     template.__c[file] = f
     return f, c
