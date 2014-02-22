@@ -1,5 +1,6 @@
 local assert = assert
 local setmetatable = setmetatable
+local getmetatable = getmetatable
 local gmatch = string.gmatch
 local print = print
 local load = load
@@ -26,7 +27,6 @@ __r[#__r + 1] = __c["%s"](__ctx)]]):format(file, file, file, file)
 }
 
 local template = setmetatable({ __c = {} }, { __index = _G })
-template.__index = template
 
 function template.escape(s, code)
     if s == nil then
