@@ -1,5 +1,6 @@
 local assert = assert
 local setmetatable = setmetatable
+local getmetatable = getmetatable
 local gmatch = string.gmatch
 local print = print
 local load = load
@@ -68,18 +69,26 @@ function template:compile(file)
     end
     c[#c + 1] = "return table.concat(__r)"
     c = concat(c, "\n")
-    local func = assert(load(c, file, "t", self))
-    template.__c[file] = func
-    return func, c
-
+    return function(context)
+        if context then
+            local tb, mt = context, getmetatable(context)
+            while mt do
+                tb, mt = mt, getmetatable(mt)
+            end
+            context = setmetatable(tb, { __index = self })
+        end
+        local func = assert(load(c, file, "t", context or self))
+        template.__c[file] = func
+        return func()
+    end, c
 end
 
-function template:render()
+function template:render(context)
     local func = self:compile()
     if (ngx) then
-        return ngx.print(func())
+        return ngx.print(func(context))
     else
-        return print(func())
+        return print(func(context))
     end
 end
 
