@@ -45,6 +45,12 @@ function template.escape(s, code)
     end
 end
 
+function template.new(file)
+    return { render = function(self)
+        template.render(file, self)
+    end }
+end
+
 function template.compile(file)
     if (template.__c[file]) then
         return template.__c[file]
