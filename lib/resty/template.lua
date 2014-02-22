@@ -104,7 +104,7 @@ function template.compile(file)
         return assert(load(c, file, "t", setcontext(context, template)))()
     end
     template.__c[file] = f
-    return f, c
+    return f
 end
 
 function template.render(file, context)
