@@ -45,6 +45,20 @@ __r[#__r + 1] = __c["%s"](self)]]):format(file, file, file, file)
     end
 }
 
+local HTML_ENTITIES = {
+    ["&"] = "&amp;",
+    ["<"] = "&lt;",
+    [">"] = "&gt;",
+    ['"'] = "&quot;",
+    ["'"] = "&#39;",
+    ["/"] = "&#47;"
+}
+
+local CODE_ENTITIES = {
+    ["{"] = "&#123;",
+    ["}"] = "&#125;"
+}
+
 local template = setmetatable({ __c = {} }, { __index = _G })
 
 function template.escape(s, code)
@@ -52,9 +66,9 @@ function template.escape(s, code)
         return ""
     else
         if code then
-            return template.escape(s:gsub("{", "&#123;"):gsub("}", "&#125;"))
+            return template.escape(s:gsub([=[[}{]]=], CODE_ENTITIES))
         else
-            return s:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+            return s:gsub([=[[">/<'&]]=], HTML_ENTITIES)
         end
     end
 end
