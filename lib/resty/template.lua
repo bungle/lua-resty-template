@@ -75,9 +75,9 @@ end
 
 function template.new(file)
     assert(file, "file was not provided for template.new(file).")
-    return setmetatable({ render = function(self, context)
+    return setcontext({ render = function(self, context)
         template.render(file, setcontext(context, self))
-    end }, { __index = template })
+    end }, template)
 end
 
 function template.compile(file)
