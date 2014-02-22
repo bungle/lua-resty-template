@@ -16,9 +16,9 @@ local VIEW_ACTIONS = {
     ["{("] = function(file)
         return ([[
 if not __c["%s"] then
-    __c["%s"] = compile(self, "%s")
+    __c["%s"] = compile("%s")
 end
-__r[#__r + 1] = __c["%s"]()]]):format(file, file, file, file)
+__r[#__r + 1] = __c["%s"](__ctx)]]):format(file, file, file, file)
     end,
     ["{<"] = function(code)
         return ([[__r[#__r + 1] = escape(%s)]]):format(code)
@@ -27,12 +27,6 @@ __r[#__r + 1] = __c["%s"]()]]):format(file, file, file, file)
 
 local template = setmetatable({ __c = {} }, { __index = _G })
 template.__index = template
-
-function template.new(file)
-    local self = setmetatable({ file = file }, template)
-    self.self = self
-    return self
-end
 
 function template.escape(s, code)
     if s == nil then
@@ -46,8 +40,7 @@ function template.escape(s, code)
     end
 end
 
-function template:compile(file)
-    file = file or self.file
+function template.compile(file)
     if (template.__c[file]) then
         return template.__c[file]
     end
@@ -68,18 +61,25 @@ function template:compile(file)
     end
     c[#c + 1] = "return table.concat(__r)"
     c = concat(c, "\n")
-    local func = function(__ctx)
-        if __ctx then
-            for k,v in pairs(__ctx) do self[k] = v end
+    local func = function(context)
+        if context then
+            local tb, mt = context, getmetatable(context)
+            while mt do
+                tb, mt = mt, getmetatable(mt)
+            end
+            setmetatable(tb, { __index = template })
+        else
+            context = template
         end
-        return assert(load(c, file, "t", self))()
+        context.__ctx = context
+        return assert(load(c, file, "t", context))()
     end
     template.__c[file] = func
     return func, c
 end
 
-function template:render(context)
-    local func = self:compile()
+function template.render(file, context)
+    local func = template.compile(file)
     if (ngx) then
         return ngx.print(func(context))
     else
