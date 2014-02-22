@@ -27,6 +27,7 @@ __r[#__r + 1] = __c["%s"](__ctx)]]):format(file, file, file, file)
 }
 
 local template = setmetatable({ __c = {} }, { __index = _G })
+template.__ctx = template
 
 function template.escape(s, code)
     if s == nil then
@@ -74,11 +75,9 @@ function template.compile(file)
             if nm then
                 setmetatable(tb, { __index = template })
             end
-        else
-            context = template
+            context.__ctx = context
         end
-        context.__ctx = context
-        return assert(load(c, file, "t", context))()
+        return assert(load(c, file, "t", context or template))()
     end
     template.__c[file] = func
     return func, c
