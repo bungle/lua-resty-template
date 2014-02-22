@@ -46,15 +46,13 @@ function template.escape(s, code)
 end
 
 function template.new(file)
-    return { render = function(self)
-        template.render(file, self)
-    end }
+    assert(file, "file was not provided for template.new(file).")
+    return { render = function(self) template.render(file, self) end }
 end
 
 function template.compile(file)
-    if (template.__c[file]) then
-        return template.__c[file]
-    end
+    assert(file, "file was not provided for template.compile(file).")
+    if (template.__c[file]) then return template.__c[file] end
     local f = assert(open(file, "r"))
     local t = f:read("*a") .. "{}"
     f:close()
@@ -82,9 +80,7 @@ function template.compile(file)
                 end
                 tb, mt = mt, getmetatable(mt)
             end
-            if nm then
-                setmetatable(tb, { __index = template })
-            end
+            if nm then setmetatable(tb, { __index = template }) end
             context.__ctx = context
         end
         return assert(load(c, file, "t", context or template))()
@@ -94,6 +90,7 @@ function template.compile(file)
 end
 
 function template.render(file, context)
+    assert(file, "file was not provided for template.render(file, context).")
     echo(template.compile(file)(context))
 end
 
