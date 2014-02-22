@@ -1,6 +1,5 @@
 local assert = assert
 local setmetatable = setmetatable
-local getmetatable = getmetatable
 local gmatch = string.gmatch
 local print = print
 local load = load
@@ -50,7 +49,6 @@ end
 function template:compile(file)
     file = file or self.file
     if (template.__c[file]) then
-        print('CACHED')
         return template.__c[file]
     end
     local f = assert(open(file, "r"))
