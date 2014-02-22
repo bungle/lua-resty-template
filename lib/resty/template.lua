@@ -30,8 +30,11 @@ local VIEW_ACTIONS = {
     ["{%"] = function(code)
         return code
     end,
-    ["{{"] = function(code)
+    ["{*"] = function(code)
         return ("__r[#__r + 1] = %s"):format(code)
+    end,
+    ["{{"] = function(code)
+        return ([[__r[#__r + 1] = escape(%s)]]):format(code)
     end,
     ["{("] = function(file)
         return ([[
@@ -39,9 +42,6 @@ if not __c["%s"] then
     __c["%s"] = compile("%s")
 end
 __r[#__r + 1] = __c["%s"](self)]]):format(file, file, file, file)
-    end,
-    ["{<"] = function(code)
-        return ([[__r[#__r + 1] = escape(%s)]]):format(code)
     end
 }
 
