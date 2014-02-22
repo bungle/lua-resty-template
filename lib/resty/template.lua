@@ -2,7 +2,6 @@ local assert = assert
 local setmetatable = setmetatable
 local getmetatable = getmetatable
 local gmatch = string.gmatch
-local print = print
 local load = load
 local concat = table.concat
 local open = io.open
