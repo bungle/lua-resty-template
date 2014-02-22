@@ -50,6 +50,7 @@ end
 function template:compile(file)
     file = file or self.file
     if (template.__c[file]) then
+        print('CACHED')
         return template.__c[file]
     end
     local f = assert(open(file, "r"))
@@ -69,18 +70,14 @@ function template:compile(file)
     end
     c[#c + 1] = "return table.concat(__r)"
     c = concat(c, "\n")
-    return function(context)
-        if context then
-            local tb, mt = context, getmetatable(context)
-            while mt do
-                tb, mt = mt, getmetatable(mt)
-            end
-            context = setmetatable(tb, { __index = self })
+    local func = function(__ctx)
+        if __ctx then
+            for k,v in pairs(__ctx) do self[k] = v end
         end
-        local func = assert(load(c, file, "t", context or self))
-        template.__c[file] = func
-        return func()
-    end, c
+        return assert(load(c, file, "t", self))()
+    end
+    template.__c[file] = func
+    return func, c
 end
 
 function template:render(context)
