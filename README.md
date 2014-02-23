@@ -130,6 +130,37 @@ template.render("view.html", { message = "Hello, World!" })
 template.render("view.html", { message = "Hello, Universe!" })
 ```
 
+## Usage Examples
+
+### How to Use Layouts?
+
+##### Lua
+```lua
+local template = require "resty.template"
+local layout = template.new("layout.html")
+layout.title = "Testing lua-resty-template"
+layout.view  = template.compile("view.html")({ message = "Hello, World!" })
+layout:render()
+```
+
+##### layout.html
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{title}}</title>
+</head>
+<body>
+    {*view*}
+</body>
+</html>
+```
+
+##### view.html
+```html
+<h1>{{message}}</h1>
+```
+
 ## Alternatives
 
 You may also look at these:
