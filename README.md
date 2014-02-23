@@ -53,7 +53,7 @@ You may use the following tags in templates:
 
 Creates a new template instance that is used as a context when `render`ed.
 
-Example:
+*Example:*
 
 ```lua
 local template = require "resty.template"
@@ -64,4 +64,16 @@ view.render()
 view.render({ title = "Testing lua-resty-template" })
 ```
 
+`local func = template.compile("template.html")`
 
+Compiles, and caches a template, and returns compiled template as a function that takes context as a parameter.
+
+*Example:*
+
+```lua
+local template = require "resty.template"
+local func     = template.compile("view.html")
+local world    = func({ message = "Hello, World!" })
+local universe = func({ message = "Hello, Universe!" })
+print(world, universe)
+```
