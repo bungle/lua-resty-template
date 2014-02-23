@@ -15,8 +15,7 @@ view.render()
 template.render("view.html", { message = "Hello, World!" })
 ```
 
-*view.html:*
-```html
+*view.html:*```html
 <!DOCTYPE html>
 <html>
 <body>
