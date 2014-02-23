@@ -48,22 +48,9 @@ You may use the following tags in templates:
 * `{( template )}`, includes `template` file
 
 #### Example
-
 ##### Lua
 
 ```lua
-local template = require "resty.template"
--- Using template.new
-local view = template.new("view.html")
-view.message  = "Hello, World!"
-view.render()
--- Using template.render
-template.render("view.html", { message = "Hello, World!" })
-```
-
-##### Lua
-
-```html
 template.render("view.html", {
   title   = "Testing lua-resty-template",
   message = "Hello, World!"
