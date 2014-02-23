@@ -4,7 +4,7 @@
 
 ## Hello World with lua-resty-template
 
-Lua Code:
+*Lua*:
 
 ```lua
 local template = require "resty.template"
@@ -19,7 +19,7 @@ template.render("view.html", { message = "Hello, World!" })
 
 ```
 
-`view.html`:
+*view.html*:
 
 ```html
 <!DOCTYPE html>
@@ -30,7 +30,7 @@ template.render("view.html", { message = "Hello, World!" })
 </html>
 ```
 
-Output:
+*Output*:
 
 ```html
 <!DOCTYPE html>
