@@ -4,7 +4,8 @@
 
 ## Hello, World with lua-resty-template
 
-*Lua:*
+##### Lua
+
 ```lua
 local template = require "resty.template"
 -- Using template.new
@@ -15,7 +16,8 @@ view.render()
 template.render("view.html", { message = "Hello, World!" })
 ```
 
-*view.html:*
+##### view.html
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -25,7 +27,8 @@ template.render("view.html", { message = "Hello, World!" })
 </html>
 ```
 
-*Output:*
+##### Output
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -46,7 +49,8 @@ You may use the following tags in templates:
 
 ### Example
 
-*Lua:*
+##### Lua
+
 ```lua
 local template = require "resty.template"
 -- Using template.new
@@ -57,7 +61,18 @@ view.render()
 template.render("view.html", { message = "Hello, World!" })
 ```
 
-*view.html:*
+##### Lua
+
+```html
+template.render("view.html", {
+  title   = "Testing lua-resty-template",
+  message = "Hello, World!"
+  names = { "James", "Jack", "Anne" }
+})
+```
+
+##### view.html
+
 ```html
 {(header.html)}
 <h1>{{message}}</h1>
@@ -69,7 +84,8 @@ template.render("view.html", { message = "Hello, World!" })
 {(footer.html)}
 ```
 
-*header.html:*
+##### header.html
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -79,7 +95,8 @@ template.render("view.html", { message = "Hello, World!" })
 <body>
 ```
 
-*footer.html:*
+##### footer.html
+
 ```html
 </body>
 </html>
@@ -110,7 +127,7 @@ view.render({ title = "Testing lua-resty-template" })
 
 Compiles, and caches a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
 
-##### Example:
+##### Example
 
 ```lua
 local template = require "resty.template"
