@@ -2,8 +2,6 @@
 
 **lua-resty-template** is a templating engine for OpenResty.
 
-*Originally this was forked from Tor Hveem's `tirtemplate.lua` that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/).*
-
 ## Hello, World with lua-resty-template
 
 ##### Lua
@@ -138,3 +136,5 @@ You may also look at these:
 * etlua (https://github.com/leafo/etlua)
 * lustache (https://github.com/Olivine-Labs/lustache)
 * mixlua (https://github.com/LuaDist/mixlua)
+
+ `lua-resty-template` *was originally forked from Tor Hveem's `tirtemplate.lua` (https://github.com/torhve/LuaWeb/blob/master/tirtemplate.lua) that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/).*
