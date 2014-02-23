@@ -93,7 +93,7 @@ template.render("view.html", { message = "Hello, World!" })
 
 Creates a new template instance that is used as a context when `render`ed.
 
-#### Example
+##### Example
 
 ```lua
 local template = require "resty.template"
@@ -110,7 +110,7 @@ view.render({ title = "Testing lua-resty-template" })
 
 Compiles, and caches a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
 
-#### Example:
+##### Example:
 
 ```lua
 local template = require "resty.template"
@@ -126,7 +126,7 @@ print(world, universe)
 
 Compiles, and outputs template either with `ngx.print` if available, or `print`.
 
-#### Example
+##### Example
 
 ```lua
 local template = require "resty.template"
