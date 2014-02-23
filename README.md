@@ -132,7 +132,7 @@ template.render("view.html", { message = "Hello, Universe!" })
 
 ## Usage Examples
 
-### How to Use Layouts?
+### Views with Layouts
 
 ##### Lua
 ```lua
