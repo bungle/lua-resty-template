@@ -5,7 +5,6 @@
 ## Hello, World with lua-resty-template
 
 ##### Lua
-
 ```lua
 local template = require "resty.template"
 -- Using template.new
@@ -17,7 +16,6 @@ template.render("view.html", { message = "Hello, World!" })
 ```
 
 ##### view.html
-
 ```html
 <!DOCTYPE html>
 <html>
@@ -28,7 +26,6 @@ template.render("view.html", { message = "Hello, World!" })
 ```
 
 ##### Output
-
 ```html
 <!DOCTYPE html>
 <html>
@@ -49,7 +46,6 @@ You may use the following tags in templates:
 
 #### Example
 ##### Lua
-
 ```lua
 template.render("view.html", {
   title   = "Testing lua-resty-template",
@@ -60,7 +56,6 @@ template.render("view.html", {
 ```
 
 ##### view.html
-
 ```html
 {(header.html)}
 <h1>{{message}}</h1>
@@ -73,7 +68,6 @@ template.render("view.html", {
 ```
 
 ##### header.html
-
 ```html
 <!DOCTYPE html>
 <html>
@@ -85,14 +79,12 @@ template.render("view.html", {
 ```
 
 ##### footer.html
-
 ```html
 </body>
 </html>
 ```
 
 ## Lua API
-
 #### template.new
 
 Creates a new template instance that is used as a context when `render`ed.
@@ -100,7 +92,6 @@ Creates a new template instance that is used as a context when `render`ed.
 `local view = template.new("template.html")`
 
 ##### Example
-
 ```lua
 local template = require "resty.template"
 local view = template.new("view.html")
@@ -117,7 +108,6 @@ Compiles, and caches a template and returns the compiled template as a function 
 `local func = template.compile("template.html")`
 
 ##### Example
-
 ```lua
 local template = require "resty.template"
 local func     = template.compile("view.html")
@@ -133,7 +123,6 @@ Compiles, and outputs template either with `ngx.print` if available, or `print`.
 `template.render("template.html", { message = "Hello, World!" })`
 
 ##### Example
-
 ```lua
 local template = require "resty.template"
 template.render("view.html", { message = "Hello, World!" })
