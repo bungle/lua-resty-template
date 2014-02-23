@@ -1,6 +1,7 @@
 local assert = assert
 local setmetatable = setmetatable
 local getmetatable = getmetatable
+local match = string.match
 local gmatch = string.gmatch
 local load = load
 local concat = table.concat
@@ -82,6 +83,7 @@ end
 
 function template.compile(file)
     assert(file, "file was not provided for template.compile(file).")
+    file = match(file, "^()%s*$") and "" or match(file, "^%s*(.*%S)")
     if (template.__c[file]) then return template.__c[file] end
     local i = assert(open(file, "r"))
     local t = i:read("*a") .. "{}"
