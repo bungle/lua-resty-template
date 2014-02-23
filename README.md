@@ -106,9 +106,9 @@ template.render("view.html", {
 
 #### template.new
 
-`local view = template.new("template.html")`
-
 Creates a new template instance that is used as a context when `render`ed.
+
+`local view = template.new("template.html")`
 
 ##### Example
 
@@ -123,9 +123,9 @@ view.render({ title = "Testing lua-resty-template" })
 
 #### template.compile
 
-`local func = template.compile("template.html")`
-
 Compiles, and caches a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
+
+`local func = template.compile("template.html")`
 
 ##### Example
 
@@ -139,9 +139,9 @@ print(world, universe)
 
 #### template.render
 
-`template.render("template.html", { message = "Hello, World!" })`
-
 Compiles, and outputs template either with `ngx.print` if available, or `print`.
+
+`template.render("template.html", { message = "Hello, World!" })`
 
 ##### Example
 
