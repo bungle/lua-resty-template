@@ -47,6 +47,7 @@ You may use the following tags in templates:
 #### Example
 ##### Lua
 ```lua
+local template = require "resty.template"
 template.render("view.html", {
   title   = "Testing lua-resty-template",
   message = "Hello, World!"
