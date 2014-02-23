@@ -2,7 +2,7 @@
 
 **lua-resty-template** is a templating engine for OpenResty.
 
-## Hello World with lua-resty-template
+## Hello, World with lua-resty-template
 
 *Lua:*
 
