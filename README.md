@@ -104,7 +104,7 @@ view.render({ title = "Testing lua-resty-template" })
 
 #### template.compile
 
-Compiles, and caches a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
+Compiles and caches a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
 
 `local func = template.compile("template.html")`
 
@@ -119,7 +119,7 @@ print(world, universe)
 
 #### template.render
 
-Compiles, and outputs template either with `ngx.print` if available, or `print`.
+Compiles, caches and outputs template either with `ngx.print` if available, or `print`.
 
 `template.render("template.html", { message = "Hello, World!" })`
 
