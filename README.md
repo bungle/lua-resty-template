@@ -138,11 +138,11 @@ You may also look at these:
 * mixlua (https://github.com/LuaDist/mixlua)
 * tirtemplate (https://github.com/torhve/LuaWeb/blob/master/tirtemplate.lua)
 
-`lua-resty-template` *was originally forked from Tor Hveem's `tirtemplate.lua` that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/).*
+`lua-resty-template` *was originally forked from Tor Hveem's `tirtemplate.lua` that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thanks for the earllier contributions goest to Tor and Zed.*
 
 ## License
 
-`lua-resty-template` uses three clause BSD license (because it was originally forked from one).
+`lua-resty-template` uses three clause BSD license (because it was originally forked from one that uses it).
 
 ```
 Copyright (c) 2014, Aapo Talvensaari
