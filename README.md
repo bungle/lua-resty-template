@@ -38,6 +38,7 @@ template.render("view.html", { message = "Hello, World!" })
   <h1>Hello, World!</h1>
 </body>
 </html>
+```
 
 ## Template Syntax
 
