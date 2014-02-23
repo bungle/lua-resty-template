@@ -139,3 +139,11 @@ local template = require "resty.template"
 template.render("view.html", { message = "Hello, World!" })
 template.render("view.html", { message = "Hello, Universe!" })
 ```
+
+## Alternatives
+
+You may also look at these:
+
+* etlua (https://github.com/leafo/etlua)
+* lustache (https://github.com/Olivine-Labs/lustache)
+* mixlua (https://github.com/LuaDist/mixlua)
