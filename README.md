@@ -98,7 +98,7 @@ local template = require "resty.template"
 local view = template.new("view.html")
 view.message  = "Hello, World!"
 view.render()
---You may also pass additional context to render:
+-- You may also pass additional context to render
 view.render({ title = "Testing lua-resty-template" })
 ```
 
