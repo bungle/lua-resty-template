@@ -47,7 +47,7 @@ You may use the following tags in templates:
 * `{% lua code %}`, executes Lua code
 * `{( template )}`, includes `template` file
 
-### Example
+#### Example
 
 ##### Lua
 
@@ -104,7 +104,7 @@ template.render("view.html", {
 
 ## Lua API
 
-### template.new
+#### template.new
 
 `local view = template.new("template.html")`
 
@@ -121,7 +121,7 @@ view.render()
 view.render({ title = "Testing lua-resty-template" })
 ```
 
-### template.compile
+#### template.compile
 
 `local func = template.compile("template.html")`
 
@@ -137,7 +137,7 @@ local universe = func({ message = "Hello, Universe!" })
 print(world, universe)
 ```
 
-### template.render
+#### template.render
 
 `template.render("template.html", { message = "Hello, World!" })`
 
