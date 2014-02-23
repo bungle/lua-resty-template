@@ -38,4 +38,12 @@ template.render("view.html", { message = "Hello, World!" })
   <h1>Hello, World!</h1>
 </body>
 </html>
-```
+
+## Template Syntax
+
+You may use the following tags in templates:
+
+* `{{expression}}`, writes result of expression - html escaped
+* `{*expression*}`, writes result of expression 
+* `{% lua code %}`, executes Lua code
+* `{( template )}`, includes `template` file
