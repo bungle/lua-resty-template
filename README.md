@@ -54,7 +54,8 @@ You may use the following tags in templates:
 template.render("view.html", {
   title   = "Testing lua-resty-template",
   message = "Hello, World!"
-  names = { "James", "Jack", "Anne" }
+  names   = { "James", "Jack", "Anne" },
+  jquery  = '<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>' 
 })
 ```
 
@@ -78,6 +79,7 @@ template.render("view.html", {
 <html>
 <head>
   <title>{{title}}</title>
+  {*jquery*}
 </head>
 <body>
 ```
