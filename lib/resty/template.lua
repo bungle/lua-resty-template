@@ -86,7 +86,8 @@ function template.compile(file)
     local i = assert(open(file, "r"))
     local t = i:read("*a") .. "{}"
     i:close()
-    local c = {[[local __r = {}]]}
+    local c = {[[local __r = {}]] }
+    local codeblock = false
     for t, b in gmatch(t, "([^{]-)(%b{})") do
         local act = VIEW_ACTIONS[b:sub(1, 2)]
         local len = #t
@@ -94,7 +95,9 @@ function template.compile(file)
         local elf = len > 0 and "\n" == t:sub(-1, 1)
         if act then
             if slf then
-                c[#c + 1] = [[__r[#__r + 1] = "\n"]]
+                if not codeblock then
+                    c[#c + 1] = [[__r[#__r + 1] = "\n"]]
+                end
                 if len > 1 then
                     c[#c + 1] = "__r[#__r + 1] = [[" .. t:sub(2) .. "]]"
                 end
@@ -104,22 +107,30 @@ function template.compile(file)
                 c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
             end
             c[#c + 1] = act(b:sub(3, -3))
-            if elf and not slf then
-                c[#c + 1] = [[__r[#__r + 1] = "\n"]]
+            if not codeblock then
+                if elf and not slf then
+                    c[#c + 1] = [[__r[#__r + 1] = "\n"]]
+                end
             end
+            codeblock = b:sub(1, 2) == "{%"
         elseif #b > 2 then
             c[#c + 1] = "__r[#__r + 1] = [[" .. t .. b .. "]]"
+            codeblock = false
         else
-            if slf or elf then
-                c[#c + 1] = [[__r[#__r + 1] = "\n"]]
+            if not codeblock then
+                if slf or elf then
+                    c[#c + 1] = [[__r[#__r + 1] = "\n"]]
+                end
             end
             if len > 0 then
                 c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
             end
+            codeblock = false
         end
     end
     c[#c + 1] = "return table.concat(__r)"
     c = concat(c, "\n")
+    print(c)
     local f = function(context)
         local context = context or {}
         return assert(load(c, file, "t", setmetatable({ context = context, template = template }, { __index = function(t, k)
