@@ -132,6 +132,8 @@ view.render()
 view.render({ title = "Testing lua-resty-template" })
 -- If you want to include view context in  replacement context
 view.render(setmetatable({ title = "Testing lua-resty-template" }, { __index = view }))
+-- To get rendered template as a string, you can use tostring
+local result = tostring(view)
 ```
 
 #### template.compile
