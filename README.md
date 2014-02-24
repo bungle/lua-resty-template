@@ -44,6 +44,12 @@ You may use the following tags in templates:
 * `{% lua code %}`, executes Lua code
 * `{( template )}`, includes `template` file
 
+From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
+
+```html
+<h1>{{message}}</h1> == <h1>{{context.message}}</h1>
+```
+
 #### Example
 ##### Lua
 ```lua
@@ -87,29 +93,14 @@ template.render("view.html", {
 
 #### Reserved Context Keys and Remarks
 
-It is adviced that you do not use these in your context tables:
+It is adviced that you do not use these keys in your context tables:
 
-* `__c`, reserved for compiled template cache
-* `compile`, reserved for including files
-* `escape`, reserved for escaping variables
+* `context`,  holds the current context, if set you need to use `{{context.context}}`
+* `template`, holds the current context, if set you need to use `{{context.template}}`
 
 In addition to that with `template.new` you should not overwrite:
 
-* `render`, the function that renders a view
-
-```lua
--- Do Not Do This
-local view = template.new("view.html")
-view.__c     = ""
-view.self    = ""
-view.compile = ""
-view.escape  = ""
-view.render  = ""
--- Also, Do Not Do This
-template.render("view.html", { __c = "", self = "", compile = "", escape = "", render = "" })
--- Or This
-template.compile("view.html")({ __c = "", self = "", compile = "", escape = "", render = "" })
-```
+* `render`, the function that renders a view, obviously ;-)
 
 You should also not `{(view.html)}` recursively
 
