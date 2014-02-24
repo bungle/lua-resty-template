@@ -24,7 +24,7 @@ local VIEW_ACTIONS = {
 if not __c["%s"] then
     __c["%s"] = compile("%s")
 end
-__r[#__r + 1] = __c["%s"](self)]]):format(file, file, file, file)
+__r[#__r + 1] = __c["%s"](context)]]):format(file, file, file, file)
     end
 }
 
@@ -93,7 +93,7 @@ function template.compile(file)
     c = concat(c, "\n")
     local f = function(context)
         context = context or {}
-        return assert(load(c, file, "t", setmetatable({ self = context }, { __index = function(_, k)
+        return assert(load(c, file, "t", setmetatable({ context = context }, { __index = function(_, k)
                 return context[k] or template[k]
             end
         })))()
