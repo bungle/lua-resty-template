@@ -17,7 +17,7 @@ local VIEW_ACTIONS = {
         return ("__r[#__r + 1] = %s"):format(code)
     end,
     ["{{"] = function(code)
-        return ([[__r[#__r + 1] = template.escape(%s)]]):format(code)
+        return ("__r[#__r + 1] = template.escape(%s)"):format(code)
     end,
     ["{("] = function(file)
         return ([[
@@ -89,13 +89,33 @@ function template.compile(file)
     local c = {[[local __r = {}]]}
     for t, b in gmatch(t, "([^{]-)(%b{})") do
         local act = VIEW_ACTIONS[b:sub(1, 2)]
+        local len = t:len()
+        local slf = len > 0 and "\n" == t:sub(1, 1)
+        local elf = len > 0 and "\n" == t:sub(-1, 1)
         if act then
-            c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
+            if slf then
+                c[#c + 1] = [[__r[#__r + 1] = "\n"]]
+                if len > 1 then
+                    c[#c + 1] = "__r[#__r + 1] = [[" .. t:sub(2) .. "]]"
+                end
+            elseif elf and len > 1 then
+                c[#c + 1] = "__r[#__r + 1] = [[" .. t:sub(-2) .. "]]"
+            elseif len > 0 then
+                c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
+            end
             c[#c + 1] = act(b:sub(3, -3))
+            if elf and not slf then
+                c[#c + 1] = [[__r[#__r + 1] = "\n"]]
+            end
         elseif #b > 2 then
             c[#c + 1] = "__r[#__r + 1] = [[" .. t .. b .. "]]"
         else
-            c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
+            if slf or elf then
+                c[#c + 1] = [[__r[#__r + 1] = "\n"]]
+            end
+            if len > 0 then
+                c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
+            end
         end
     end
     c[#c + 1] = "return table.concat(__r)"
