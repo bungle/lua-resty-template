@@ -42,7 +42,7 @@ You may use the following tags in templates:
 * `{{expression}}`, writes result of expression - html escaped
 * `{*expression*}`, writes result of expression 
 * `{% lua code %}`, executes Lua code
-* `{( template )}`, includes `template` file
+* `{(template)}  `, includes `template` file
 
 From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
 
@@ -95,7 +95,7 @@ template.render("view.html", {
 
 It is adviced that you do not use these keys in your context tables:
 
-* `context`,  holds the current context, if set you need to use `{{context.context}}`
+* `context `,  holds the current context, if set you need to use `{{context.context}}`
 * `template`, holds the current context, if set you need to use `{{context.template}}`
 
 In addition to that with `template.new` you should not overwrite:
