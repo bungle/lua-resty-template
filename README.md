@@ -119,7 +119,7 @@ template.compile("view.html")({ __c = "", self = "", compile = "", escape = "", 
 
 Creates a new template instance that is used as a context when `render`ed.
 
-`local view = template.new("template.html")`
+`local view = template.new("template.html")` or `local view = template.new("view.html", "layout")`
 
 ##### Example
 ```lua
