@@ -114,6 +114,29 @@ template.render("view.html", { __c = "", self = "", compile = "", escape = "", r
 template.compile("view.html")({ __c = "", self = "", compile = "", escape = "", render = "" })
 ```
 
+Also note that `lua-resty-template` modifies metatables of context tables.
+
+That's why, please, do not set recursive metatables in context tables
+
+```lua
+-- Do Not Do This
+local view = template.new("view.html")
+-- context table metatables are too deeply nested.
+setmetatable(view, view)
+-- loop in gettable
+setmetatable(view, { __index = view })
+```
+
+You should also not `{(view.html)}` recursively
+
+```lua
+template.render("view.html")
+```
+
+```html
+{(view.html)}
+```
+
 ## Lua API
 #### template.new
 
