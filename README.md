@@ -89,7 +89,7 @@ template.render("view.html", {
 
 It is adviced that you do not use these in your context tables:
 
-* `__c`, reserved for compile cache
+* `__c`, reserved for compiled template cache
 * `self`, reserved for current context table
 * `compile`, reserved for including files
 * `escape`, reserved for escaping variables
@@ -119,7 +119,7 @@ template.compile("view.html")({ __c = "", self = "", compile = "", escape = "", 
 
 Creates a new template instance that is used as a context when `render`ed.
 
-`local view = template.new("template.html")`
+`local view = template.new("template.html")` or `local view = template.new("view.html", "layout.html")`
 
 ##### Example
 ```lua
@@ -166,10 +166,20 @@ template.render("view.html", { message = "Hello, Universe!" })
 ##### Lua
 ```lua
 local template = require "resty.template"
-local layout = template.new("layout.html")
-layout.title = "Testing lua-resty-template"
-layout.view  = template.compile("view.html")({ message = "Hello, World!" })
+local layout   = template.new("layout.html")
+layout.title   = "Testing lua-resty-template"
+layout.view    = template.compile("view.html")({ message = "Hello, World!" })
 layout:render()
+-- Or like this
+template.render("layout.html", {
+  title = "Testing lua-resty-template",
+  view  = template.compile("view.html")({ message = "Hello, World!" })
+})
+-- Or maybe you like this style more (but please remember that view.view is overwritten on render)
+local view     = template.new("view.html", "layout.html")
+view.title     = "Testing lua-resty-template"
+view.message   = "Hello, World!"
+view:render()
 ```
 
 ##### layout.html
@@ -199,7 +209,7 @@ You may also look at these:
 * mixlua (https://github.com/LuaDist/mixlua)
 * tirtemplate (https://github.com/torhve/LuaWeb/blob/master/tirtemplate.lua)
 
-`lua-resty-template` *was originally forked from Tor Hveem's `tirtemplate.lua` that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thanks you Tor, and Zed for the earlier contributions.*
+`lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thank you Tor, and Zed for your earlier contributions.*
 
 ## License
 
