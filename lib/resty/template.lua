@@ -1,6 +1,5 @@
 local assert = assert
 local setmetatable = setmetatable
-local getmetatable = getmetatable
 local match = string.match
 local gmatch = string.gmatch
 local load = load
@@ -9,28 +8,6 @@ local open = io.open
 local echo = print
 
 if ngx then echo = ngx.print end
-
-local function setcontext(context, index)
-    if not context then return index end
-    local i, nm, tb, mt = 1, true, context, getmetatable(context)
-    while mt do
-        assert(i < 11, "context table metatables are too deeply nested.")
-        if mt.__index then
-            if mt.__index == index then
-                nm = false
-                break
-            end
-        else
-            mt.__index = mt
-        end
-        i, tb, mt = i + 1, mt, getmetatable(mt)
-    end
-    if nm then
-        setmetatable(tb, { __index = index })
-        context.self = context
-    end
-    return context
-end
 
 local VIEW_ACTIONS = {
     ["{%"] = function(code)
@@ -82,15 +59,14 @@ end
 function template.new(view, layout)
     assert(view, "file was not provided for template.new(file).")
     if layout then
-        return setcontext({ render = function(self, context)
-            local ctx = setcontext(context, self)
-            ctx.view = template.compile(view)(ctx)
-            template.render(layout, ctx)
-        end }, template)
+        return { render = function(self, context)
+            self.view = template.compile(view)(context or self)
+            template.render(layout, context or self)
+        end }
     else
-        return setcontext({ render = function(self, context)
-            template.render(view, setcontext(context, self))
-        end }, template)
+        return { render = function(self, context)
+            template.render(view, context or self)
+        end }
     end
 end
 
@@ -116,7 +92,10 @@ function template.compile(file)
     c[#c + 1] = "return table.concat(__r)"
     c = concat(c, "\n")
     local f = function(context)
-        return assert(load(c, file, "t", setcontext(context, template)))()
+        return assert(load(c, file, "t", setmetatable({ self = context }, { __index = function(_, k)
+                return context[k] or template[k]
+            end
+        })))()
     end
     template.__c[file] = f
     return f
