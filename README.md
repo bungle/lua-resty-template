@@ -209,7 +209,7 @@ You may also look at these:
 * mixlua (https://github.com/LuaDist/mixlua)
 * tirtemplate (https://github.com/torhve/LuaWeb/blob/master/tirtemplate.lua)
 
-`lua-resty-template` *was originally forked from Tor Hveem's `tirtemplate.lua` that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thanks you Tor, and Zed for the earlier contributions.*
+`lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thanks you Tor, and Zed for the earlier contributions.*
 
 ## License
 
