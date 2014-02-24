@@ -2,7 +2,7 @@
 
 **lua-resty-template** is a templating engine for OpenResty.
 
-## Hello, World with lua-resty-template
+## Hello World with lua-resty-template
 
 ##### Lua
 ```lua
@@ -85,7 +85,7 @@ template.render("view.html", {
 </html>
 ```
 
-#### Reserved Context Keys
+#### Reserved Context Keys and Remarks
 
 It is adviced that you do not use these in your context tables:
 
@@ -112,6 +112,31 @@ view.render  = ""
 template.render("view.html", { __c = "", self = "", compile = "", escape = "", render = "" })
 -- Or This
 template.compile("view.html")({ __c = "", self = "", compile = "", escape = "", render = "" })
+```
+
+Also note that `lua-resty-template` modifies metatables of context tables.
+
+That's why, please do not set recursive metatables in context tables
+
+```lua
+-- Do Not Do This
+local view = template.new("view.html")
+-- context table metatables are too deeply nested (hard limit of 10 metatables).
+setmetatable(view, view)
+-- loop in gettable
+setmetatable(view, { __index = view })
+```
+
+You should also not `{(view.html)}` recursively
+
+##### Lua
+```lua
+template.render("view.html")
+```
+
+##### view.html
+```html
+{(view.html)}
 ```
 
 ## Lua API
