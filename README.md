@@ -129,10 +129,12 @@ setmetatable(view, { __index = view })
 
 You should also not `{(view.html)}` recursively
 
+##### Lua
 ```lua
 template.render("view.html")
 ```
 
+##### view.html
 ```html
 {(view.html)}
 ```
