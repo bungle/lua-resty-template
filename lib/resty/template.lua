@@ -14,9 +14,13 @@ local function setcontext(context, index)
     if not context then return index end
     local nm, tb, mt = true, context, getmetatable(context)
     while mt do
-        if mt.__index == index then
-            nm = false
-            break
+        if mt.__index then
+            if mt.__index == index then
+                nm = false
+                break
+            end
+        else
+            mt.__index = mt
         end
         tb, mt = mt, getmetatable(mt)
     end
