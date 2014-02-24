@@ -89,7 +89,7 @@ function template.compile(file)
     local c = {[[local __r = {}]]}
     for t, b in gmatch(t, "([^{]-)(%b{})") do
         local act = VIEW_ACTIONS[b:sub(1, 2)]
-        local len = t:len()
+        local len = #t
         local slf = len > 0 and "\n" == t:sub(1, 1)
         local elf = len > 0 and "\n" == t:sub(-1, 1)
         if act then
