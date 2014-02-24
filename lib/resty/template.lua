@@ -92,6 +92,7 @@ function template.compile(file)
     c[#c + 1] = "return table.concat(__r)"
     c = concat(c, "\n")
     local f = function(context)
+        context = context or {}
         return assert(load(c, file, "t", setmetatable({ self = context }, { __index = function(_, k)
                 return context[k] or template[k]
             end
