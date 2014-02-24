@@ -42,7 +42,7 @@ You may use the following tags in templates:
 * `{{expression}}`, writes result of expression - html escaped
 * `{*expression*}`, writes result of expression 
 * `{% lua code %}`, executes Lua code
-* `{( templat e)}`, includes `template` file
+* `{( template )}`, includes `template` file
 
 From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
 
