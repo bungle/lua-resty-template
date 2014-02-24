@@ -12,8 +12,9 @@ if ngx then echo = ngx.print end
 
 local function setcontext(context, index)
     if not context then return index end
-    local nm, tb, mt = true, context, getmetatable(context)
+    local i, nm, tb, mt = 1, true, context, getmetatable(context)
     while mt do
+        assert(i < 11, "context table metatables are too deeply nested.")
         if mt.__index then
             if mt.__index == index then
                 nm = false
@@ -22,7 +23,7 @@ local function setcontext(context, index)
         else
             mt.__index = mt
         end
-        tb, mt = mt, getmetatable(mt)
+        i, tb, mt = i + 1, mt, getmetatable(mt)
     end
     if nm then
         setmetatable(tb, { __index = index })
