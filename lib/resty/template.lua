@@ -79,10 +79,10 @@ function template.compile(file)
     i:close()
     local c = {[[local __r = {}]]}
     for t, b in gmatch(t, "([^{]-)(%b{})") do
-        local act = VIEW_ACTIONS[b:sub(1,2)]
+        local act = VIEW_ACTIONS[b:sub(1, 2)]
         if act then
             c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
-            c[#c + 1] = act(b:sub(3,-3))
+            c[#c + 1] = act(b:sub(3, -3))
         elseif #b > 2 then
             c[#c + 1] = "__r[#__r + 1] = [[" .. t .. b .. "]]"
         else
