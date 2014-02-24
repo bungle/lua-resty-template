@@ -100,8 +100,8 @@ In addition to that with `template.new` you should not overwrite:
 * `compile`
 * `escape`
 
-##### Do Not Do This
 ```lua
+-- Do Not Do This
 local view = template.new("view.html")
 view.__c     = ""
 view.self    = ""
