@@ -17,14 +17,14 @@ local VIEW_ACTIONS = {
         return ("__r[#__r + 1] = %s"):format(code)
     end,
     ["{{"] = function(code)
-        return ([[__r[#__r + 1] = escape(%s)]]):format(code)
+        return ([[__r[#__r + 1] = template.escape(%s)]]):format(code)
     end,
     ["{("] = function(file)
         return ([[
-if not __c["%s"] then
-    __c["%s"] = compile("%s")
+if not template.__c["%s"] then
+    template.__c["%s"] = template.compile("%s")
 end
-__r[#__r + 1] = __c["%s"](context)]]):format(file, file, file, file)
+__r[#__r + 1] = template.__c["%s"](context)]]):format(file, file, file, file)
     end
 }
 
@@ -92,9 +92,9 @@ function template.compile(file)
     c[#c + 1] = "return table.concat(__r)"
     c = concat(c, "\n")
     local f = function(context)
-        context = context or {}
-        return assert(load(c, file, "t", setmetatable({ context = context }, { __index = function(_, k)
-                return context[k] or template[k]
+        local context = context or {}
+        return assert(load(c, file, "t", setmetatable({ context = context, template = template }, { __index = function(t, k)
+                return t.context[k] or t.template[k]
             end
         })))()
     end
