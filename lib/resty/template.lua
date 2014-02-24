@@ -59,14 +59,22 @@ end
 function template.new(view, layout)
     assert(view, "file was not provided for template.new(file).")
     if layout then
-        return { render = function(self, context)
-            self.view = template.compile(view)(context or self)
-            template.render(layout, context or self)
-        end }
+        return setmetatable({ render = function(self, context)
+                local context = context or self
+                self.view = template.compile(view)(context)
+                template.render(layout, context)
+            end }, { __tostring = function(self)
+                self.view = template.compile(view)(self)
+                return template.compile(layout)(self)
+            end
+        })
     else
-        return { render = function(self, context)
+        return setmetatable({ render = function(self, context)
             template.render(view, context or self)
-        end }
+            end }, { __tostring = function(self)
+                return template.compile(layout)(self)
+            end
+        })
     end
 end
 
