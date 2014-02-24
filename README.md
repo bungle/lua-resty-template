@@ -101,7 +101,6 @@ In addition to that with `template.new` you should not overwrite:
 * `escape`
 
 ##### Do Not Do This
-
 ```lua
 local view = template.new("view.html")
 view.__c     = ""
