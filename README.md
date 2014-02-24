@@ -175,7 +175,7 @@ template.render("layout.html", {
   title = "Testing lua-resty-template",
   view  = template.compile("view.html")({ message = "Hello, World!" })
 })
--- Or maybe you like this style more (but please remember not to overwrite view.view)
+-- Or maybe you like this style more (but please remember that view.view is overwritten on render)
 local view     = template.new("view.html", "layout.html")
 view.title     = "Testing lua-resty-template"
 view.message   = "Hello, World!"
