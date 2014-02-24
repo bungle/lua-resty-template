@@ -97,7 +97,7 @@ It is adviced that you do not use these keys in your context tables:
 
 * `__r`, holds the compiled template, if set you need to use `{{context.__r}}`
 * `context`, holds the current context, if set you need to use `{{context.context}}`
-* `template`, holds the template table (used in escaping, and compiling child templates), if set you need to use `{{context.template}}`
+* `template`, holds the template table, if set you need to use `{{context.template}}` (used in escaping, and compiling child templates)
 
 In addition to that with `template.new` you should not overwrite:
 
