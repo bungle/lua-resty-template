@@ -2,7 +2,7 @@
 
 **lua-resty-template** is a templating engine for OpenResty.
 
-## Hello, World with lua-resty-template
+## Hello World with lua-resty-template
 
 ##### Lua
 ```lua
@@ -85,7 +85,7 @@ template.render("view.html", {
 </html>
 ```
 
-#### Reserved Context Keys
+#### Reserved Context Keys and Remarks
 
 It is adviced that you do not use these in your context tables:
 
