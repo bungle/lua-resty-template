@@ -89,7 +89,7 @@ template.render("view.html", {
 
 It is adviced that you do not use these in your context tables:
 
-* `__c`, reserved for compile cache
+* `__c`, reserved for compiled template cache
 * `self`, reserved for current context table
 * `compile`, reserved for including files
 * `escape`, reserved for escaping variables
