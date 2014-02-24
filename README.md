@@ -166,10 +166,20 @@ template.render("view.html", { message = "Hello, Universe!" })
 ##### Lua
 ```lua
 local template = require "resty.template"
-local layout = template.new("layout.html")
-layout.title = "Testing lua-resty-template"
-layout.view  = template.compile("view.html")({ message = "Hello, World!" })
+local layout   = template.new("layout.html")
+layout.title   = "Testing lua-resty-template"
+layout.view    = template.compile("view.html")({ message = "Hello, World!" })
 layout:render()
+-- Or like this
+template.render("layout.html", {
+  title = "Testing lua-resty-template",
+  view  = template.compile("view.html")({ message = "Hello, World!" })
+})
+-- Or maybe you like this style more (but please remember not to overwrite view.view)
+local view     = template.new("view.html", "layout.html")
+view.title     = "Testing lua-resty-template"
+view.message   = "Hello, World!"
+view:render()
 ```
 
 ##### layout.html
