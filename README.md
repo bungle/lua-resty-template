@@ -110,6 +110,8 @@ view.escape  = ""
 view.render  = ""
 -- Also, Do Not Do This
 template.render("view.html", { __c = "", self = "", compile = "", escape = "", render = "" })
+-- Or This
+template.compile("view.html")({ __c = "", self = "", compile = "", escape = "", render = "" })
 ```
 
 ## Lua API
