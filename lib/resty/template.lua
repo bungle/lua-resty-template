@@ -64,15 +64,16 @@ function template.new(view, layout)
                 self.view = template.compile(view)(context)
                 template.render(layout, context)
             end }, { __tostring = function(self)
-                self.view = template.compile(view)(self)
-                return template.compile(layout)(self)
+                local context = context or self
+                self.view = template.compile(view)(context)
+                return template.compile(layout)(context)
             end
         })
     else
         return setmetatable({ render = function(self, context)
             template.render(view, context or self)
             end }, { __tostring = function(self)
-                return template.compile(view)(self)
+                return template.compile(view)(context or self)
             end
         })
     end
