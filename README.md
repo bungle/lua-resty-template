@@ -85,6 +85,34 @@ template.render("view.html", {
 </html>
 ```
 
+#### Reserved Context Keys
+
+It is adviced that you do not use these in your context tables:
+
+* `__c`, reserved for compile cache
+* `self`, reserved for current context table
+* `compile`, reserved for including files
+* `escape`, reserved for escaping variables
+
+In addition to that with `template.new` you should not overwrite:
+
+* `render`
+* `compile`
+* `escape`
+
+##### Do Not Do This
+
+```lua
+local view = template.new("view.html")
+view.__c     = ""
+view.self    = ""
+view.compile = ""
+view.escape  = ""
+view.render  = ""
+-- Also, Do Not Do This
+template.render("view.html", { __c = "", self = "", compile = "", escape = "", render = "" })
+```
+
 ## Lua API
 #### template.new
 
