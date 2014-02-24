@@ -74,11 +74,19 @@ function template.escape(s, code)
     end
 end
 
-function template.new(file)
-    assert(file, "file was not provided for template.new(file).")
-    return setcontext({ render = function(self, context)
-        template.render(file, setcontext(context, self))
-    end }, template)
+function template.new(view, layout)
+    assert(view, "file was not provided for template.new(file).")
+    if layout then
+        return setcontext({ render = function(self, context)
+            local ctx = setcontext(context, self)
+            ctx.view = template.compile(view)(ctx)
+            template.render(layout, ctx)
+        end }, template)
+    else
+        return setcontext({ render = function(self, context)
+            template.render(view, setcontext(context, self))
+        end }, template)
+    end
 end
 
 function template.compile(file)
