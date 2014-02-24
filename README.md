@@ -90,15 +90,12 @@ template.render("view.html", {
 It is adviced that you do not use these in your context tables:
 
 * `__c`, reserved for compiled template cache
-* `self`, reserved for current context table
 * `compile`, reserved for including files
 * `escape`, reserved for escaping variables
 
 In addition to that with `template.new` you should not overwrite:
 
-* `render`
-* `compile`
-* `escape`
+* `render`, the function that renders a view
 
 ```lua
 -- Do Not Do This
@@ -112,19 +109,6 @@ view.render  = ""
 template.render("view.html", { __c = "", self = "", compile = "", escape = "", render = "" })
 -- Or This
 template.compile("view.html")({ __c = "", self = "", compile = "", escape = "", render = "" })
-```
-
-Also note that `lua-resty-template` modifies metatables of context tables.
-
-That's why, please do not set recursive metatables in context tables
-
-```lua
--- Do Not Do This
-local view = template.new("view.html")
--- context table metatables are too deeply nested (hard limit of 10 metatables).
-setmetatable(view, view)
--- loop in gettable
-setmetatable(view, { __index = view })
 ```
 
 You should also not `{(view.html)}` recursively
