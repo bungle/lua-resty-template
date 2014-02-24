@@ -72,7 +72,7 @@ function template.new(view, layout)
         return setmetatable({ render = function(self, context)
             template.render(view, context or self)
             end }, { __tostring = function(self)
-                return template.compile(layout)(self)
+                return template.compile(view)(self)
             end
         })
     end
