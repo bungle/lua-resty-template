@@ -1,12 +1,13 @@
 local setmetatable = setmetatable
 local tostring = tostring
 local assert = assert
-local gmatch = string.gmatch
 local concat = table.concat
+local gmatch = string.gmatch
 local load = load
 local open = io.open
 local echo = print
 local type = type
+
 
 if ngx then echo = ngx.print end
 
@@ -22,10 +23,10 @@ local VIEW_ACTIONS = {
     end,
     ["{("] = function(view)
         return ([[
-if not template.__c["%s"] then
-    template.__c["%s"] = template.compile("%s")
+if not template.cache["%s"] then
+    template.cache["%s"] = template.compile("%s")
 end
-__r[#__r + 1] = template.__c["%s"](context)]]):format(view, view, view, view)
+__r[#__r + 1] = template.cache["%s"](context)]]):format(view, view, view, view)
     end
 }
 
@@ -43,7 +44,7 @@ local CODE_ENTITIES = {
     ["}"] = "&#125;"
 }
 
-local template = { __c = {} }
+local template = { cache = {} }
 
 function template.output(s)
     if s == nil then
@@ -106,14 +107,14 @@ end
 
 function template.compile(view)
     assert(view, "view was not provided for template.compile(view).")
-    if template.__c[view] then return template.__c[view] end
+    if template.cache[view] then return template.cache[view] end
     local file, content = open(view, "r"), view
     if file then
         content = file:read("*a")
         file:close()
     end
     local matches, codeblock = gmatch(content .. "{}", "([^{]-)(%b{})"), false
-    local c = {[[local __r = {}]] }
+    local c = {[[local __r = {}]]}
     for t, b in matches do
         local act = VIEW_ACTIONS[b:sub(1, 2)]
         local len = #t
@@ -154,20 +155,21 @@ function template.compile(view)
             codeblock = false
         end
     end
-    c[#c + 1] = "return table.concat(__r)"
+    c[#c + 1] = "return __c(__r)"
     c = concat(c, "\n")
     local f = function(context)
         local context = context or {}
         return assert(load(c, view, "t", setmetatable({
             template = template,
-             context = context
+             context = context,
+                 __c = concat
         }, {
              __index = function(_, k)
                  return context[k] or template[k] or _G[k]
              end
         })))()
     end
-    template.__c[view] = f
+    template.cache[view] = f
     return f
 end
 
