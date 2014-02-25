@@ -7,7 +7,7 @@ local escape = template.escape
 local html = {}
 
 function html.tag(content)
-    return setmetatable({}, {
+    return setmetatable({ content = content }, {
         __index = function(_, tag)
             return function(_, attr)
                 return function()
@@ -31,6 +31,9 @@ function html.tag(content)
                     return concat(r)
                 end
             end
+        end,
+        __tostring = function(self)
+            return self.content
         end
     })
 end
