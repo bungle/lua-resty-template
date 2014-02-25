@@ -194,6 +194,8 @@ template.render("view.html", { message = "Hello, Universe!" })
 
 ### Views with Layouts
 
+Layouts (or Master Pages) can be used to wrap a view inside another view (aka layout).
+
 ##### Lua
 ```lua
 local template = require "resty.template"
@@ -229,6 +231,23 @@ view:render()
 ##### view.html
 ```html
 <h1>{{message}}</h1>
+```
+
+### Calling Methods in Templates
+
+You can call string methods (or other table functions) in templates too.
+
+##### Lua
+```lua
+local template = require "resty.template"
+template.render([[
+<h1>{{header:upper()}}</h1>
+]], { header = "hello, world!})
+```
+
+##### Output
+```html
+<h1>HELLO, WORLD!</h1>
 ```
 
 ## Alternatives
