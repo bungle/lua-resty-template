@@ -246,7 +246,7 @@ You can call string methods (or other table functions) in templates too.
 local template = require "resty.template"
 template.render([[
 <h1>{{header:upper()}}</h1>
-]], { header = "hello, world!})
+]], { header = "hello, world!" })
 ```
 
 ##### Output
