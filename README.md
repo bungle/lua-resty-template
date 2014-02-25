@@ -226,6 +226,11 @@ view:render()
 </html>
 ```
 
+##### view.html
+```html
+<h1>{{message}}</h1>
+```
+
 ### Calling Methods in Templates
 
 You can call string methods (or other table functions) in templates too.
@@ -241,11 +246,6 @@ template.render([[
 ##### Output
 ```html
 <h1>HELLO, WORLD!</h1>
-```
-
-##### view.html
-```html
-<h1>{{message}}</h1>
 ```
 
 ## Alternatives
