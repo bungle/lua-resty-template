@@ -59,7 +59,7 @@ From templates you may access everything in `context` table, and everything in `
 
 ##### A Word About HTML Escaping
 
-Only strings are escaped, functions are called (and results are returned as is), and other types are simply just returned.
+Only strings are escaped, functions are called (recursively) and results are returned as is, tables are `tostring`ified and other types are simply just returned. `nil`s are converted to `""`.
 
 #### Example
 ##### Lua
@@ -246,7 +246,7 @@ You can call string methods (or other table functions) in templates too.
 local template = require "resty.template"
 template.render([[
 <h1>{{header:upper()}}</h1>
-]], { header = "hello, world!})
+]], { header = "hello, world!" })
 ```
 
 ##### Output
