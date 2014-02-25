@@ -1,4 +1,4 @@
-#lua-resty-template
+# lua-resty-template
 
 **lua-resty-template** is a templating engine for OpenResty.
 
