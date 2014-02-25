@@ -41,7 +41,7 @@ local CODE_ENTITIES = {
     ["}"] = "&#125;"
 }
 
-local template = setmetatable({ __c = {} }, { __index = _G })
+local template = { __c = {} }
 
 function template.output(s)
     if s == nil then
@@ -156,9 +156,13 @@ function template.compile(view)
     c = concat(c, "\n")
     local f = function(context)
         local context = context or {}
-        return assert(load(c, view, "t", setmetatable({ context = context, template = template }, { __index = function(t, k)
-                return t.context[k] or t.template[k]
-            end
+        return assert(load(c, view, "t", setmetatable({
+            template = template,
+             context = context
+        }, {
+             __index = function(_, k)
+                 return context[k] or template[k] or _G[k]
+             end
         })))()
     end
     template.__c[view] = f
