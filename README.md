@@ -194,6 +194,8 @@ template.render("view.html", { message = "Hello, Universe!" })
 
 ### Views with Layouts
 
+Layouts (or Master Pages) can be used to wrap a view inside another view (aka layout).
+
 ##### Lua
 ```lua
 local template = require "resty.template"
