@@ -46,7 +46,7 @@ template.render([[
 
 You may use the following tags in templates:
 
-* `{{expression}}`, writes result of expression - html escaped
+* `{{expression}}`, writes result of expression - html escaped (only strings are escaped, functions are called, and other types are returned)
 * `{*expression*}`, writes result of expression 
 * `{% lua code %}`, executes Lua code
 * `{(template)}`, includes `template` file
