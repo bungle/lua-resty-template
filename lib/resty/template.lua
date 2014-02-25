@@ -1,6 +1,5 @@
 local assert = assert
 local setmetatable = setmetatable
-local match = string.match
 local gmatch = string.gmatch
 local load = load
 local concat = table.concat
@@ -19,12 +18,12 @@ local VIEW_ACTIONS = {
     ["{{"] = function(code)
         return ("__r[#__r + 1] = template.escape(%s)"):format(code)
     end,
-    ["{("] = function(file)
+    ["{("] = function(view)
         return ([[
 if not template.__c["%s"] then
     template.__c["%s"] = template.compile("%s")
 end
-__r[#__r + 1] = template.__c["%s"](context)]]):format(file, file, file, file)
+__r[#__r + 1] = template.__c["%s"](context)]]):format(view, view, view, view)
     end
 }
 
@@ -57,7 +56,7 @@ function template.escape(s, code)
 end
 
 function template.new(view, layout)
-    assert(view, "file was not provided for template.new(file).")
+    assert(view, "view was not provided for template.new(view, layout).")
     if layout then
         return setmetatable({ render = function(self, context)
                 local context = context or self
@@ -79,16 +78,17 @@ function template.new(view, layout)
     end
 end
 
-function template.compile(file)
-    assert(file, "file was not provided for template.compile(file).")
-    file = match(file, "^()%s*$") and "" or match(file, "^%s*(.*%S)")
-    if (template.__c[file]) then return template.__c[file] end
-    local i = assert(open(file, "r"))
-    local t = i:read("*a") .. "{}"
-    i:close()
+function template.compile(view)
+    assert(view, "view was not provided for template.compile(view).")
+    if template.__c[view] then return template.__c[view] end
+    local file, content = open(view, "r"), view
+    if file then
+        content = file:read("*a")
+        file:close()
+    end
+    local matches, codeblock = gmatch(content .. "{}", "([^{]-)(%b{})"), false
     local c = {[[local __r = {}]] }
-    local codeblock = false
-    for t, b in gmatch(t, "([^{]-)(%b{})") do
+    for t, b in matches do
         local act = VIEW_ACTIONS[b:sub(1, 2)]
         local len = #t
         local slf = len > 0 and "\n" == t:sub(1, 1)
@@ -132,18 +132,18 @@ function template.compile(file)
     c = concat(c, "\n")
     local f = function(context)
         local context = context or {}
-        return assert(load(c, file, "t", setmetatable({ context = context, template = template }, { __index = function(t, k)
+        return assert(load(c, view, "t", setmetatable({ context = context, template = template }, { __index = function(t, k)
                 return t.context[k] or t.template[k]
             end
         })))()
     end
-    template.__c[file] = f
+    template.__c[view] = f
     return f
 end
 
-function template.render(file, context)
-    assert(file, "file was not provided for template.render(file, context).")
-    echo(template.compile(file)(context))
+function template.render(view, context)
+    assert(view, "view was not provided for template.render(view, context).")
+    echo(template.compile(view)(context))
 end
 
 return template
