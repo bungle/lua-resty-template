@@ -1,10 +1,12 @@
-local assert = assert
 local setmetatable = setmetatable
+local tostring = tostring
+local assert = assert
 local gmatch = string.gmatch
-local load = load
 local concat = table.concat
+local load = load
 local open = io.open
 local echo = print
+local type = type
 
 if ngx then echo = ngx.print end
 
