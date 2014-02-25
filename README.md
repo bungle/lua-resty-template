@@ -4,7 +4,6 @@
 
 ## Hello World with lua-resty-template
 
-##### Lua
 ```lua
 local template = require "resty.template"
 -- Using template.new
@@ -126,7 +125,7 @@ template.render("view.html")
 **Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used.**
 
 ## Lua API
-#### template.new
+#### table template.new(view, layout)
 
 Creates a new template instance that is used as a context when `render`ed.
 
@@ -157,7 +156,7 @@ view.render(setmetatable({ title = "Testing lua-resty-template" }, { __index = v
 local result = tostring(view)
 ```
 
-#### template.compile
+#### function template.compile(view)
 
 Compiles and caches a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
 
@@ -175,7 +174,7 @@ local universe = func({ message = "Hello, Universe!" })
 print(world, universe)
 ```
 
-#### template.render
+#### template.render(view, context)
 
 Compiles, caches and outputs template either with `ngx.print` if available, or `print`.
 
