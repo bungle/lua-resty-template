@@ -130,10 +130,10 @@ template.render("view.html")
 
 Creates a new template instance that is used as a context when `render`ed.
 
-`local view = template.new("template.html")` or
-`local view = template.new("view.html", "layout.html")` or
-`local view = template.new([[<h1>{{message}}</h1>]])` or
 ```lua
+local view = template.new("template.html")            -- or
+local view = template.new("view.html", "layout.html") -- or
+local view = template.new([[<h1>{{message}}</h1>]])   -- or
 local view = template.new([[<h1>{{message}}</h1>]], [[
 <html>
 <body>
@@ -161,8 +161,10 @@ local result = tostring(view)
 
 Compiles and caches a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
 
-`local func = template.compile("template.html")` or
-`local func = template.compile([[<h1>{{message}}</h1>]])`
+```lua
+local func = template.compile("template.html")          -- or
+local func = template.compile([[<h1>{{message}}</h1>]])
+```
 
 ##### Example
 ```lua
@@ -177,8 +179,10 @@ print(world, universe)
 
 Compiles, caches and outputs template either with `ngx.print` if available, or `print`.
 
-`template.render("template.html", { message = "Hello, World!" })` or
-`template.render([[<h1>{{message}}</h1>]], { message = "Hello, World!" })`
+```lua
+template.render("template.html", { message = "Hello, World!" })          -- or
+template.render([[<h1>{{message}}</h1>]], { message = "Hello, World!" })
+```
 
 ##### Example
 ```lua
