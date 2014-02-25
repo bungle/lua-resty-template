@@ -13,7 +13,7 @@ local VIEW_ACTIONS = {
         return code
     end,
     ["{*"] = function(code)
-        return ("__r[#__r + 1] = %s"):format(code)
+        return ("__r[#__r + 1] = template.output(%s)"):format(code)
     end,
     ["{{"] = function(code)
         return ("__r[#__r + 1] = template.escape(%s)"):format(code)
@@ -43,19 +43,36 @@ local CODE_ENTITIES = {
 
 local template = setmetatable({ __c = {} }, { __index = _G })
 
-function template.escape(s, code)
+function template.output(s)
     if s == nil then
         return ""
     else
         local t = type(s)
-        if t == "string" then
-            if code then
+        if t == "function" then
+            return template.output(s())
+        elseif t == "table" then
+            return tostring(s)
+        else
+            return s
+        end
+    end
+end
+
+function template.escape(s, c)
+    if s == nil then
+        return ""
+    else
+        local t = type(s)
+        if t == "string" and #t > 0 then
+            if c then
                 return template.escape(s:gsub([=[[}{]]=], CODE_ENTITIES))
             else
                 return s:gsub([=[[">/<'&]]=], HTML_ENTITIES)
             end
         elseif t == "function" then
-            return s()
+            return template.output(s())
+        elseif t == "table" then
+            return tostring(s)
         else
             return s
         end
