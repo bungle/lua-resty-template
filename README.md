@@ -255,6 +255,12 @@ template.render([[
 <h1>HELLO, WORLD!</h1>
 ```
 
+## FAQ
+
+### How Do I Clear the Template Cache
+
+`lua-resty-template` automatically caches the resulting template functions in `template.cache` table. You can clear the cache by issuing `template.cache = {}`.
+
 ## Alternatives
 
 You may also look at these:
