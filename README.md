@@ -123,7 +123,7 @@ template.render("view.html")
 {(view.html)}
 ```
 
-**Also note that you can provide template either as a file path or as a string. If file exists, it will be used, otherwise string is used.**
+**Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used.**
 
 ## Lua API
 #### template.new
