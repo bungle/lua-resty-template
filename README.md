@@ -13,6 +13,15 @@ view.message  = "Hello, World!"
 view.render()
 -- Using template.render
 template.render("view.html", { message = "Hello, World!" })
+-- Using template string
+template.render([[
+<!DOCTYPE html>
+<html>
+<body>
+  <h1>{{message}}</h1>
+</body>
+</html>
+]],  { message = "Hello, World!" })
 ```
 
 ##### view.html
@@ -42,7 +51,7 @@ You may use the following tags in templates:
 * `{{expression}}`, writes result of expression - html escaped
 * `{*expression*}`, writes result of expression 
 * `{% lua code %}`, executes Lua code
-* `{( template )}`, includes `template` file
+* `{(template)}`, includes `template` file
 
 From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
 
