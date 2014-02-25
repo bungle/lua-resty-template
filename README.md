@@ -133,6 +133,7 @@ Creates a new template instance that is used as a context when `render`ed.
 `local view = template.new("template.html")` or
 `local view = template.new("view.html", "layout.html")` or
 `local view = template.new([[<h1>{{message}}</h1>]])` or
+
 ```lua
 local view = template.new([[<h1>{{message}}</h1>]], [[
 <html>
