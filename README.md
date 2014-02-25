@@ -46,7 +46,7 @@ template.render([[
 
 You may use the following tags in templates:
 
-* `{{expression}}`, writes result of expression - html escaped (only strings are escaped, functions are called, and other types are returned)
+* `{{expression}}`, writes result of expression - html escaped
 * `{*expression*}`, writes result of expression 
 * `{% lua code %}`, executes Lua code
 * `{(template)}`, includes `template` file
@@ -56,6 +56,10 @@ From templates you may access everything in `context` table, and everything in `
 ```html
 <h1>{{message}}</h1> == <h1>{{context.message}}</h1>
 ```
+
+##### A Word About HTML Escaping
+
+Only strings are escaped, functions are called (and results are returned as is), and other types are simply just returned.
 
 #### Example
 ##### Lua
