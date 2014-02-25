@@ -20,8 +20,7 @@ template.render([[
 <body>
   <h1>{{message}}</h1>
 </body>
-</html>
-]],  { message = "Hello, World!" })
+</html>]],  { message = "Hello, World!" })
 ```
 
 ##### view.html
