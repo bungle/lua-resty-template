@@ -46,6 +46,8 @@ local template = setmetatable({ __c = {} }, { __index = _G })
 function template.escape(s, code)
     if s == nil then
         return ""
+    elseif type(s) ~= "string" then
+        return s
     else
         if code then
             return template.escape(s:gsub([=[[}{]]=], CODE_ENTITIES))
