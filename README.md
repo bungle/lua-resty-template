@@ -1,10 +1,9 @@
-#lua-resty-template
+# lua-resty-template
 
 **lua-resty-template** is a templating engine for OpenResty.
 
 ## Hello World with lua-resty-template
 
-##### Lua
 ```lua
 local template = require "resty.template"
 -- Using template.new
@@ -13,6 +12,14 @@ view.message  = "Hello, World!"
 view.render()
 -- Using template.render
 template.render("view.html", { message = "Hello, World!" })
+-- Using template string
+template.render([[
+<!DOCTYPE html>
+<html>
+<body>
+  <h1>{{message}}</h1>
+</body>
+</html>]],  { message = "Hello, World!" })
 ```
 
 ##### view.html
@@ -42,7 +49,7 @@ You may use the following tags in templates:
 * `{{expression}}`, writes result of expression - html escaped
 * `{*expression*}`, writes result of expression 
 * `{% lua code %}`, executes Lua code
-* `{( template )}`, includes `template` file
+* `{(template)}`, includes `template` file
 
 From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
 
@@ -115,12 +122,25 @@ template.render("view.html")
 {(view.html)}
 ```
 
+**Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used.**
+
 ## Lua API
-#### template.new
+#### table template.new(view, layout)
 
 Creates a new template instance that is used as a context when `render`ed.
 
-`local view = template.new("template.html")` or `local view = template.new("view.html", "layout.html")`
+```lua
+local view = template.new("template.html")            -- or
+local view = template.new("view.html", "layout.html") -- or
+local view = template.new([[<h1>{{message}}</h1>]])   -- or
+local view = template.new([[<h1>{{message}}</h1>]], [[
+<html>
+<body>
+  {*view*}
+</body>
+</html>
+]])
+```
 
 ##### Example
 ```lua
@@ -136,11 +156,14 @@ view.render(setmetatable({ title = "Testing lua-resty-template" }, { __index = v
 local result = tostring(view)
 ```
 
-#### template.compile
+#### function template.compile(view)
 
 Compiles and caches a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
 
-`local func = template.compile("template.html")`
+```lua
+local func = template.compile("template.html")          -- or
+local func = template.compile([[<h1>{{message}}</h1>]])
+```
 
 ##### Example
 ```lua
@@ -151,11 +174,14 @@ local universe = func({ message = "Hello, Universe!" })
 print(world, universe)
 ```
 
-#### template.render
+#### template.render(view, context)
 
 Compiles, caches and outputs template either with `ngx.print` if available, or `print`.
 
-`template.render("template.html", { message = "Hello, World!" })`
+```lua
+template.render("template.html", { message = "Hello, World!" })          -- or
+template.render([[<h1>{{message}}</h1>]], { message = "Hello, World!" })
+```
 
 ##### Example
 ```lua
