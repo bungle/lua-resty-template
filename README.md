@@ -53,13 +53,13 @@ You may use the following tags in templates:
 
 From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
 
-##### A Word About HTML Escaping
-
-Only strings are escaped, functions are called (and results are returned as is), and other types are simply just returned.
-
 ```html
 <h1>{{message}}</h1> == <h1>{{context.message}}</h1>
 ```
+
+##### A Word About HTML Escaping
+
+Only strings are escaped, functions are called (and results are returned as is), and other types are simply just returned.
 
 #### Example
 ##### Lua
