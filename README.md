@@ -357,6 +357,64 @@ You may also look at these:
 
 `lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thank you Tor, and Zed for your earlier contributions.*
 
+## Benchmarks
+
+There is a small microbenchmark located here:
+https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template/microbenchmark.lua
+
+##### Lua
+
+```lua
+local benchmark = require "resty.template.microbenchmark"
+benchmark.run()
+```
+
+Here are some results from my laptop.
+
+##### Lua 5.2.2  Copyright (C) 1994-2013 Lua.org, PUC-Rio
+
+```
+10.000 Iterations in Each Test
+Compilation Time: 0.24 (no template cache)
+Compilation Time: 0.00 (with template cache)
+  Execution Time: 0.66 (same template)
+  Execution Time: 0.38 (same template cached)
+  Execution Time: 1.05 (different template)
+  Execution Time: 0.69 (different template cached)
+  Execution Time: 1.13 (different template, different context)
+  Execution Time: 0.79 (different template, different context cached)
+```
+
+##### LuaJIT 2.0.2 -- Copyright (C) 2005-2013 Mike Pall. http://luajit.org/
+
+```
+10.000 Iterations in Each Test
+Compilation Time: 0.14 (no template cache)
+Compilation Time: 0.01 (with template cache)
+  Execution Time: 0.35 (same template)
+  Execution Time: 0.19 (same template cached)
+  Execution Time: 6.34 (different template)
+  Execution Time: 1.03 (different template cached)
+  Execution Time: 8.54 (different template, different context)
+  Execution Time: 1.37 (different template, different context cached)
+```
+
+##### LuaJIT 2.1.0-alpha -- Copyright (C) 2005-2014 Mike Pall. http://luajit.org/
+
+```
+10.000 Iterations in Each Test
+Compilation Time: 0.14 (no template cache)
+Compilation Time: 0.01 (with template cache)
+  Execution Time: 0.31 (same template)
+  Execution Time: 0.19 (same template cached)
+  Execution Time: 4.96 (different template)
+  Execution Time: 1.00 (different template cached)
+  Execution Time: 7.18 (different template, different context)
+  Execution Time: 1.32 (different template, different context cached)
+```
+
+I have not yet compared the results against the alternatives. There seems to be some regressions with LuaJIT (although it seems to work quite alright with cached templates - the most important thing in production, IMO. I will look forward to work these LuaJIT regressions in a future (there has been talks about `table.clear`, `table.new`, and string buffers that could help a lot in parsing templates (which is probably the achiles heel of LuaJIT).
+
 ## License
 
 `lua-resty-template` uses three clause BSD license (because it was originally forked from one that uses it).
