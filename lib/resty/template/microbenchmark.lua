@@ -17,14 +17,14 @@ local function run(iterations)
     {% end %}
     </ul>]]
 
-    print(string.format("%d Iterations in Each Test", iterations))
+    print(string.format("Running %d iterations in each test", iterations))
 
     local x = os.clock()
     for i = 1, iterations do
         template.compile(view)
         template.cache = {}
     end
-    print(string.format("Compilation Time: %.4f (no template cache)", os.clock() - x))
+    print(string.format("Compilation Time: %.4f (template)", os.clock() - x))
 
     template.compile(view)
 
@@ -32,7 +32,7 @@ local function run(iterations)
     for i = 1, iterations do
         template.compile(view)
     end
-    print(string.format("Compilation Time: %.4f (with template cache)", os.clock() - x))
+    print(string.format("Compilation Time: %.4f (template cached)", os.clock() - x))
 
     local context = { "Emma", "James", "Nicholas", "Mary" }
 

@@ -1,4 +1,3 @@
-local crc32 = require "resty.template.crc32"
 local setmetatable = setmetatable
 local tostring = tostring
 local assert = assert
@@ -95,8 +94,7 @@ end
 
 function template.compile(view)
     assert(view, "view was not provided for template.compile(view).")
-    local crc = crc32(view)
-    if template.cache[crc] then return template.cache[crc] end
+    if template.cache[view] then return template.cache[view] end
     local file, content = open(view, "r"), view
     if file then
         content = file:read("*a")
@@ -158,7 +156,7 @@ function template.compile(view)
              end
         })))()
     end
-    template.cache[crc] = f
+    template.cache[view] = f
     return f
 end
 
