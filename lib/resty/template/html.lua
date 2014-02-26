@@ -1,3 +1,5 @@
+-- This is just a stupid example
+-- And this is horrible. Still looking for other ways to extend templates.
 local template = require "resty.template"
 local setmetatable = setmetatable
 local pairs = pairs
