@@ -6,6 +6,8 @@ if not ok then
 end
 
 local function run()
+    collectgarbage("stop")
+
     local view = [[
     <ul>
     {% for _, v in ipairs(context) do %}
@@ -42,7 +44,6 @@ local function run()
     print(string.format("  Execution Time: %.2f (same template)", os.clock() - x))
 
     template.cache = {}
-
     template.compile(view)
 
     local x = os.clock()
@@ -88,6 +89,8 @@ local function run()
         template.compile(views[i])(contexts[i])
     end
     print(string.format("  Execution Time: %.2f (different template, different context cached)", os.clock() - x))
+
+    collectgarbage("restart")
 end
 
 return {
