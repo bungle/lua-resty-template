@@ -11,18 +11,10 @@ local type = type
 if ngx then echo = ngx.print end
 
 local VIEW_ACTIONS = {
-    ["{%"] = function(code)
-        return code
-    end,
-    ["{*"] = function(code)
-        return ("__r[#__r + 1] = template.output(%s)"):format(code)
-    end,
-    ["{{"] = function(code)
-        return ("__r[#__r + 1] = template.escape(%s)"):format(code)
-    end,
-    ["{("] = function(view)
-        return ([[__r[#__r + 1] = template.compile("%s")(context)]]):format(view)
-    end
+    ["{%"] = function(code) return code end,
+    ["{*"] = function(code) return ("__r[#__r + 1] = template.output(%s)"):format(code) end,
+    ["{{"] = function(code) return ("__r[#__r + 1] = template.escape(%s)"):format(code) end,
+    ["{("] = function(view) return ([[__r[#__r + 1] = template.compile("%s")(context)]]):format(view) end
 }
 
 local HTML_ENTITIES = {
