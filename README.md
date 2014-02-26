@@ -174,8 +174,8 @@ local func = template.compile([[<h1>{{message}}</h1>]])
 ```lua
 local template = require "resty.template"
 local func     = template.compile("view.html")
-local world    = func({ message = "Hello, World!" })
-local universe = func({ message = "Hello, Universe!" })
+local world    = func{ message = "Hello, World!" }
+local universe = func{ message = "Hello, Universe!" }
 print(world, universe)
 ```
 
@@ -206,12 +206,12 @@ Layouts (or Master Pages) can be used to wrap a view inside another view (aka la
 local template = require "resty.template"
 local layout   = template.new("layout.html")
 layout.title   = "Testing lua-resty-template"
-layout.view    = template.compile("view.html")({ message = "Hello, World!" })
+layout.view    = template.compile("view.html"){ message = "Hello, World!" }
 layout:render()
 -- Or like this
 template.render("layout.html", {
   title = "Testing lua-resty-template",
-  view  = template.compile("view.html")({ message = "Hello, World!" })
+  view  = template.compile("view.html"){ message = "Hello, World!" }
 })
 -- Or maybe you like this style more (but please remember that view.view is overwritten on render)
 local view     = template.new("view.html", "layout.html")
@@ -267,8 +267,13 @@ You may also look at these:
 
 * etlua (https://github.com/leafo/etlua)
 * lustache (https://github.com/Olivine-Labs/lustache)
+* lust (https://github.com/weshoke/Lust)
+* templet (http://colberg.org/lua-templet/)
+* luahtml (https://github.com/TheLinx/LuaHTML)
 * mixlua (https://github.com/LuaDist/mixlua)
 * tirtemplate (https://github.com/torhve/LuaWeb/blob/master/tirtemplate.lua)
+* cosmo (http://cosmo.luaforge.net/)
+* lua-codegen (http://fperrad.github.io/lua-CodeGen/)
 
 `lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thank you Tor, and Zed for your earlier contributions.*
 
