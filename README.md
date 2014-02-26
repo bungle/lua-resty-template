@@ -205,7 +205,7 @@ While `lua-resty-template` does not have much infrastucture or ways to extend it
 * Add local functions either to `template` table or `context` table
 * Use metamethods in your tables
 
-while modifying global types seems convenient, it can have nasty side effects. That's why I suggest you to look at these libraries, and articles first:
+While modifying global types seems convenient, it can have nasty side effects. That's why I suggest you to look at these libraries, and articles first:
 
 * Method Chaining Wrapper (http://lua-users.org/wiki/MethodChainingWrapper)
 * Moses (https://github.com/Yonaba/Moses)
