@@ -6,7 +6,6 @@ if not ok then
 end
 
 local function run()
-
     local view = [[
     <ul>
     {% for _, v in ipairs(context) do %}
