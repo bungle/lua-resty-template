@@ -8,7 +8,6 @@ local open = io.open
 local echo = print
 local type = type
 
-
 if ngx then echo = ngx.print end
 
 local VIEW_ACTIONS = {
@@ -22,11 +21,7 @@ local VIEW_ACTIONS = {
         return ("__r[#__r + 1] = template.escape(%s)"):format(code)
     end,
     ["{("] = function(view)
-        return ([[
-if not template.cache["%s"] then
-    template.cache["%s"] = template.compile("%s")
-end
-__r[#__r + 1] = template.cache["%s"](context)]]):format(view, view, view, view)
+        return ([[__r[#__r + 1] = template.compile("%s")(context)]]):format(view)
     end
 }
 
