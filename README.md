@@ -221,7 +221,7 @@ local template = require "resty.template"
 template._ = _
 ```
 
-Then you can use `_` inside your templates. I created one example template helper that you can be found here:
+Then you can use `_` inside your templates. I created one example template helper that can be found from here:
 https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template/html.lua
 
 ##### Lua
