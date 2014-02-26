@@ -195,6 +195,86 @@ template.render("view.html", { message = "Hello, World!" })
 template.render("view.html", { message = "Hello, Universe!" })
 ```
 
+## Template Helpers
+
+While `lua-resty-template` does not have much infrastucture or ways to extend it, you still have a few possibilities that you may try.
+
+* Adding methods to global `string`, and `table` types (not encouraged, though)
+* Wrap your values with something before adding them in context
+* Create global functions
+* Add local functions either to `template` table or `context` table
+* Use metamethods in your tables
+
+while modifying global types seems convenient, it can have nasty side effects. That's why I suggest you to look at these libraries, and articles first:
+
+* Method Chaining Wrapper (http://lua-users.org/wiki/MethodChainingWrapper)
+* Moses (https://github.com/Yonaba/Moses)
+* underscore-lua (https://github.com/jtarchie/underscore-lua)
+
+You could for example add Moses' or Underscore's `_` to template table or context table.
+
+##### Example
+
+```lua
+local _ = require "moses"
+local template = require "resty.template"
+template._ = _
+```
+
+Then you can use `_` inside your templates. I created one example template helper that you can be found here:
+https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template/html.lua
+
+##### Lua
+
+```lua
+local template = require "resty.template"
+local html = require "resty.template.html"
+
+template.render([[
+<ul>
+{% for _, person in ipairs(context) do %}
+    {*html.li(person.name)*}
+{% end %}
+</ul>
+<table>
+{% for _, person in ipairs(context) do %}
+    <tr data-sort="{{(person.name or ""):lower()}}">
+        {*html.td{ id = person.id }(person.name)*}
+    </tr>
+{% end %}
+</table>]], {
+    { id = 1, name = "Emma"},
+    { id = 2, name = "James" },
+    { id = 3, name = "Nicholas" },
+    { id = 4 }
+})
+```
+
+##### Output
+
+```html
+<ul>
+    <li>Emma</li>
+    <li>James</li>
+    <li>Nicholas</li>
+    <li />
+</ul>
+<table>
+    <tr data-sort="emma">
+        <td id="1">Emma</td>
+    </tr>
+    <tr data-sort="james">
+        <td id="2">James</td>
+    </tr>
+    <tr data-sort="nicholas">
+        <td id="3">Nicholas</td>
+    </tr>
+    <tr data-sort="">
+        <td id="4" />
+    </tr>
+</table>
+```
+
 ## Usage Examples
 
 ### Views with Layouts
