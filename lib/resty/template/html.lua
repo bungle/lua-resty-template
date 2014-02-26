@@ -17,7 +17,7 @@ local function tag(name, content, attr)
             r[#r + 1] = concat(a, " ")
         end
     end
-    if content then
+    if type(content) == "string" then
         r[#r + 1] = ">"
         r[#r + 1] = escape(content)
         r[#r + 1] = "</"
