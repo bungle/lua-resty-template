@@ -11,8 +11,7 @@ local function run()
     {% for _, v in ipairs(context) do %}
         <li>{{v}}</li>
     {% end %}
-    </ul>
-    </table>]]
+    </ul>]]
 
     print("10.000 Iterations in Each Test")
 
