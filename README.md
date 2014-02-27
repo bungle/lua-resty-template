@@ -163,7 +163,7 @@ local result = tostring(view)
 
 #### function template.compile(view)
 
-Compiles and caches a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
+Parses, compiles and caches a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
 
 ```lua
 local func = template.compile("template.html")          -- or
@@ -181,7 +181,7 @@ print(world, universe)
 
 #### template.render(view, context)
 
-Compiles, caches and outputs template either with `ngx.print` if available, or `print`.
+Parses, compiles, caches and outputs template either with `ngx.print` if available, or `print`.
 
 ```lua
 template.render("template.html", { message = "Hello, World!" })          -- or
@@ -193,6 +193,15 @@ template.render([[<h1>{{message}}</h1>]], { message = "Hello, World!" })
 local template = require "resty.template"
 template.render("view.html", { message = "Hello, World!" })
 template.render("view.html", { message = "Hello, Universe!" })
+```
+
+#### string template.parse(view)
+
+Parses template file or string, and generates a parsed template string. This may come usefull when debugging templates.
+
+```lua
+local t1 = template.parse("template.html")
+local t2 = template.parse([[<h1>{{message}}</h1>]])
 ```
 
 ## Template Helpers
