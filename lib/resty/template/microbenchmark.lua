@@ -8,8 +8,6 @@ end
 local function run(iterations)
     local  print, compile, iterations = print, template.compile, iterations or 10000
 
-    collectgarbage()
-
     local view = [[
     <ul>
     {% for _, v in ipairs(context) do %}
