@@ -131,7 +131,7 @@ template.render("view.html")
 
 ## Lua API
 
-#### boolean template.caching(boolean|nil)
+#### boolean template.caching(boolean or nil)
 
 This function enables or disables template caching, or if no parameters are passed, returns current state of template caching. By default template caching is enabled, but you may want to disable it on development or low-memory situations.
 
