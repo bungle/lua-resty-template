@@ -130,6 +130,23 @@ template.render("view.html")
 **Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used.**
 
 ## Lua API
+
+#### boolean template.caching(boolean or nil)
+
+This function enables or disables template caching, or if no parameters are passed, returns current state of template caching. By default template caching is enabled, but you may want to disable it on development or low-memory situations.
+
+```lua
+local template = require "resty.template"   
+-- Get current state of template caching
+local enabled = template.caching()
+-- Disable template caching
+template.caching(false)
+-- Enable template caching
+template.caching(true)
+```
+
+Please note that if the template was already cached when compiling a template or loading a precompiled template, the cached version will be returned. You may want to flush cache with `template.cache = {}` to ensure that your template really gets recompiled or loaded.
+
 #### table template.new(view, layout, precompiled)
 
 Creates a new template instance that is used as a context when `render`ed. If you have precompiled your `view` (and `layout`), please set `precompiled` to `true`.
