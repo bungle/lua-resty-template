@@ -32,7 +32,8 @@ local CODE_ENTITIES = {
     ["}"] = "&#125;"
 }
 
-local template = { cache = {}, __caching = true }
+local caching = true
+local template = { cache = {} }
 
 local context = setmetatable({ context = {}, template = template, __c = concat }, {
     __index = function(t, k)
@@ -41,13 +42,10 @@ local context = setmetatable({ context = {}, template = template, __c = concat }
 })
 
 function template.caching(enable)
-    if enable == nil then
-        return template.__caching == true
-    else
-        enable = enable == true
-        template.__caching = enable
-        return enable
+    if enable ~= nil then
+        caching = enable == true
     end
+    return caching
 end
 
 function template.output(s)
@@ -149,7 +147,7 @@ function template.load(view)
     else
         func = assert(load(view, nil, "b", context))
     end
-    if template.caching then
+    if caching then
         cache[view] = func
     end
     return func
@@ -162,7 +160,7 @@ function template.compile(view)
         return cache[view]
     end
     local func = assert(load(template.parse(view), view, "t", context))
-    if template.caching then
+    if caching then
         cache[view] = func
     end
     return func
