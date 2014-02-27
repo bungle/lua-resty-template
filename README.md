@@ -49,9 +49,12 @@ You may use the following tags in templates:
 * `{{expression}}`, writes result of expression - html escaped
 * `{*expression*}`, writes result of expression 
 * `{% lua code %}`, executes Lua code
-* `{(template)}`, includes `template` file (if you precompile your templates, inclusion expects that all the included templates are precompiled too, and vise versa)
+* `{(template)}`, includes `template` file
 
 From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
+
+*If you precompile your templates, the inclusion `{(file)}` expects that all the included templates are precompiled too. So you cannot mix, and match text, and binary templates with this.*
+
 
 ```html
 <h1>{{message}}</h1> == <h1>{{context.message}}</h1>
