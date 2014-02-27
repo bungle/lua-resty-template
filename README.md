@@ -215,9 +215,9 @@ template.render("view.html", { message = "Hello, World!" })
 template.render("view.html", { message = "Hello, Universe!" })
 ```
 
-#### string template.parse(view)
+#### string template.parse(view, precompiled)
 
-Parses template file or string, and generates a parsed template string. This may come usefull when debugging templates.
+Parses template file or string, and generates a parsed template string. This may come usefull when debugging templates. `precompiled` parameter is optional, and it affects only on `{(file)}` tag rendering (`template.compile("%s")(context)` or `template.load("%s")(context)`).
 
 ```lua
 local t1 = template.parse("template.html")
