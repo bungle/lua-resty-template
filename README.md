@@ -228,7 +228,7 @@ local t2 = template.parse([[<h1>{{message}}</h1>]])
 
 Precompiles template as a binary chunk. This binary chunk can be written out as a file, or used directly with `template.load`. For convenience you may optionally specify `path` argument to output binary chunk to file.
 
-```
+```lua
 local view = [[
 <h1>{{title}}</h1>
 <ul>
