@@ -33,7 +33,7 @@ local function run(iterations)
     for i = 1, iterations do
         compile(view)
     end
-    print(string.format("Compilation Time: %.4f (template template.cached)", os.clock() - x))
+    print(string.format("Compilation Time: %.4f (template cached)", os.clock() - x))
 
     local context = { "Emma", "James", "Nicholas", "Mary" }
 
@@ -53,7 +53,7 @@ local function run(iterations)
     for i = 1, iterations do
         compile(view)(context)
     end
-    print(string.format("  Execution Time: %.4f (same template template.cached)", os.clock() - x))
+    print(string.format("  Execution Time: %.4f (same template cached)", os.clock() - x))
 
     template.cache = {}
 
@@ -72,7 +72,7 @@ local function run(iterations)
     for i = 1, iterations do
         compile(views[i])(context)
     end
-    print(string.format("  Execution Time: %.4f (different template template.cached)", os.clock() - x))
+    print(string.format("  Execution Time: %.4f (different template cached)", os.clock() - x))
 
     template.cache = {}
     local contexts = new_tab(iterations, 0)
@@ -91,7 +91,7 @@ local function run(iterations)
     for i = 1, iterations do
         compile(views[i])(contexts[i])
     end
-    print(string.format("  Execution Time: %.4f (different template, different context template.cached)", os.clock() - x))
+    print(string.format("  Execution Time: %.4f (different template, different context cached)", os.clock() - x))
 
     gc("restart")
 end
