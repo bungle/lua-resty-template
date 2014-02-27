@@ -53,7 +53,7 @@ You may use the following tags in templates:
 
 From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
 
-**If you precompile your templates, the inclusion `{(file)}` expects that all the included templates are precompiled too. So you cannot mix, and match text, and binary templates with this.**
+**If you precompile your templates, the inclusion `{(file)}` expects that all the included templates are precompiled too. So you cannot mix and match text and binary templates with this.**
 
 
 ```html
@@ -183,7 +183,7 @@ local result = tostring(view)
 
 #### function template.compile(view)
 
-Parses, compiles and caches a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
+Parses, compiles and caches (if caching is enabled) a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
 
 ```lua
 local func = template.compile("template.html")          -- or
@@ -201,7 +201,7 @@ print(world, universe)
 
 #### template.render(view, context, precompiled)
 
-Parses, compiles, caches and outputs template either with `ngx.print` if available, or `print`. If you have precompiled your view, please set `precompiled` to `true`.
+Parses, compiles, caches (if caching is enabled) and outputs template either with `ngx.print` if available, or `print`. If you have precompiled your view, please set `precompiled` to `true`.
 
 ```lua
 template.render("template.html", { message = "Hello, World!" })          -- or
@@ -217,7 +217,7 @@ template.render("view.html", { message = "Hello, Universe!" })
 
 #### string template.parse(view, precompile)
 
-Parses template file or string, and generates a parsed template string. This may come usefull when debugging templates. `precompile` parameter is optional, and it affects only on `{(file)}` tag rendering (`template.compile("%s")(context)` or `template.load("%s")(context)`).
+Parses template file or string, and generates a parsed template string. This may come useful when debugging templates. `precompile` parameter is optional, and it affects only on `{(file)}` tag rendering (`template.compile("%s")(context)` or `template.load("%s")(context)`).
 
 ```lua
 local t1 = template.parse("template.html")
@@ -428,7 +428,7 @@ template.render([[
 
 ### How Do I Clear the Template Cache
 
-`lua-resty-template` automatically caches the resulting template functions in `template.cache` table. You can clear the cache by issuing `template.cache = {}`.
+`lua-resty-template` automatically caches (if caching is enabled) the resulting template functions in `template.cache` table. You can clear the cache by issuing `template.cache = {}`.
 
 ## Alternatives
 
