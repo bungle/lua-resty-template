@@ -71,36 +71,59 @@ end
 
 function template.new(view, layout)
     assert(view, "view was not provided for template.new(view, layout).")
+    local render, compile = template.render, template.compile
     if layout then
         return setmetatable({ render = function(self, context)
-                local context = context or self
-                self.view = template.compile(view)(context)
-                template.render(layout, context)
-            end }, { __tostring = function(self)
-                local context = context or self
-                self.view = template.compile(view)(context)
-                return template.compile(layout)(context)
-            end
+            local context = context or self
+            self.view = compile(view)(context)
+            render(layout, context)
+        end }, { __tostring = function(self)
+            local context = context or self
+            self.view = compile(view)(context)
+            return compile(layout)(context)
+        end
         })
     else
         return setmetatable({ render = function(self, context)
-            template.render(view, context or self)
-            end }, { __tostring = function(self)
-                return template.compile(view)(context or self)
-            end
+            render(view, context or self)
+        end }, { __tostring = function(self)
+            return compile(view)(context or self)
+        end
         })
     end
 end
 
 function template.compile(view)
     assert(view, "view was not provided for template.compile(view).")
-    if template.cache[view] then return template.cache[view] end
-    local file, content = open(view, "r"), view
+    local parse = template.parse
+    local cache = template.cache
+    if cache[view] then
+        return cache[view]
+    else
+        local parsed = parse(view)
+        cache[view] = function(context)
+            local context = context or {}
+            return assert(load(parsed, view, "t", setmetatable({
+                template = template,
+                context = context,
+                __c = concat
+            }, {
+                __index = function(_, k)
+                    return context[k] or template[k] or _G[k]
+                end
+            })))()
+        end
+        return cache[view]
+    end
+end
+
+function template.parse(view)
+    local file = open(view, "r")
     if file then
-        content = file:read("*a")
+        view = file:read("*a")
         file:close()
     end
-    local matches, codeblock = gmatch(content .. "{}", "([^{]-)(%b{})"), false
+    local matches, codeblock = gmatch(view .. "{}", "([^{]-)(%b{})"), false
     local c = {[[local __r = {}]]}
     for t, b in matches do
         local act = VIEW_ACTIONS[b:sub(1, 2)]
@@ -143,21 +166,7 @@ function template.compile(view)
         end
     end
     c[#c + 1] = "return __c(__r)"
-    c = concat(c, "\n")
-    local f = function(context)
-        local context = context or {}
-        return assert(load(c, view, "t", setmetatable({
-            template = template,
-             context = context,
-                 __c = concat
-        }, {
-             __index = function(_, k)
-                 return context[k] or template[k] or _G[k]
-             end
-        })))()
-    end
-    template.cache[view] = f
-    return f
+    return concat(c, "\n")
 end
 
 function template.render(view, context)
