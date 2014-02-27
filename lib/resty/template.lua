@@ -138,8 +138,14 @@ function template.new(view, layout, precompiled)
     end
 end
 
-function template.precompile(view)
-    return string.dump(assert(load(template.parse(view, true), view, "t", context)))
+function template.precompile(view, path)
+    local chunk = string.dump(assert(load(template.parse(view, true), view, "t", context)))
+    if path then
+        local file = io.open(path, "wb")
+        file:write(chunk)
+        file:close()
+    end
+    return chunk
 end
 
 function template.load(view)
