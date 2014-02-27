@@ -367,6 +367,8 @@ https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template/micr
 ```lua
 local benchmark = require "resty.template.microbenchmark"
 benchmark.run()
+-- You may also pass iteration count (by default it is 10000)
+benchmark.run(100)
 ```
 
 Here are some results from my laptop.
