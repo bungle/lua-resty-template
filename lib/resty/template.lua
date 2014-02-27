@@ -15,8 +15,8 @@ local VIEW_ACTIONS = {
     ["{%"] = function(code) return code end,
     ["{*"] = function(code) return ("__r[#__r + 1] = template.output(%s)"):format(code) end,
     ["{{"] = function(code) return ("__r[#__r + 1] = template.escape(%s)"):format(code) end,
-    ["{("] = function(view, precompiled)
-        if precompiled then
+    ["{("] = function(view, precompile)
+        if precompile then
             return ([[__r[#__r + 1] = template.load("%s")(context)]]):format(view)
         else
             return ([[__r[#__r + 1] = template.compile("%s")(context)]]):format(view)
