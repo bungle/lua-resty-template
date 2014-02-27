@@ -101,9 +101,9 @@ function template.compile(view)
         cache[view] = function(context)
             local context = context or {}
             return assert(load(parsed, view, "t", setmetatable({
-                template = template,
+               template = template,
                 context = context,
-                __c = concat
+                    __c = concat
             }, {
                 __index = function(_, k)
                     return context[k] or template[k] or _G[k]
