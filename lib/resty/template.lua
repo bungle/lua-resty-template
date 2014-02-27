@@ -5,6 +5,7 @@ local concat = table.concat
 local gmatch = string.gmatch
 local load = load
 local open = io.open
+local rename = os.rename
 local echo = print
 local type = type
 
@@ -97,6 +98,22 @@ function template.new(view, layout)
         end
         })
     end
+end
+
+function template.precompile(view)
+    return string.dump(assert(load(template.parse(view), view, "t", context)))
+end
+
+function template.load(view)
+    local cache = template.cache
+    if not cache[view] then
+        if rename(view, view) then
+            cache[view] = assert(loadfile(view, "b", context))
+        else
+            cache[view] = assert(load(view, nil, "b", context))
+        end
+    end
+    return cache[view]
 end
 
 function template.compile(view)
