@@ -241,6 +241,29 @@ local f = template.load(compiled)
 local r = f({ title = "Names", "Emma", "James", "Nicholas", "Mary" })
 ```
 
+## Template Precompilation
+
+`lua-resty-template` supports template precompilation. This can be useful when you want to skip template parsing (and Lua interpretation) in production or if you do not want your templates distributed as plain text files on production servers. Although templates are cached (even without precompilation), there are some perfomance gains. You could integrate template precompilation in your build (or deployment) scripts (maybe as Gulp, Grunt or Ant tasks).
+
+##### Precompiling template, and output it as a binary file
+
+```lua
+local template = require "resty.template"
+local compiled = template.precompile("example.html")
+local file = io.open("example-bin.html", "w")
+file:write(t)
+file:close()
+```
+
+##### Load precompiled template file, and run it with context parameters
+
+```lua
+local template = require "resty.template"
+template.render("example-bin.html", { "Jack", "Mary" }, true)
+```
+
+The last parameter in `template.render` denotes that the template (`example-bin.html` in this case) is a precompiled binary chunk.
+
 ## Template Helpers
 
 While `lua-resty-template` does not have much infrastucture or ways to extend it, you still have a few possibilities that you may try.
