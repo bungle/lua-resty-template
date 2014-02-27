@@ -15,7 +15,13 @@ local VIEW_ACTIONS = {
     ["{%"] = function(code) return code end,
     ["{*"] = function(code) return ("__r[#__r + 1] = template.output(%s)"):format(code) end,
     ["{{"] = function(code) return ("__r[#__r + 1] = template.escape(%s)"):format(code) end,
-    ["{("] = function(view) return ([[__r[#__r + 1] = template.compile("%s")(context)]]):format(view) end
+    ["{("] = function(view, precompiled)
+        if precompiled then
+            return ([[__r[#__r + 1] = template.load("%s")(context)]]):format(view)
+        else
+            return ([[__r[#__r + 1] = template.compile("%s")(context)]]):format(view)
+        end
+    end
 }
 
 local HTML_ENTITIES = {
@@ -133,7 +139,7 @@ function template.new(view, layout, precompiled)
 end
 
 function template.precompile(view)
-    return string.dump(assert(load(template.parse(view), view, "t", context)))
+    return string.dump(assert(load(template.parse(view, true), view, "t", context)))
 end
 
 function template.load(view)
@@ -166,7 +172,7 @@ function template.compile(view)
     return func
 end
 
-function template.parse(view)
+function template.parse(view, precompiled)
     assert(view, "view was not provided for template.parse(view).")
     local file = open(view, "r")
     if file then
@@ -179,7 +185,8 @@ function template.parse(view)
         [[local __r = {}]]
     }
     for t, b in matches do
-        local act = VIEW_ACTIONS[b:sub(1, 2)]
+        local tag = b:sub(1, 2)
+        local act = VIEW_ACTIONS[tag]
         local len = #t
         local slf = len > 0 and "\n" == t:sub(1, 1)
         local elf = len > 0 and "\n" == t:sub(-1, 1)
@@ -196,13 +203,17 @@ function template.parse(view)
             elseif len > 0 then
                 c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
             end
-            c[#c + 1] = act(b:sub(3, -3))
+            if precompiled and tag == "{(" then
+                c[#c + 1] = act(b:sub(3, -3), true)
+            else
+                c[#c + 1] = act(b:sub(3, -3))
+            end
             if not cb then
                 if elf and not slf then
                     c[#c + 1] = [[__r[#__r + 1] = "\n"]]
                 end
             end
-            cb = b:sub(1, 2) == "{%"
+            cb = tag == "{%"
         elseif #b > 2 then
             c[#c + 1] = "__r[#__r + 1] = [[" .. t .. b .. "]]"
             cb = false
