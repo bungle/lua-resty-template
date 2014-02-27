@@ -224,22 +224,27 @@ local t1 = template.parse("template.html")
 local t2 = template.parse([[<h1>{{message}}</h1>]])
 ```
 
-#### string template.precompile(view)
+#### string template.precompile(view, path)
 
-Precompiles template as a binary chunk. This binary chunk can be written out as a file, or used directly with `template.load`.
+Precompiles template as a binary chunk. This binary chunk can be written out as a file, or used directly with `template.load`. For convenience you may optionally specify `path` argument to output binary chunk to file.
 
 ```
-local compiled = template.precompile([[
+local view = [[
 <h1>{{title}}</h1>
 <ul>
 {% for _, v in ipairs(context) do %}
     <li>{{v}}</li>
 {% end %}
-</ul>]])
+</ul>]]
 
-local file = io.open("precompiled-bin.html", "w")
+local compiled = template.precompile(view)
+
+local file = io.open("precompiled-bin.html", "wb")
 file:write(t)
 file:close()
+
+-- Alternatively you could just write (which does the same thing as above)
+template.precompile(view, "precompiled-bin.html")
 
 template.render("precompiled-bin.html", { title = "Names", "Emma", "James", "Nicholas", "Mary" }, true)
 ```
