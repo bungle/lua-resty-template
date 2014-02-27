@@ -121,7 +121,7 @@ function template.parse(view)
         view = file:read("*a")
         file:close()
     end
-    local matches, codeblock = gmatch(view .. "{}", "([^{]-)(%b{})"), false
+    local matches, cb = gmatch(view .. "{}", "([^{]-)(%b{})"), false
     local c = {[[local __r = {}]]}
     for t, b in matches do
         local act = VIEW_ACTIONS[b:sub(1, 2)]
@@ -130,7 +130,7 @@ function template.parse(view)
         local elf = len > 0 and "\n" == t:sub(-1, 1)
         if act then
             if slf then
-                if not codeblock then
+                if not cb then
                     c[#c + 1] = [[__r[#__r + 1] = "\n"]]
                 end
                 if len > 1 then
@@ -142,17 +142,17 @@ function template.parse(view)
                 c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
             end
             c[#c + 1] = act(b:sub(3, -3))
-            if not codeblock then
+            if not cb then
                 if elf and not slf then
                     c[#c + 1] = [[__r[#__r + 1] = "\n"]]
                 end
             end
-            codeblock = b:sub(1, 2) == "{%"
+            cb = b:sub(1, 2) == "{%"
         elseif #b > 2 then
             c[#c + 1] = "__r[#__r + 1] = [[" .. t .. b .. "]]"
-            codeblock = false
+            cb = false
         else
-            if not codeblock then
+            if not cb then
                 if slf or elf then
                     c[#c + 1] = [[__r[#__r + 1] = "\n"]]
                 end
@@ -160,7 +160,7 @@ function template.parse(view)
             if len > 0 then
                 c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
             end
-            codeblock = false
+            cb = false
         end
     end
     c[#c + 1] = "return __c(__r)"
