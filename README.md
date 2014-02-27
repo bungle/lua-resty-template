@@ -53,7 +53,7 @@ You may use the following tags in templates:
 
 From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
 
-*If you precompile your templates, the inclusion `{(file)}` expects that all the included templates are precompiled too. So you cannot mix, and match text, and binary templates with this.*
+**If you precompile your templates, the inclusion `{(file)}` expects that all the included templates are precompiled too. So you cannot mix, and match text, and binary templates with this.**
 
 
 ```html
