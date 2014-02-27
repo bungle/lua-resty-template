@@ -130,9 +130,9 @@ template.render("view.html")
 **Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used.**
 
 ## Lua API
-#### table template.new(view, layout)
+#### table template.new(view, layout, precompiled)
 
-Creates a new template instance that is used as a context when `render`ed.
+Creates a new template instance that is used as a context when `render`ed. If you have precompiled your `view` (and `layout`), please set `precompiled` to `true`.
 
 ```lua
 local view = template.new("template.html")            -- or
@@ -179,9 +179,9 @@ local universe = func{ message = "Hello, Universe!" }
 print(world, universe)
 ```
 
-#### template.render(view, context)
+#### template.render(view, context, precompiled)
 
-Parses, compiles, caches and outputs template either with `ngx.print` if available, or `print`.
+Parses, compiles, caches and outputs template either with `ngx.print` if available, or `print`. If you have precompiled your view, please set `precompiled` to `true`.
 
 ```lua
 template.render("template.html", { message = "Hello, World!" })          -- or
@@ -203,6 +203,66 @@ Parses template file or string, and generates a parsed template string. This may
 local t1 = template.parse("template.html")
 local t2 = template.parse([[<h1>{{message}}</h1>]])
 ```
+
+#### string template.precompile(view)
+
+Precompiles template as a binary chunk. This binary chunk can be written out as a file, or used directly with `template.load`.
+
+```
+local compiled = template.precompile([[
+<h1>{{title}}</h1>
+<ul>
+{% for _, v in ipairs(context) do %}
+    <li>{{v}}</li>
+{% end %}
+</ul>]])
+
+local file = io.open("precompiled-bin.html", "w")
+file:write(t)
+file:close()
+
+template.render("precompiled-bin.html", { title = "Names", "Emma", "James", "Nicholas", "Mary" }, true)
+```
+
+#### function template.load(view)
+
+Loads precompiled chunk either from file or string (`view`). Binary chunks can be obtained with `template.precompile`.
+
+```lua
+local compiled = template.precompile([[
+<h1>{{title}}</h1>
+<ul>
+{% for _, v in ipairs(context) do %}
+    <li>{{v}}</li>
+{% end %}
+</ul>]])
+
+local f = template.load(compiled)
+local r = f({ title = "Names", "Emma", "James", "Nicholas", "Mary" })
+```
+
+## Template Precompilation
+
+`lua-resty-template` supports template precompilation. This can be useful when you want to skip template parsing (and Lua interpretation) in production or if you do not want your templates distributed as plain text files on production servers. Although templates are cached (even without precompilation), there are some perfomance gains. You could integrate template precompilation in your build (or deployment) scripts (maybe as Gulp, Grunt or Ant tasks).
+
+##### Precompiling template, and output it as a binary file
+
+```lua
+local template = require "resty.template"
+local compiled = template.precompile("example.html")
+local file = io.open("example-bin.html", "w")
+file:write(t)
+file:close()
+```
+
+##### Load precompiled template file, and run it with context parameters
+
+```lua
+local template = require "resty.template"
+template.render("example-bin.html", { "Jack", "Mary" }, true)
+```
+
+The last parameter in `template.render` denotes that the template (`example-bin.html` in this case) is a precompiled binary chunk.
 
 ## Template Helpers
 
