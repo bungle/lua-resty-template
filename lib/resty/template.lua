@@ -32,13 +32,23 @@ local CODE_ENTITIES = {
     ["}"] = "&#125;"
 }
 
-local template = { cache = {} }
+local template = { cache = {}, __caching = true }
 
 local context = setmetatable({ context = {}, template = template, __c = concat }, {
     __index = function(t, k)
         return t.context[k] or t.template[k] or _G[k]
     end
 })
+
+function template.caching(enable)
+    if enable == nil then
+        return template.__caching == true
+    else
+        enable = enable == true
+        template.__caching = enable
+        return enable
+    end
+end
 
 function template.output(s)
     if s == nil then
@@ -130,23 +140,32 @@ end
 
 function template.load(view)
     local cache = template.cache
-    if not cache[view] then
-        if rename(view, view) then
-            cache[view] = assert(loadfile(view, "b", context))
-        else
-            cache[view] = assert(load(view, nil, "b", context))
-        end
+    if cache[view] then
+        return cache[view]
     end
-    return cache[view]
+    local func
+    if rename(view, view) then
+        func = assert(loadfile(view, "b", context))
+    else
+        func = assert(load(view, nil, "b", context))
+    end
+    if template.caching then
+        cache[view] = func
+    end
+    return func
 end
 
 function template.compile(view)
     assert(view, "view was not provided for template.compile(view).")
     local cache = template.cache
-    if not cache[view] then
-        cache[view] = assert(load(template.parse(view), view, "t", context))
+    if cache[view] then
+        return cache[view]
     end
-    return cache[view]
+    local func = assert(load(template.parse(view), view, "t", context))
+    if template.caching then
+        cache[view] = func
+    end
+    return func
 end
 
 function template.parse(view)
