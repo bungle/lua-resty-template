@@ -118,6 +118,7 @@ function template.compile(view)
 end
 
 function template.parse(view)
+    assert(view, "view was not provided for template.parse(view).")
     local file = open(view, "r")
     if file then
         view = file:read("*a")
