@@ -246,7 +246,10 @@ file:close()
 -- Alternatively you could just write (which does the same thing as above)
 template.precompile(view, "precompiled-bin.html")
 
-template.render("precompiled-bin.html", { title = "Names", "Emma", "James", "Nicholas", "Mary" }, true)
+template.render("precompiled-bin.html", {
+    title = "Names",
+    "Emma", "James", "Nicholas", "Mary"
+  }, true)
 ```
 
 #### function template.load(view)
