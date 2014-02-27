@@ -6,8 +6,9 @@ if not ok then
 end
 
 local function run(iterations)
-    collectgarbage("stop")
+    local gc, print, compile = collectgarbage, print, template.compile
 
+    gc("stop")
     iterations = iterations or 10000
 
     local view = [[
@@ -21,18 +22,18 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        template.compile(view)
+        compile(view)
         template.cache = {}
     end
     print(string.format("Compilation Time: %.4f (template)", os.clock() - x))
 
-    template.compile(view)
+    compile(view)
 
     local x = os.clock()
     for i = 1, iterations do
-        template.compile(view)
+        compile(view)
     end
-    print(string.format("Compilation Time: %.4f (template cached)", os.clock() - x))
+    print(string.format("Compilation Time: %.4f (template template.cached)", os.clock() - x))
 
     local context = { "Emma", "James", "Nicholas", "Mary" }
 
@@ -40,19 +41,19 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        template.compile(view)(context)
+        compile(view)(context)
         template.cache = {}
     end
     print(string.format("  Execution Time: %.4f (same template)", os.clock() - x))
 
     template.cache = {}
-    template.compile(view)
+    compile(view)
 
     local x = os.clock()
     for i = 1, iterations do
-        template.compile(view)(context)
+        compile(view)(context)
     end
-    print(string.format("  Execution Time: %.4f (same template cached)", os.clock() - x))
+    print(string.format("  Execution Time: %.4f (same template template.cached)", os.clock() - x))
 
     template.cache = {}
 
@@ -63,15 +64,15 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        template.compile(views[i])(context)
+        compile(views[i])(context)
     end
     print(string.format("  Execution Time: %.4f (different template)", os.clock() - x))
 
     local x = os.clock()
     for i = 1, iterations do
-        template.compile(views[i])(context)
+        compile(views[i])(context)
     end
-    print(string.format("  Execution Time: %.4f (different template cached)", os.clock() - x))
+    print(string.format("  Execution Time: %.4f (different template template.cached)", os.clock() - x))
 
     template.cache = {}
     local contexts = new_tab(iterations, 0)
@@ -82,17 +83,17 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        template.compile(views[i])(contexts[i])
+        compile(views[i])(contexts[i])
     end
     print(string.format("  Execution Time: %.4f (different template, different context)", os.clock() - x))
 
     local x = os.clock()
     for i = 1, iterations do
-        template.compile(views[i])(contexts[i])
+        compile(views[i])(contexts[i])
     end
-    print(string.format("  Execution Time: %.4f (different template, different context cached)", os.clock() - x))
+    print(string.format("  Execution Time: %.4f (different template, different context template.cached)", os.clock() - x))
 
-    collectgarbage("restart")
+    gc("restart")
 end
 
 return {
