@@ -76,27 +76,51 @@ function template.escape(s, c)
     end
 end
 
-function template.new(view, layout)
-    assert(view, "view was not provided for template.new(view, layout).")
-    local render, compile = template.render, template.compile
-    if layout then
-        return setmetatable({ render = function(self, context)
-            local context = context or self
-            self.view = compile(view)(context)
-            render(layout, context)
-        end }, { __tostring = function(self)
-            local context = context or self
-            self.view = compile(view)(context)
-            return compile(layout)(context)
+function template.new(view, layout, precompiled)
+    assert(view, "view was not provided for template.new(view, layout, precompiled).")
+    local render = template.render
+    if precompiled then
+        local load = template.load
+        if layout then
+            return setmetatable({ render = function(self, context)
+                local context = context or self
+                context.view = load(view)(context)
+                render(layout, context, true)
+            end }, { __tostring = function(self)
+                local context = context or self
+                context.view = load(view)(context)
+                return load(layout)(context)
+            end
+            })
+        else
+            return setmetatable({ render = function(self, context)
+                render(view, context or self, true)
+            end }, { __tostring = function(self)
+                return load(view)(context or self)
+            end
+            })
         end
-        })
     else
-        return setmetatable({ render = function(self, context)
-            render(view, context or self)
-        end }, { __tostring = function(self)
-            return compile(view)(context or self)
+        local compile = template.compile
+        if layout then
+            return setmetatable({ render = function(self, context)
+                local context = context or self
+                context.view = compile(view)(context)
+                render(layout, context)
+            end }, { __tostring = function(self)
+                local context = context or self
+                context.view = compile(view)(context)
+                return compile(layout)(context)
+            end
+            })
+        else
+            return setmetatable({ render = function(self, context)
+                render(view, context or self)
+            end }, { __tostring = function(self)
+                return compile(view)(context or self)
+            end
+            })
         end
-        })
     end
 end
 
@@ -181,9 +205,13 @@ function template.parse(view)
     return concat(c, "\n")
 end
 
-function template.render(view, context)
-    assert(view, "view was not provided for template.render(view, context).")
-    echo(template.compile(view)(context))
+function template.render(view, context, precompiled)
+    assert(view, "view was not provided for template.render(view, context, precompiled).")
+    if precompiled then
+        echo(template.load(view)(context))
+    else
+        echo(template.compile(view)(context))
+    end
 end
 
 return template
