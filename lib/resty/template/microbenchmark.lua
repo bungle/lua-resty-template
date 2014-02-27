@@ -6,10 +6,9 @@ if not ok then
 end
 
 local function run(iterations)
-    local gc, print, compile = collectgarbage, print, template.compile
+    local gc, print, compile, iterations = collectgarbage, print, template.compile, iterations or 10000
 
     gc("stop")
-    iterations = iterations or 10000
 
     local view = [[
     <ul>
