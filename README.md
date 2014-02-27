@@ -130,9 +130,9 @@ template.render("view.html")
 **Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used.**
 
 ## Lua API
-#### table template.new(view, layout)
+#### table template.new(view, layout, precompiled)
 
-Creates a new template instance that is used as a context when `render`ed.
+Creates a new template instance that is used as a context when `render`ed. If you have precompiled your `view` (and `layout`), please set `precompiled` to `true`.
 
 ```lua
 local view = template.new("template.html")            -- or
@@ -179,9 +179,9 @@ local universe = func{ message = "Hello, Universe!" }
 print(world, universe)
 ```
 
-#### template.render(view, context)
+#### template.render(view, context, precompiled)
 
-Parses, compiles, caches and outputs template either with `ngx.print` if available, or `print`.
+Parses, compiles, caches and outputs template either with `ngx.print` if available, or `print`. If you have precompiled your view, please set `precompiled` to `true`.
 
 ```lua
 template.render("template.html", { message = "Hello, World!" })          -- or
@@ -202,6 +202,43 @@ Parses template file or string, and generates a parsed template string. This may
 ```lua
 local t1 = template.parse("template.html")
 local t2 = template.parse([[<h1>{{message}}</h1>]])
+```
+
+#### string template.precompile(view)
+
+Precompiles template as a binary chunk. This binary chunk can be written out as a file, or used directly with `template.load`.
+
+```
+local compiled = template.precompile([[
+<h1>{{title}}</h1>
+<ul>
+{% for _, v in ipairs(context) do %}
+    <li>{{v}}</li>
+{% end %}
+</ul>]])
+
+local file = io.open("precompiled-bin.html", "w")
+file:write(t)
+file:close()
+
+template.render("precompiled-bin.html", { title = "Names", "Emma", "James", "Nicholas", "Mary" }, true)
+```
+
+#### function template.load(view)
+
+Loads precompiled chunk either from file or string (`view`). Binary chunks can be obtained with `template.precompile`.
+
+```lua
+local compiled = template.precompile([[
+<h1>{{title}}</h1>
+<ul>
+{% for _, v in ipairs(context) do %}
+    <li>{{v}}</li>
+{% end %}
+</ul>]])
+
+local f = template.load(compiled)
+local r = f({ title = "Names", "Emma", "James", "Nicholas", "Mary" })
 ```
 
 ## Template Helpers
