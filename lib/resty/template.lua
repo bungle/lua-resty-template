@@ -95,12 +95,9 @@ end
 
 function template.compile(view)
     assert(view, "view was not provided for template.compile(view).")
-    local parse = template.parse
     local cache = template.cache
-    if cache[view] then
-        return cache[view]
-    else
-        local parsed = parse(view)
+    if not cache[view] then
+        local parsed = template.parse(view)
         cache[view] = function(context)
             local context = context or {}
             return assert(load(parsed, view, "t", setmetatable({
@@ -113,8 +110,8 @@ function template.compile(view)
                 end
             })))()
         end
-        return cache[view]
     end
+    return cache[view]
 end
 
 function template.parse(view)
