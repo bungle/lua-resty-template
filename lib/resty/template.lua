@@ -33,6 +33,12 @@ local CODE_ENTITIES = {
 
 local template = { cache = {} }
 
+local context = setmetatable({ context = {}, template = template, __c = concat }, {
+    __index = function(t, k)
+        return t.context[k] or t.template[k] or _G[k]
+    end
+})
+
 function template.output(s)
     if s == nil then
         return ""
@@ -97,19 +103,7 @@ function template.compile(view)
     assert(view, "view was not provided for template.compile(view).")
     local cache = template.cache
     if not cache[view] then
-        local parsed = template.parse(view)
-        cache[view] = function(context)
-            local context = context or {}
-            return assert(load(parsed, view, "t", setmetatable({
-               template = template,
-                context = context,
-                    __c = concat
-            }, {
-                __index = function(_, k)
-                    return context[k] or template[k] or _G[k]
-                end
-            })))()
-        end
+        cache[view] = assert(load(template.parse(view), view, "t", context))
     end
     return cache[view]
 end
@@ -122,7 +116,10 @@ function template.parse(view)
         file:close()
     end
     local matches, cb = gmatch(view .. "{}", "([^{]-)(%b{})"), false
-    local c = {[[local __r = {}]]}
+    local c = {
+        [[context = ... or {}]],
+        [[local __r = {}]]
+    }
     for t, b in matches do
         local act = VIEW_ACTIONS[b:sub(1, 2)]
         local len = #t
