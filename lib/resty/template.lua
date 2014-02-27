@@ -172,7 +172,7 @@ function template.compile(view)
     return func
 end
 
-function template.parse(view, precompiled)
+function template.parse(view, precompile)
     assert(view, "view was not provided for template.parse(view, precompiled).")
     local file = open(view, "r")
     if file then
@@ -203,7 +203,7 @@ function template.parse(view, precompiled)
             elseif len > 0 then
                 c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
             end
-            if precompiled and tag == "{(" then
+            if precompile and tag == "{(" then
                 c[#c + 1] = act(b:sub(3, -3), true)
             else
                 c[#c + 1] = act(b:sub(3, -3))
