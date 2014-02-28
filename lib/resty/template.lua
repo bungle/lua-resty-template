@@ -6,10 +6,7 @@ local gmatch = string.gmatch
 local load = load
 local open = io.open
 local rename = os.rename
-local echo = print
 local type = type
-
-if ngx then echo = ngx.print end
 
 local VIEW_ACTIONS = {
     ["{%"] = function(code) return code end,
@@ -40,6 +37,12 @@ local CODE_ENTITIES = {
 
 local caching = true
 local template = { cache = {} }
+
+if ngx then
+    template.print = ngx.print or print
+else
+    template.print = print
+end
 
 local context = setmetatable({ context = {}, template = template, __c = concat }, {
     __index = function(t, k)
@@ -242,9 +245,9 @@ end
 function template.render(view, context, precompiled)
     assert(view, "view was not provided for template.render(view, context, precompiled).")
     if precompiled then
-        echo(template.load(view)(context))
+        template.print(template.load(view)(context))
     else
-        echo(template.compile(view)(context))
+        template.print(template.compile(view)(context))
     end
 end
 
