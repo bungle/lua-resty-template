@@ -1,6 +1,6 @@
 # lua-resty-template
 
-**lua-resty-template** is a templating engine for OpenResty.
+**lua-resty-template** is a templating engine for OpenResty and Lua.
 
 ## Hello World with lua-resty-template
 
