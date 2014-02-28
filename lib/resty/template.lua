@@ -44,7 +44,7 @@ else
     template.print = print
 end
 
-local context = setmetatable({ context = {}, template = template, __c = concat }, {
+local context = setmetatable({ context = {}, template = template, table = table }, {
     __index = function(t, k)
         return t.context[k] or t.template[k] or _G[k]
     end
@@ -238,7 +238,7 @@ function template.parse(view, precompile)
             cb = false
         end
     end
-    c[#c + 1] = "return __c(__r)"
+    c[#c + 1] = "return table.concat(__r)"
     return concat(c, "\n")
 end
 
