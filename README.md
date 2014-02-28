@@ -110,7 +110,7 @@ template.render("view.html", {
 It is adviced that you do not use these keys in your context tables:
 
 * `__r`, holds the compiled template, if set you need to use `{{context.__r}}`
-* `__c`, used to concatenate resulting template (`table.concat`), if set you need to use `{{context.__c}}`
+* `table`, used to concatenate resulting template (`table.concat`), if set you need to use `{{context.table}}`
 * `context`, holds the current context, if set you need to use `{{context.context}}`
 * `template`, holds the template table, if set you need to use `{{context.template}}` (used in escaping, and compiling child templates)
 
