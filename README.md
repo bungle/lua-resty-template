@@ -269,6 +269,19 @@ local f = template.load(compiled)
 local r = f({ title = "Names", "Emma", "James", "Nicholas", "Mary" })
 ```
 
+#### function template.print
+
+This field contains a function that is used on `template.render()` or `template.new("example.html").render()` to output the results. By default this holds either `ngx.print` (if available) or `print`. You may want (and are allowed to) to overwrite this field, if you want to use your own output function instead. This is also useful if you are using some other framework (i.e. Turbo.lua [http://turbolua.org/]).
+
+```lua
+local template = require "resty.template"
+
+template.print = function(s)
+  print(s)
+  print("<!-- Output by My Functions -->")
+end
+```
+
 ## Template Precompilation
 
 `lua-resty-template` supports template precompilation. This can be useful when you want to skip template parsing (and Lua interpretation) in production or if you do not want your templates distributed as plain text files on production servers. Also by precompiling, you can ensure that your templates do not contain something, that cannot be compiled (they are syntactically valid Lua). Although templates are cached (even without precompilation), there are some perfomance (and memory) gains. You could integrate template precompilation in your build (or deployment) scripts (maybe as Gulp, Grunt or Ant tasks).
