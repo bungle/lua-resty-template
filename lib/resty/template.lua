@@ -36,7 +36,7 @@ local CODE_ENTITIES = {
 }
 
 local caching = true
-local template = { cache = {} }
+local template = { cache = {}, concat = concat }
 
 if ngx then
     template.print = ngx.print or print
@@ -44,7 +44,7 @@ else
     template.print = print
 end
 
-local context = setmetatable({ context = {}, template = template, table = table }, {
+local context = setmetatable({ context = {}, template = template }, {
     __index = function(t, k)
         return t.context[k] or t.template[k] or _G[k]
     end
@@ -238,7 +238,7 @@ function template.parse(view, precompile)
             cb = false
         end
     end
-    c[#c + 1] = "return table.concat(__r)"
+    c[#c + 1] = "return template.concat(__r)"
     return concat(c, "\n")
 end
 
