@@ -110,7 +110,7 @@ template.render("view.html", {
 It is adviced that you do not use these keys in your context tables:
 
 * `__r`, holds the compiled template, if set you need to use `{{context.__r}}`
-* `__c`, used to concatenate resulting template (`table.concat`), if set you need to use `{{context.__c}}`
+* `table`, used to concatenate resulting template (`table.concat`), if set you need to use `{{context.table}}`
 * `context`, holds the current context, if set you need to use `{{context.context}}`
 * `template`, holds the template table, if set you need to use `{{context.template}}` (used in escaping, and compiling child templates)
 
@@ -267,6 +267,19 @@ local compiled = template.precompile([[
 
 local f = template.load(compiled)
 local r = f({ title = "Names", "Emma", "James", "Nicholas", "Mary" })
+```
+
+#### function template.print
+
+This field contains a function that is used on `template.render()` or `template.new("example.html").render()` to output the results. By default this holds either `ngx.print` (if available) or `print`. You may want to (and are allowed to) overwrite this field, if you want to use your own output function instead. This is also useful if you are using some other framework, e.g. Turbo.lua (http://turbolua.org/).
+
+```lua
+local template = require "resty.template"
+
+template.print = function(s)
+  print(s)
+  print("<!-- Output by My Functions -->")
+end
 ```
 
 ## Template Precompilation
