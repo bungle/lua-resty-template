@@ -10,13 +10,13 @@ local type = type
 
 local VIEW_ACTIONS = {
     ["{%"] = function(code) return code end,
-    ["{*"] = function(code) return ("__r[#__r + 1] = template.output(%s)"):format(code) end,
-    ["{{"] = function(code) return ("__r[#__r + 1] = template.escape(%s)"):format(code) end,
+    ["{*"] = function(code) return ("__r[#__r+1] = template.output(%s)"):format(code) end,
+    ["{{"] = function(code) return ("__r[#__r+1] = template.escape(%s)"):format(code) end,
     ["{("] = function(view, precompile)
         if precompile then
-            return ([[__r[#__r + 1] = template.load("%s")(context)]]):format(view)
+            return ([[__r[#__r+1] = template.load("%s")(context)]]):format(view)
         else
-            return ([[__r[#__r + 1] = template.compile("%s")(context)]]):format(view)
+            return ([[__r[#__r+1] = template.compile("%s")(context)]]):format(view)
         end
     end
 }
@@ -202,43 +202,43 @@ function template.parse(view, precompile)
         if act then
             if slf then
                 if not cb then
-                    c[#c + 1] = [[__r[#__r + 1] = "\n"]]
+                    c[#c+1] = [[__r[#__r+1] = "\n"]]
                 end
                 if len > 1 then
-                    c[#c + 1] = "__r[#__r + 1] = [[" .. t:sub(2) .. "]]"
+                    c[#c+1] = concat({ "__r[#__r+1] = [[", t:sub(2), "]]" })
                 end
             elseif elf and len > 1 then
-                c[#c + 1] = "__r[#__r + 1] = [[" .. t:sub(-2) .. "]]"
+                c[#c+1] = concat({ "__r[#__r+1] = [[", t:sub(-2), "]]" })
             elseif len > 0 then
-                c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
+                c[#c+1] = concat({ "__r[#__r+1] = [[", t, "]]" })
             end
             if precompile and tag == "{(" then
-                c[#c + 1] = act(b:sub(3, -3), true)
+                c[#c+1] = act(b:sub(3, -3), true)
             else
-                c[#c + 1] = act(b:sub(3, -3))
+                c[#c+1] = act(b:sub(3, -3))
             end
             if not cb then
                 if elf and not slf then
-                    c[#c + 1] = [[__r[#__r + 1] = "\n"]]
+                    c[#c+1] = [[__r[#__r+1] = "\n"]]
                 end
             end
             cb = tag == "{%"
         elseif #b > 2 then
-            c[#c + 1] = "__r[#__r + 1] = [[" .. t .. b .. "]]"
+            c[#c+1] = concat({ "__r[#__r+1] = [[", t, b, "]]" })
             cb = false
         else
             if not cb then
                 if slf or elf then
-                    c[#c + 1] = [[__r[#__r + 1] = "\n"]]
+                    c[#c+1] = [[__r[#__r+1] = "\n"]]
                 end
             end
             if len > 0 then
-                c[#c + 1] = "__r[#__r + 1] = [[" .. t .. "]]"
+                c[#c+1] = concat({ "__r[#__r+1] = [[", t, "]]" })
             end
             cb = false
         end
     end
-    c[#c + 1] = "return template.concat(__r)"
+    c[#c+1] = "return template.concat(__r)"
     return concat(c, "\n")
 end
 
