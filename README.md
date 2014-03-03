@@ -289,10 +289,7 @@ end
 
 ```lua
 local template = require "resty.template"
-local compiled = template.precompile("example.html")
-local file = io.open("example-bin.html", "w")
-file:write(t)
-file:close()
+local compiled = template.precompile("example.html", "example-bin.html")
 ```
 
 ##### Load precompiled template file, and run it with context parameters
