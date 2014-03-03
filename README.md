@@ -110,7 +110,6 @@ template.render("view.html", {
 It is adviced that you do not use these keys in your context tables:
 
 * `__r`, holds the compiled template, if set you need to use `{{context.__r}}`
-* `table`, used to concatenate resulting template (`table.concat`), if set you need to use `{{context.table}}`
 * `context`, holds the current context, if set you need to use `{{context.context}}`
 * `template`, holds the template table, if set you need to use `{{context.template}}` (used in escaping, and compiling child templates)
 
@@ -290,10 +289,7 @@ end
 
 ```lua
 local template = require "resty.template"
-local compiled = template.precompile("example.html")
-local file = io.open("example-bin.html", "w")
-file:write(t)
-file:close()
+local compiled = template.precompile("example.html", "example-bin.html")
 ```
 
 ##### Load precompiled template file, and run it with context parameters
@@ -310,7 +306,7 @@ The last parameter in `template.render` denotes that the template (`example-bin.
 While `lua-resty-template` does not have much infrastucture or ways to extend it, you still have a few possibilities that you may try.
 
 * Adding methods to global `string`, and `table` types (not encouraged, though)
-* Wrap your values with something before adding them in context
+* Wrap your values with something before adding them in context (e.g. proxy-table)
 * Create global functions
 * Add local functions either to `template` table or `context` table
 * Use metamethods in your tables
