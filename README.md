@@ -309,7 +309,7 @@ The last parameter in `template.render` denotes that the template (`example-bin.
 While `lua-resty-template` does not have much infrastucture or ways to extend it, you still have a few possibilities that you may try.
 
 * Adding methods to global `string`, and `table` types (not encouraged, though)
-* Wrap your values with something before adding them in context
+* Wrap your values with something before adding them in context (e.g. proxy-table)
 * Create global functions
 * Add local functions either to `template` table or `context` table
 * Use metamethods in your tables
