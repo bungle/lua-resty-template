@@ -268,7 +268,7 @@ local f = template.load(compiled)
 local r = f({ title = "Names", "Emma", "James", "Nicholas", "Mary" })
 ```
 
-#### function template.print
+#### template.print
 
 This field contains a function that is used on `template.render()` or `template.new("example.html").render()` to output the results. By default this holds either `ngx.print` (if available) or `print`. You may want to (and are allowed to) overwrite this field, if you want to use your own output function instead. This is also useful if you are using some other framework, e.g. Turbo.lua (http://turbolua.org/).
 
