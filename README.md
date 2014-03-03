@@ -460,6 +460,9 @@ You may also look at these:
 * tirtemplate (https://github.com/torhve/LuaWeb/blob/master/tirtemplate.lua)
 * cosmo (http://cosmo.luaforge.net/)
 * lua-codegen (http://fperrad.github.io/lua-CodeGen/)
+* groucho (https://github.com/hanjos/groucho)
+* simple lua preprocessor (http://lua-users.org/wiki/SimpleLuaPreprocessor)
+* slightly less simple lua preprocessor
 
 `lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thank you Tor, and Zed for your earlier contributions.*
 
