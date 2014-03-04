@@ -485,46 +485,46 @@ Here are some results from my laptop.
 ##### Lua 5.2.2  Copyright (C) 1994-2013 Lua.org, PUC-Rio
 
 ```
-Running 10000 iterations in each test
-Compilation Time: 0.4915 (template)
-Compilation Time: 0.0020 (template cached)
-  Execution Time: 0.6120 (same template)
-  Execution Time: 0.0893 (same template cached)
-  Execution Time: 0.9096 (different template)
-  Execution Time: 0.2119 (different template cached)
-  Execution Time: 0.9524 (different template, different context)
-  Execution Time: 0.2460 (different template, different context cached)
+Running 1000 iterations in each test
+Compilation Time: 0.0507 (template)
+Compilation Time: 0.0003 (template cached)
+  Execution Time: 0.0626 (same template)
+  Execution Time: 0.0095 (same template cached)
+  Execution Time: 0.0658 (different template)
+  Execution Time: 0.0121 (different template cached)
+  Execution Time: 0.0717 (different template, different context)
+  Execution Time: 0.0117 (different template, different context cached)
 ```
 
 ##### LuaJIT 2.0.2 -- Copyright (C) 2005-2013 Mike Pall. http://luajit.org/
 
 ```
-Running 10000 iterations in each test
-Compilation Time: 0.2274 (template)
+Running 1000 iterations in each test
+Compilation Time: 0.0237 (template)
 Compilation Time: 0.0001 (template cached)
-  Execution Time: 0.2990 (same template)
-  Execution Time: 0.0380 (same template cached)
-  Execution Time: 2.6530 (different template)
-  Execution Time: 1.2008 (different template cached)
-  Execution Time: 2.2990 (different template, different context)
-  Execution Time: 0.1769 (different template, different context cached)
+  Execution Time: 0.0306 (same template)
+  Execution Time: 0.0040 (same template cached)
+  Execution Time: 0.0514 (different template)
+  Execution Time: 0.0096 (different template cached)
+  Execution Time: 0.0553 (different template, different context)
+  Execution Time: 0.0067 (different template, different context cached)
 ```
 
 ##### LuaJIT 2.1.0-alpha -- Copyright (C) 2005-2014 Mike Pall. http://luajit.org/
 
 ```
-Running 10000 iterations in each test
-Compilation Time: 0.1903 (template)
-Compilation Time: 0.0001 (template cached)
-  Execution Time: 0.2670 (same template)
-  Execution Time: 0.0334 (same template cached)
-  Execution Time: 2.0942 (different template)
-  Execution Time: 1.2497 (different template cached)
-  Execution Time: 2.0963 (different template, different context)
-  Execution Time: 0.1903 (different template, different context cached)
+Running 1000 iterations in each test
+Compilation Time: 0.0184 (template)
+Compilation Time: 0.0000 (template cached)
+  Execution Time: 0.0263 (same template)
+  Execution Time: 0.0028 (same template cached)
+  Execution Time: 0.0448 (different template)
+  Execution Time: 0.0112 (different template cached)
+  Execution Time: 0.0467 (different template, different context)
+  Execution Time: 0.0077 (different template, different context cached)
 ```
 
-I have not yet compared the results against the alternatives. There seems to be opportunity to improve LuaJIT performance. The main performance bottleneck with LuaJIT seems to be in `template.parse` as it uses `string.gmatch` that cannot be JIT compiled. 
+I have not yet compared the results against the alternatives.
 
 ## License
 
