@@ -8,19 +8,6 @@ local open = io.open
 local rename = os.rename
 local type = type
 
-local VIEW_ACTIONS = {
-    ["{%"] = function(code) return code end,
-    ["{*"] = function(code) return ("__r[#__r+1] = template.output(%s)"):format(code) end,
-    ["{{"] = function(code) return ("__r[#__r+1] = template.escape(%s)"):format(code) end,
-    ["{("] = function(view, precompile)
-        if precompile then
-            return ([[__r[#__r+1] = template.load("%s")(context)]]):format(view)
-        else
-            return ([[__r[#__r+1] = template.compile("%s")(context)]]):format(view)
-        end
-    end
-}
-
 local HTML_ENTITIES = {
     ["&"] = "&amp;",
     ["<"] = "&lt;",
@@ -188,56 +175,54 @@ function template.parse(view, precompile)
         view = file:read("*a")
         file:close()
     end
-    local matches, cb = gmatch(view .. "{}", "([^{]-)(%b{})"), false
     local c = {
-        [[context = ... or {}]],
-        [[local __r = {}]]
+        "context = ... or {}",
+        "local __r = {}"
     }
-    for t, b in matches do
-        local tag = b:sub(1, 2)
-        local act = VIEW_ACTIONS[tag]
-        local len = #t
-        local slf = len > 0 and "\n" == t:sub(1, 1)
-        local elf = len > 0 and "\n" == t:sub(-1, 1)
-        if act then
-            if slf then
-                if not cb then
-                    c[#c+1] = [[__r[#__r+1] = "\n"]]
-                end
-                if len > 1 then
-                    c[#c+1] = concat({ "__r[#__r+1] = [[", t:sub(2), "]]" })
-                end
-            elseif elf and len > 1 then
-                c[#c+1] = concat({ "__r[#__r+1] = [[", t:sub(-2), "]]" })
-            elseif len > 0 then
-                c[#c+1] = concat({ "__r[#__r+1] = [[", t, "]]" })
+    local i, j, s, e = 0, 0, view:find("{", 1, true)
+    while s do
+        local t = view:sub(s, e + 1)
+        if t == "{{" then
+            local x, y = view:find("}}", e + 2, true)
+            if x then
+                c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j, s - 1), "]]"})
+                c[#c+1] = concat({"__r[#__r+1] = template.escape(", view:sub(e + 2, x - 1) ,")"})
+                i, j = y, y + 1
             end
-            if precompile and tag == "{(" then
-                c[#c+1] = act(b:sub(3, -3), true)
-            else
-                c[#c+1] = act(b:sub(3, -3))
+        elseif t == "{*" then
+            local x, y = view:find("*}", e + 2, true)
+            if x then
+                c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j, s - 1), "]]"})
+                c[#c+1] = concat({"__r[#__r+1] = template.output(", view:sub(e + 2, x - 1), ")"})
+                i, j = y, y + 1
             end
-            if not cb then
-                if elf and not slf then
-                    c[#c+1] = [[__r[#__r+1] = "\n"]]
-                end
-            end
-            cb = tag == "{%"
-        elseif #b > 2 then
-            c[#c+1] = concat({ "__r[#__r+1] = [[", t, b, "]]" })
-            cb = false
-        else
-            if not cb then
-                if slf or elf then
-                    c[#c+1] = [[__r[#__r+1] = "\n"]]
+        elseif t == "{%" then
+            local x, y = view:find("%}", e + 2, true)
+            if x then
+                c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j, s - 1), "]]"})
+                c[#c+1] = view:sub(e + 2, x - 1)
+                if view:sub(y + 1, y + 1) == "\n" then
+                    i, j = y + 1, y + 2
+                else
+                    i, j = y, y + 1
                 end
             end
-            if len > 0 then
-                c[#c+1] = concat({ "__r[#__r+1] = [[", t, "]]" })
+        elseif t == "{(" then
+            local x, y = view:find(")}", e + 2, true)
+            if x then
+                c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j, s - 1), "]]"})
+                if precompile then
+                    c[#c+1] = concat({'__r[#__r+1] = template.load("', view:sub(e + 2, x - 1), '")(context)'})
+                else
+                    c[#c+1] = concat({'__r[#__r+1] = template.compile("', view:sub(e + 2, x - 1), '")(context)'})
+                end
+                i, j = y, y + 1
             end
-            cb = false
         end
+        i = i + 1
+        s, e = view:find("{", i, true)
     end
+    c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j), "]]"})
     c[#c+1] = "return template.concat(__r)"
     return concat(c, "\n")
 end
