@@ -185,21 +185,21 @@ function template.parse(view, precompile)
         if t == "{{" then
             local x, y = view:find("}}", e + 2, true)
             if x then
-                c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j, s - 1), "]]"})
+                if j ~= s then c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j, s - 1), "]]"}) end
                 c[#c+1] = concat({"__r[#__r+1] = template.escape(", view:sub(e + 2, x - 1) ,")"})
                 i, j = y, y + 1
             end
         elseif t == "{*" then
             local x, y = view:find("*}", e + 2, true)
             if x then
-                c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j, s - 1), "]]"})
+                if j ~= s then c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j, s - 1), "]]"}) end
                 c[#c+1] = concat({"__r[#__r+1] = template.output(", view:sub(e + 2, x - 1), ")"})
                 i, j = y, y + 1
             end
         elseif t == "{%" then
             local x, y = view:find("%}", e + 2, true)
             if x then
-                c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j, s - 1), "]]"})
+                if j ~= s then c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j, s - 1), "]]"}) end
                 c[#c+1] = view:sub(e + 2, x - 1)
                 if view:sub(y + 1, y + 1) == "\n" then
                     i, j = y + 1, y + 2
@@ -210,7 +210,7 @@ function template.parse(view, precompile)
         elseif t == "{(" then
             local x, y = view:find(")}", e + 2, true)
             if x then
-                c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j, s - 1), "]]"})
+                if j ~= s then c[#c+1] = concat({"__r[#__r+1] = [[", view:sub(j, s - 1), "]]"}) end
                 if precompile then
                     c[#c+1] = concat({'__r[#__r+1] = template.load("', view:sub(e + 2, x - 1), '")(context)'})
                 else
