@@ -277,7 +277,7 @@ local template = require "resty.template"
 
 template.print = function(s)
   print(s)
-  print("<!-- Output by My Functions -->")
+  print("<!-- Output by My Function -->")
 end
 ```
 
