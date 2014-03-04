@@ -268,7 +268,7 @@ local f = template.load(compiled)
 local r = f({ title = "Names", "Emma", "James", "Nicholas", "Mary" })
 ```
 
-#### function template.print
+#### template.print
 
 This field contains a function that is used on `template.render()` or `template.new("example.html").render()` to output the results. By default this holds either `ngx.print` (if available) or `print`. You may want to (and are allowed to) overwrite this field, if you want to use your own output function instead. This is also useful if you are using some other framework, e.g. Turbo.lua (http://turbolua.org/).
 
@@ -277,7 +277,7 @@ local template = require "resty.template"
 
 template.print = function(s)
   print(s)
-  print("<!-- Output by My Functions -->")
+  print("<!-- Output by My Function -->")
 end
 ```
 
@@ -460,6 +460,9 @@ You may also look at these:
 * tirtemplate (https://github.com/torhve/LuaWeb/blob/master/tirtemplate.lua)
 * cosmo (http://cosmo.luaforge.net/)
 * lua-codegen (http://fperrad.github.io/lua-CodeGen/)
+* groucho (https://github.com/hanjos/groucho)
+* simple lua preprocessor (http://lua-users.org/wiki/SimpleLuaPreprocessor)
+* slightly less simple lua preprocessor (http://lua-users.org/wiki/SlightlyLessSimpleLuaPreprocessor)
 
 `lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thank you Tor, and Zed for your earlier contributions.*
 
