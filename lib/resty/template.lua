@@ -103,7 +103,7 @@ function template.new(view, layout, precompiled)
 end
 
 function template.precompile(view, path)
-    local chunk = string.dump(assert(load(template.parse(view, true), view, "t", context)))
+    local chunk = string.dump(assert(load(template.parse(view, true), view, "t", context)), true)
     if path then
         local file = io.open(path, "wb")
         file:write(chunk)
