@@ -64,6 +64,15 @@ From templates you may access everything in `context` table, and everything in `
 
 Only strings are escaped, functions are called (recursively) and results are returned as is, tables are `tostring`ified and other types are simply just returned. `nil`s are converted to `""`.
 
+Escaped HTML characters:
+
+* `&` becomes `&amp;`
+* `<` becomes `&lt;`
+* `>` becomes `&gt;`
+* `"` becomes `&quot;`
+* `'` becomes `&#39;`
+* `/` becomes `&#47;`
+
 #### Example
 ##### Lua
 ```lua
