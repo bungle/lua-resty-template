@@ -1,2 +1,2 @@
 local benchmark = require "resty.template.microbenchmark"
-benchmark.run()
+benchmark.run(1000)
