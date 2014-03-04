@@ -64,6 +64,15 @@ From templates you may access everything in `context` table, and everything in `
 
 Only strings are escaped, functions are called (recursively) and results are returned as is, tables are `tostring`ified and other types are simply just returned. `nil`s are converted to `""`.
 
+Escaped HTML characters:
+
+* `&` becomes `&amp;`
+* `<` becomes `&lt;`
+* `>` becomes `&gt;`
+* `"` becomes `&quot;`
+* `'` becomes `&#39;`
+* `/` becomes `&#47;`
+
 #### Example
 ##### Lua
 ```lua
@@ -109,7 +118,7 @@ template.render("view.html", {
 
 It is adviced that you do not use these keys in your context tables:
 
-* `__r`, holds the compiled template, if set you need to use `{{context.__r}}`
+* `___`, holds the compiled template, if set you need to use `{{context.___}}`
 * `context`, holds the current context, if set you need to use `{{context.context}}`
 * `template`, holds the template table, if set you need to use `{{context.template}}` (used in escaping, and compiling child templates)
 
