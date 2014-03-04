@@ -1,11 +1,10 @@
 local setmetatable = setmetatable
 local tostring = tostring
-local assert = assert
 local concat = table.concat
-local gmatch = string.gmatch
-local load = load
-local open = io.open
+local assert = assert
 local rename = os.rename
+local open = io.open
+local load = load
 local type = type
 
 local HTML_ENTITIES = {
@@ -38,46 +37,28 @@ local context = setmetatable({ context = {}, template = template }, {
 })
 
 function template.caching(enable)
-    if enable ~= nil then
-        caching = enable == true
-    end
+    if enable ~= nil then caching = enable == true end
     return caching
 end
 
 function template.output(s)
-    if s == nil then
-        return ""
-    else
-        local t = type(s)
-        if t == "function" then
-            return template.output(s())
-        elseif t == "table" then
-            return tostring(s)
-        else
-            return s
-        end
-    end
+    if s == nil then return "" end
+    local t = type(s)
+    if t == "function" then return template.output(s()) end
+    if t == "table"    then return tostring(s)          end
+    return s
 end
 
 function template.escape(s, c)
-    if s == nil then
-        return ""
-    else
-        local t = type(s)
-        if t == "string" and #t > 0 then
-            if c then
-                return template.escape(s:gsub([=[[}{]]=], CODE_ENTITIES))
-            else
-                return s:gsub([=[[">/<'&]]=], HTML_ENTITIES)
-            end
-        elseif t == "function" then
-            return template.output(s())
-        elseif t == "table" then
-            return tostring(s)
-        else
-            return s
-        end
+    if s == nil then return "" end
+    local t = type(s)
+    if t == "string" and #t > 0 then
+        if c then return template.escape(s:gsub("[}{]", CODE_ENTITIES)) end
+        return s:gsub("[\">/<'&]", HTML_ENTITIES)
     end
+    if t == "function" then return template.output(s()) end
+    if t == "table"    then return tostring(s)          end
+    return s
 end
 
 function template.new(view, layout, precompiled)
@@ -94,38 +75,31 @@ function template.new(view, layout, precompiled)
                 local context = context or self
                 context.view = load(view)(context)
                 return load(layout)(context)
-            end
-            })
-        else
-            return setmetatable({ render = function(self, context)
-                render(view, context or self, true)
-            end }, { __tostring = function(self)
-                return load(view)(context or self)
-            end
-            })
+            end })
         end
-    else
-        local compile = template.compile
-        if layout then
-            return setmetatable({ render = function(self, context)
-                local context = context or self
-                context.view = compile(view)(context)
-                render(layout, context)
-            end }, { __tostring = function(self)
-                local context = context or self
-                context.view = compile(view)(context)
-                return compile(layout)(context)
-            end
-            })
-        else
-            return setmetatable({ render = function(self, context)
-                render(view, context or self)
-            end }, { __tostring = function(self)
-                return compile(view)(context or self)
-            end
-            })
-        end
+        return setmetatable({ render = function(self, context)
+            render(view, context or self, true)
+        end }, { __tostring = function(self)
+            return load(view)(context or self)
+        end })
     end
+    local compile = template.compile
+    if layout then
+        return setmetatable({ render = function(self, context)
+            local context = context or self
+            context.view = compile(view)(context)
+            render(layout, context)
+        end }, { __tostring = function(self)
+            local context = context or self
+            context.view = compile(view)(context)
+            return compile(layout)(context)
+        end })
+    end
+    return setmetatable({ render = function(self, context)
+        render(view, context or self)
+    end }, { __tostring = function(self)
+        return compile(view)(context or self)
+    end })
 end
 
 function template.precompile(view, path)
@@ -140,31 +114,23 @@ end
 
 function template.load(view)
     local cache = template.cache
-    if cache[view] then
-        return cache[view]
-    end
+    if cache[view] then return cache[view] end
     local func
     if rename(view, view) then
         func = assert(loadfile(view, "b", context))
     else
         func = assert(load(view, nil, "b", context))
     end
-    if caching then
-        cache[view] = func
-    end
+    if caching then cache[view] = func end
     return func
 end
 
 function template.compile(view)
     assert(view, "view was not provided for template.compile(view).")
     local cache = template.cache
-    if cache[view] then
-        return cache[view]
-    end
+    if cache[view] then return cache[view] end
     local func = assert(load(template.parse(view), view, "t", context))
-    if caching then
-        cache[view] = func
-    end
+    if caching then cache[view] = func end
     return func
 end
 
@@ -229,11 +195,8 @@ end
 
 function template.render(view, context, precompiled)
     assert(view, "view was not provided for template.render(view, context, precompiled).")
-    if precompiled then
-        template.print(template.load(view)(context))
-    else
-        template.print(template.compile(view)(context))
-    end
+    if precompiled then return template.print(template.load(view)(context)) end
+    return template.print(template.compile(view)(context))
 end
 
 return template
