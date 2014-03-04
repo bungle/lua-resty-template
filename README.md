@@ -495,42 +495,42 @@ Here are some results from my laptop.
 
 ```
 Running 1000 iterations in each test
-Compilation Time: 0.0507 (template)
-Compilation Time: 0.0003 (template cached)
-  Execution Time: 0.0626 (same template)
-  Execution Time: 0.0095 (same template cached)
-  Execution Time: 0.0658 (different template)
-  Execution Time: 0.0121 (different template cached)
-  Execution Time: 0.0717 (different template, different context)
-  Execution Time: 0.0117 (different template, different context cached)
+Compilation Time: 0.054367 (template)
+Compilation Time: 0.000210 (template cached)
+  Execution Time: 0.064408 (same template)
+  Execution Time: 0.007195 (same template cached)
+  Execution Time: 0.069924 (different template)
+  Execution Time: 0.008852 (different template cached)
+  Execution Time: 0.072363 (different template, different context)
+  Execution Time: 0.009644 (different template, different context cached)
 ```
 
 ##### LuaJIT 2.0.2 -- Copyright (C) 2005-2013 Mike Pall. http://luajit.org/
 
 ```
 Running 1000 iterations in each test
-Compilation Time: 0.0237 (template)
-Compilation Time: 0.0001 (template cached)
-  Execution Time: 0.0306 (same template)
-  Execution Time: 0.0040 (same template cached)
-  Execution Time: 0.0514 (different template)
-  Execution Time: 0.0096 (different template cached)
-  Execution Time: 0.0553 (different template, different context)
-  Execution Time: 0.0067 (different template, different context cached)
+Compilation Time: 0.025507 (template)
+Compilation Time: 0.000077 (template cached)
+  Execution Time: 0.033740 (same template)
+  Execution Time: 0.003093 (same template cached)
+  Execution Time: 0.050661 (different template)
+  Execution Time: 0.005467 (different template cached)
+  Execution Time: 0.058558 (different template, different context)
+  Execution Time: 0.009827 (different template, different context cached)
 ```
 
 ##### LuaJIT 2.1.0-alpha -- Copyright (C) 2005-2014 Mike Pall. http://luajit.org/
 
 ```
 Running 1000 iterations in each test
-Compilation Time: 0.0184 (template)
-Compilation Time: 0.0000 (template cached)
-  Execution Time: 0.0263 (same template)
-  Execution Time: 0.0028 (same template cached)
-  Execution Time: 0.0448 (different template)
-  Execution Time: 0.0112 (different template cached)
-  Execution Time: 0.0467 (different template, different context)
-  Execution Time: 0.0077 (different template, different context cached)
+Compilation Time: 0.021580 (template)
+Compilation Time: 0.000043 (template cached)
+  Execution Time: 0.028772 (same template)
+  Execution Time: 0.002287 (same template cached)
+  Execution Time: 0.043041 (different template)
+  Execution Time: 0.006379 (different template cached)
+  Execution Time: 0.051076 (different template, different context)
+  Execution Time: 0.010268 (different template, different context cached)
 ```
 
 I have not yet compared the results against the alternatives.
