@@ -473,42 +473,42 @@ Here are some results from my laptop.
 
 ```
 Running 1000 iterations in each test
-Compilation Time: 0.054367 (template)
-Compilation Time: 0.000210 (template cached)
-  Execution Time: 0.064408 (same template)
-  Execution Time: 0.007195 (same template cached)
-  Execution Time: 0.069924 (different template)
-  Execution Time: 0.008852 (different template cached)
-  Execution Time: 0.072363 (different template, different context)
-  Execution Time: 0.009644 (different template, different context cached)
+Compilation Time: 0.056178 (template)
+Compilation Time: 0.000266 (template cached)
+  Execution Time: 0.067796 (same template)
+  Execution Time: 0.009158 (same template cached)
+  Execution Time: 0.062518 (different template)
+  Execution Time: 0.008550 (different template cached)
+  Execution Time: 0.071966 (different template, different context)
+  Execution Time: 0.009919 (different template, different context cached)
 ```
 
 ##### LuaJIT 2.0.2 -- Copyright (C) 2005-2013 Mike Pall. http://luajit.org/
 
 ```
 Running 1000 iterations in each test
-Compilation Time: 0.025507 (template)
-Compilation Time: 0.000077 (template cached)
-  Execution Time: 0.033740 (same template)
-  Execution Time: 0.003093 (same template cached)
-  Execution Time: 0.050661 (different template)
-  Execution Time: 0.005467 (different template cached)
-  Execution Time: 0.058558 (different template, different context)
-  Execution Time: 0.009827 (different template, different context cached)
+Compilation Time: 0.026106 (template)
+Compilation Time: 0.000079 (template cached)
+  Execution Time: 0.034294 (same template)
+  Execution Time: 0.004126 (same template cached)
+  Execution Time: 0.057301 (different template)
+  Execution Time: 0.009084 (different template cached)
+  Execution Time: 0.063139 (different template, different context)
+  Execution Time: 0.005883 (different template, different context cached)
 ```
 
 ##### LuaJIT 2.1.0-alpha -- Copyright (C) 2005-2014 Mike Pall. http://luajit.org/
 
 ```
 Running 1000 iterations in each test
-Compilation Time: 0.021580 (template)
-Compilation Time: 0.000043 (template cached)
-  Execution Time: 0.028772 (same template)
-  Execution Time: 0.002287 (same template cached)
-  Execution Time: 0.043041 (different template)
-  Execution Time: 0.006379 (different template cached)
-  Execution Time: 0.051076 (different template, different context)
-  Execution Time: 0.010268 (different template, different context cached)
+Compilation Time: 0.021228 (template)
+Compilation Time: 0.000077 (template cached)
+  Execution Time: 0.029370 (same template)
+  Execution Time: 0.004002 (same template cached)
+  Execution Time: 0.049048 (different template)
+  Execution Time: 0.018746 (different template cached)
+  Execution Time: 0.061752 (different template, different context)
+  Execution Time: 0.006793 (different template, different context cached)
 ```
 
 I have not yet compared the results against the alternatives.
