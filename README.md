@@ -19,7 +19,7 @@ template.render([[
 <body>
   <h1>{{message}}</h1>
 </body>
-</html>]],  { message = "Hello, World!" })
+</html>]], { message = "Hello, World!" })
 ```
 
 ##### view.html
@@ -79,7 +79,7 @@ Escaped HTML characters:
 local template = require "resty.template"
 template.render("view.html", {
   title   = "Testing lua-resty-template",
-  message = "Hello, World!"
+  message = "Hello, World!",
   names   = { "James", "Jack", "Anne" },
   jquery  = '<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>' 
 })
@@ -189,9 +189,9 @@ view.render(setmetatable({ title = "Testing lua-resty-template" }, { __index = v
 local result = tostring(view)
 ```
 
-#### function template.compile(view)
+#### function template.compile(view, key)
 
-Parses, compiles and caches (if caching is enabled) a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string.
+Parses, compiles and caches (if caching is enabled) a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string. Optionally you may pass `key` that is used as a cache key. If cache key is not provided `view` wil be used as a cache key.
 
 ```lua
 local func = template.compile("template.html")          -- or
@@ -207,9 +207,9 @@ local universe = func{ message = "Hello, Universe!" }
 print(world, universe)
 ```
 
-#### template.render(view, context, precompiled)
+#### template.render(view, context, key)
 
-Parses, compiles, caches (if caching is enabled) and outputs template either with `ngx.print` if available, or `print`. If you have precompiled your view, please set `precompiled` to `true`.
+Parses, compiles, caches (if caching is enabled) and outputs template either with `ngx.print` if available, or `print`. You may optionally also pass `key` that is used as a cache key.
 
 ```lua
 template.render("template.html", { message = "Hello, World!" })          -- or
@@ -223,9 +223,9 @@ template.render("view.html", { message = "Hello, World!" })
 template.render("view.html", { message = "Hello, Universe!" })
 ```
 
-#### string template.parse(view, precompile)
+#### string template.parse(view)
 
-Parses template file or string, and generates a parsed template string. This may come useful when debugging templates. `precompile` parameter is optional, and it affects only on `{(file)}` tag rendering (`template.compile("%s")(context)` or `template.load("%s")(context)`).
+Parses template file or string, and generates a parsed template string. This may come useful when debugging templates. You should not that if you are trying to parse a binary chunk (e.g. one returned with `template.compile`), `template.parse` will return that binary chunk as is.
 
 ```lua
 local t1 = template.parse("template.html")
@@ -234,7 +234,7 @@ local t2 = template.parse([[<h1>{{message}}</h1>]])
 
 #### string template.precompile(view, path)
 
-Precompiles template as a binary chunk. This binary chunk can be written out as a file, or used directly with `template.load`. For convenience you may optionally specify `path` argument to output binary chunk to file.
+Precompiles template as a binary chunk. This binary chunk can be written out as a file (and you may use it directly with Lua's `load` and `loadfile`). For convenience you may optionally specify `path` argument to output binary chunk to file.
 
 ```lua
 local view = [[
@@ -260,26 +260,9 @@ template.render("precompiled-bin.html", {
   }, true)
 ```
 
-#### function template.load(view)
-
-Loads precompiled chunk either from file or string (`view`). Binary chunks can be obtained with `template.precompile`.
-
-```lua
-local compiled = template.precompile([[
-<h1>{{title}}</h1>
-<ul>
-{% for _, v in ipairs(context) do %}
-    <li>{{v}}</li>
-{% end %}
-</ul>]])
-
-local f = template.load(compiled)
-local r = f({ title = "Names", "Emma", "James", "Nicholas", "Mary" })
-```
-
 #### template.print
 
-This field contains a function that is used on `template.render()` or `template.new("example.html").render()` to output the results. By default this holds either `ngx.print` (if available) or `print`. You may want to (and are allowed to) overwrite this field, if you want to use your own output function instead. This is also useful if you are using some other framework, e.g. Turbo.lua (http://turbolua.org/).
+This field contains a function that is used on `template.render()` or `template.new("example.html"):render()` to output the results. By default this holds either `ngx.print` (if available) or `print`. You may want to (and are allowed to) overwrite this field, if you want to use your own output function instead. This is also useful if you are using some other framework, e.g. Turbo.lua (http://turbolua.org/).
 
 ```lua
 local template = require "resty.template"
@@ -305,10 +288,8 @@ local compiled = template.precompile("example.html", "example-bin.html")
 
 ```lua
 local template = require "resty.template"
-template.render("example-bin.html", { "Jack", "Mary" }, true)
+template.render("example-bin.html", { "Jack", "Mary" })
 ```
-
-The last parameter in `template.render` denotes that the template (`example-bin.html` in this case) is a precompiled binary chunk.
 
 ## Template Helpers
 
