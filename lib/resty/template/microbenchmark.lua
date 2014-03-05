@@ -6,7 +6,7 @@ if not ok then
 end
 
 local function run(iterations)
-    local  print, compile, iterations = print, template.compile, iterations or 10000
+    local  print, compile, iterations = print, template.compile, iterations or 1000
 
     local view = [[
     <ul>
@@ -23,7 +23,6 @@ local function run(iterations)
         template.cache = {}
     end
     print(string.format("Compilation Time: %.6f (template)", os.clock() - x))
-    collectgarbage()
 
     compile(view)
 
@@ -32,7 +31,6 @@ local function run(iterations)
         compile(view, 1)
     end
     print(string.format("Compilation Time: %.6f (template cached)", os.clock() - x))
-    collectgarbage()
 
     local context = { "Emma", "James", "Nicholas", "Mary" }
 
@@ -44,17 +42,15 @@ local function run(iterations)
         template.cache = {}
     end
     print(string.format("  Execution Time: %.6f (same template)", os.clock() - x))
-    collectgarbage()
 
     template.cache = {}
-    compile(view)
+    compile(view, 1)
 
     local x = os.clock()
     for i = 1, iterations do
         compile(view, 1)(context)
     end
     print(string.format("  Execution Time: %.6f (same template cached)", os.clock() - x))
-    collectgarbage()
 
     template.cache = {}
 
@@ -68,14 +64,12 @@ local function run(iterations)
         compile(views[i], i)(context)
     end
     print(string.format("  Execution Time: %.6f (different template)", os.clock() - x))
-    collectgarbage()
 
     local x = os.clock()
     for i = 1, iterations do
         compile(views[i], i)(context)
     end
     print(string.format("  Execution Time: %.6f (different template cached)", os.clock() - x))
-    collectgarbage()
 
     template.cache = {}
     local contexts = new_tab(iterations, 0)
@@ -89,14 +83,12 @@ local function run(iterations)
         compile(views[i], i)(contexts[i])
     end
     print(string.format("  Execution Time: %.6f (different template, different context)", os.clock() - x))
-    collectgarbage()
 
     local x = os.clock()
     for i = 1, iterations do
         compile(views[i], i)(contexts[i])
     end
     print(string.format("  Execution Time: %.6f (different template, different context cached)", os.clock() - x))
-    collectgarbage()
 end
 
 return {
