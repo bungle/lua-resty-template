@@ -29,7 +29,7 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(view)
+        compile(view, 1)
     end
     print(string.format("Compilation Time: %.6f (template cached)", os.clock() - x))
     collectgarbage()
@@ -40,7 +40,7 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(view)(context)
+        compile(view, 1)(context)
         template.cache = {}
     end
     print(string.format("  Execution Time: %.6f (same template)", os.clock() - x))
@@ -51,7 +51,7 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(view)(context)
+        compile(view, 1)(context)
     end
     print(string.format("  Execution Time: %.6f (same template cached)", os.clock() - x))
     collectgarbage()
@@ -65,14 +65,14 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(views[i])(context)
+        compile(views[i], i)(context)
     end
     print(string.format("  Execution Time: %.6f (different template)", os.clock() - x))
     collectgarbage()
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(views[i])(context)
+        compile(views[i], i)(context)
     end
     print(string.format("  Execution Time: %.6f (different template cached)", os.clock() - x))
     collectgarbage()
@@ -86,14 +86,14 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(views[i])(contexts[i])
+        compile(views[i], i)(contexts[i])
     end
     print(string.format("  Execution Time: %.6f (different template, different context)", os.clock() - x))
     collectgarbage()
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(views[i])(contexts[i])
+        compile(views[i], i)(contexts[i])
     end
     print(string.format("  Execution Time: %.6f (different template, different context cached)", os.clock() - x))
     collectgarbage()

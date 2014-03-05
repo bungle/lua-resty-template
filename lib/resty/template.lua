@@ -2,7 +2,6 @@ local setmetatable = setmetatable
 local tostring = tostring
 local concat = table.concat
 local assert = assert
-local rename = os.rename
 local open = io.open
 local load = load
 local type = type
@@ -50,39 +49,16 @@ function template.output(s)
 end
 
 function template.escape(s, c)
-    if s == nil then return "" end
-    local t = type(s)
-    if t == "string" and #t > 0 then
-        if c then return template.escape(s:gsub("[}{]", CODE_ENTITIES)) end
+    if type(s) == "string" then
+        if c then s = s:gsub("[}{]", CODE_ENTITIES) end
         return s:gsub("[\">/<'&]", HTML_ENTITIES)
     end
-    if t == "function" then return template.output(s()) end
-    if t == "table"    then return tostring(s)          end
-    return s
+    return template.output(s)
 end
 
-function template.new(view, layout, precompiled)
-    assert(view, "view was not provided for template.new(view, layout, precompiled).")
+function template.new(view, layout)
+    assert(view, "view was not provided for template.new(view, layout).")
     local render = template.render
-    if precompiled then
-        local load = template.load
-        if layout then
-            return setmetatable({ render = function(self, context)
-                local context = context or self
-                context.view = load(view)(context)
-                render(layout, context, true)
-            end }, { __tostring = function(self)
-                local context = context or self
-                context.view = load(view)(context)
-                return load(layout)(context)
-            end })
-        end
-        return setmetatable({ render = function(self, context)
-            render(view, context or self, true)
-        end }, { __tostring = function(self)
-            return load(view)(context or self)
-        end })
-    end
     local compile = template.compile
     if layout then
         return setmetatable({ render = function(self, context)
@@ -103,7 +79,7 @@ function template.new(view, layout, precompiled)
 end
 
 function template.precompile(view, path)
-    local chunk = string.dump(assert(load(template.parse(view, true), view, "t", context)), true)
+    local chunk = string.dump(template.compile(view), true)
     if path then
         local file = io.open(path, "wb")
         file:write(chunk)
@@ -112,69 +88,49 @@ function template.precompile(view, path)
     return chunk
 end
 
-function template.load(view)
-    local cache = template.cache
-    if cache[view] then return cache[view] end
-    local func
-    if rename(view, view) then
-        func = assert(loadfile(view, "b", context))
-    else
-        func = assert(load(view, nil, "b", context))
-    end
-    if caching then cache[view] = func end
-    return func
-end
-
-function template.compile(view)
+function template.compile(view, key)
     assert(view, "view was not provided for template.compile(view).")
+    key = key or view
     local cache = template.cache
-    if cache[view] then return cache[view] end
-    local func = assert(load(template.parse(view), view, "t", context))
-    if caching then cache[view] = func end
+    if cache[key] then return cache[key] end
+    local func = assert(load(template.parse(view), nil, "tb", context))
+    if caching then cache[key] = func end
     return func
 end
 
-function template.parse(view, precompile)
-    assert(view, "view was not provided for template.parse(view, precompiled).")
+function template.parse(view)
+    assert(view, "view was not provided for template.parse(view).")
     local file = open(view, "r")
     if file then
         view = file:read("*a")
         file:close()
     end
+    if view:sub(1, 1):byte() == 27 then return view end
     local c = {
-        "context = ... or {}",
-        "local ___ = {}"
+        "context=... or {}",
+        "local ___={}"
     }
-    local r, i, j, s, e = 1, 0, 0, view:find("{", 1, true)
+    local i, j, s, e = 0, 0, view:find("{", 1, true)
     while s do
         local t = view:sub(s, e + 1)
         if t == "{{" then
             local x, y = view:find("}}", e + 2, true)
             if x then
-                if j ~= s then
-                    c[#c+1] = concat({"___[", r, "] = [=[", view:sub(j, s - 1), "]=]"})
-                    r = r + 1
-                end
-                c[#c+1] = concat({"___[", r, "] = template.escape(", view:sub(e + 2, x - 1) ,")"})
-                i, j, r = y, y + 1, r + 1
+                if j ~= s then c[#c+1] = concat({"___[#___+1]=[=[", view:sub(j, s - 1), "]=]"}) end
+                c[#c+1] = concat({"___[#___+1]=template.escape(", view:sub(e + 2, x - 1) ,")"})
+                i, j = y, y + 1
             end
         elseif t == "{*" then
             local x, y = view:find("*}", e + 2, true)
             if x then
-                if j ~= s then
-                    c[#c+1] = concat({"___[", r, "] = [=[", view:sub(j, s - 1), "]=]"})
-                    r = r + 1
-                end
-                c[#c+1] = concat({"___[", r, "] = template.output(", view:sub(e + 2, x - 1), ")"})
-                i, j, r = y, y + 1, r + 1
+                if j ~= s then c[#c+1] = concat({"___[#___+1]=[=[", view:sub(j, s - 1), "]=]"}) end
+                c[#c+1] = concat({"___[#___+1]=template.output(", view:sub(e + 2, x - 1), ")"})
+                i, j = y, y + 1
             end
         elseif t == "{%" then
             local x, y = view:find("%}", e + 2, true)
             if x then
-                if j ~= s then
-                    c[#c+1] = concat({"___[", r, "] = [=[", view:sub(j, s - 1), "]=]"})
-                    r = r + 1
-                end
+                if j ~= s then c[#c+1] = concat({"___[#___+1]=[=[", view:sub(j, s - 1), "]=]"}) end
                 c[#c+1] = view:sub(e + 2, x - 1)
                 if view:sub(y + 1, y + 1) == "\n" then
                     i, j = y + 1, y + 2
@@ -185,30 +141,22 @@ function template.parse(view, precompile)
         elseif t == "{(" then
             local x, y = view:find(")}", e + 2, true)
             if x then
-                if j ~= s then
-                    c[#c+1] = concat({"___[", r, "] = [=[", view:sub(j, s - 1), "]=]"})
-                    r = r + 1
-                end
-                if precompile then
-                    c[#c+1] = concat({"___[", r, '] = template.load("', view:sub(e + 2, x - 1), '")(context)'})
-                else
-                    c[#c+1] = concat({"___[", r, '] = template.compile("', view:sub(e + 2, x - 1), '")(context)'})
-                end
-                i, j, r = y, y + 1, r + 1
+                if j ~= s then c[#c+1] = concat({"___[#___+1]=[=[", view:sub(j, s - 1), "]=]"}) end
+                c[#c+1] = concat({'___[#___+1]=template.compile("', view:sub(e + 2, x - 1), '")(context)'})
+                i, j = y, y + 1
             end
         end
         i = i + 1
         s, e = view:find("{", i, true)
     end
-    c[#c+1] = concat({"___[", r, "] = [=[", view:sub(j), "]=]"})
+    c[#c+1] = concat({"___[#___+1]=[=[", view:sub(j), "]=]"})
     c[#c+1] = "return template.concat(___)"
     return concat(c, "\n")
 end
 
-function template.render(view, context, precompiled)
-    assert(view, "view was not provided for template.render(view, context, precompiled).")
-    if precompiled then return template.print(template.load(view)(context)) end
-    return template.print(template.compile(view)(context))
+function template.render(view, context, key)
+    assert(view, "view was not provided for template.render(view, context, key).")
+    return template.print(template.compile(view, key)(context))
 end
 
 return template
