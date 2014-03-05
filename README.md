@@ -257,7 +257,7 @@ template.precompile(view, "precompiled-bin.html")
 template.render("precompiled-bin.html", {
     title = "Names",
     "Emma", "James", "Nicholas", "Mary"
-  }, true)
+})
 ```
 
 #### template.print
