@@ -158,9 +158,9 @@ template.caching(true)
 
 Please note that if the template was already cached when compiling a template or loading a precompiled template, the cached version will be returned. You may want to flush cache with `template.cache = {}` to ensure that your template really gets recompiled or loaded.
 
-#### table template.new(view, layout, precompiled)
+#### table template.new(view, layout)
 
-Creates a new template instance that is used as a context when `render`ed. If you have precompiled your `view` (and `layout`), please set `precompiled` to `true`.
+Creates a new template instance that is used as a (default) context when `render`ed.
 
 ```lua
 local view = template.new("template.html")            -- or
