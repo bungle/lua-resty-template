@@ -59,7 +59,7 @@ From templates you may access everything in `context` table, and everything in `
 
 ##### A Word About HTML Escaping
 
-Only strings are escaped, functions are called (recursively) and results are returned as is, tables are `tostring`ified and other types are simply just returned. `nil`s are converted to `""`.
+Only strings are escaped, functions are called without arguments (recursively) and results are returned as is, tables are `tostring`ified and other types are simply just returned. `nil`s are converted to `""`.
 
 Escaped HTML characters:
 
