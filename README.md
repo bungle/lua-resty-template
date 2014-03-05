@@ -153,7 +153,7 @@ template.caching(false)
 template.caching(true)
 ```
 
-Please note that if the template was already cached when compiling a template or loading a precompiled template, the cached version will be returned. You may want to flush cache with `template.cache = {}` to ensure that your template really gets recompiled or loaded.
+Please note that if the template was already cached when compiling a template, the cached version will be returned. You may want to flush cache with `template.cache = {}` to ensure that your template really gets recompiled.
 
 #### table template.new(view, layout)
 
