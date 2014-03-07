@@ -232,6 +232,8 @@ http {
 }
 ```
 
+**See also [`template.load`](#templateload).**
+
 ## Lua API
 
 #### boolean template.caching(boolean or nil)
