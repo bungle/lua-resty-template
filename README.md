@@ -160,6 +160,13 @@ template.render("view.html")
 {(view.html)}
 ```
 
+You can  load templates from "sub-directories" as well with `{(syntax)}`:
+
+##### view.html
+```html
+{(users/list.html)}
+```
+
 **Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used. See also [`template.load`](#templateload).**
 
 
