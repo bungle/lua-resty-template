@@ -36,9 +36,15 @@ local function load_lua(path)
 end
 
 local function load_ngx(path)
-    local root, file = ngx.var.template_root or ngx.var.document_root, path
+    local file, location = path, ngx.var.template_location
+    if file:sub(1)  == "/" then file = file:sub(2) end
+    if location and location ~= "" then
+        if location:sub(-1) == "/" then location = location:sub(1, -2) end
+        local res = ngx.location.capture(location .. '/' .. file)
+        if res.status == 200 then return res.body end
+    end
+    local root = ngx.var.template_root or ngx.var.document_root
     if root:sub(-1) == "/" then root = root:sub(1, -2) end
-    if file:sub(1)  == "/" then file = file:sub(2)     end
     return read_file(root .. "/" .. file) or path
 end
 
