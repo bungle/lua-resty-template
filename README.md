@@ -135,7 +135,77 @@ template.render("view.html")
 {(view.html)}
 ```
 
-**Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used.**
+**Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used. See also [`template.load`](#templateload).**
+
+
+## Nginx / OpenResty Configuration
+
+When `lua-resty-template` is used in context of Nginx / OpenResty there are a few configuration directives that you need to be aware:
+
+* `template_root` (`set $template_root /var/www/site/templates`)
+* `template_location` (`set $template_location /templates`)
+
+If none of these are set in Nginx configuration, `ngx.var.document_root` (aka root-directive) value is used. If `template_location` is set, it will be used first, and if the location returns anything but `200` as a status code, we do fallback to either `template_root` (if defined) or `document_root`.
+
+##### Using `document_root`
+
+This one tries to load file content with Lua code from `html` directory (relative to Nginx prefix).
+
+```nginx
+http {
+  server {
+    location / {
+      root html;
+      content_by_lua '
+        local template = require "resty.template"
+        template.render("view.html", { message = "Hello, World!" })
+      ';      
+    }
+  }
+}
+```
+
+##### Using `template_root`
+
+This one tries to load file content with Lua code from `/usr/local/openresty/nginx/html/templates` directory.
+
+```nginx
+http {
+  server {
+    set $template_root /usr/local/openresty/nginx/html/templates;
+    location / {
+      root html;
+      content_by_lua '
+        local template = require "resty.template"
+        template.render("view.html", { message = "Hello, World!" })
+      ';      
+    }
+  }
+}
+```
+
+##### Using `template_location`
+
+This one tries to load content with `ngx.location.capture` from `/templates` location (in this case this is served with `ngx_static` module).
+
+```nginx
+http {
+  server {
+    set $template_location /templates;
+    location / {
+      root html;
+      content_by_lua '
+        local template = require "resty.template"
+        template.render("view.html", { message = "Hello, World!" })
+      ';      
+    }
+    location /templates {
+      internal;
+      alias html/templates/;
+    }    
+  }
+}
+```
 
 ## Lua API
 
@@ -255,6 +325,44 @@ template.render("precompiled-bin.html", {
     title = "Names",
     "Emma", "James", "Nicholas", "Mary"
 })
+```
+
+#### template.load
+
+This field is used to load templates. `template.parse` calls this function before it starts parsing the template. By default there are two loaders in `lua-resty-template`: one for Lua and the other for Nginx / OpenResty. Users can overwrite this field with their own function. For example you may want to write a template loader function that loads templates from a database.
+
+Default `template.load` for Lua (attached as template.load when used directly with Lua):
+
+```lua
+local function load_lua(path)
+    -- read_file tries to open file from path, and return its content.
+    return read_file(path) or path
+end
+```
+
+Default `template.load` for Nginx / OpenResty (attached as template.load when used in context of Nginx / OpenResty):
+
+```lua
+local function load_ngx(path)
+    local file, location = path, ngx.var.template_location
+    if file:sub(1)  == "/" then file = file:sub(2) end
+    if location and location ~= "" then
+        if location:sub(-1) == "/" then location = location:sub(1, -2) end
+        local res = ngx.location.capture(location .. '/' .. file)
+        if res.status == 200 then return res.body end
+    end
+    local root = ngx.var.template_root or ngx.var.document_root
+    if root:sub(-1) == "/" then root = root:sub(1, -2) end
+    -- read_file tries to open file from path, and return its content.
+    return read_file(root .. "/" .. file) or path
+end
+```
+
+As you can see, `lua-resty-template` always tries (by default) to load a template from a file (or with `ngx.location.capture`) even if you provided template as a string. `lua-resty-template` cannot easily differentiate when the provided template is a string or a file path (at least with the API that it currently has). But if you know that your templates are always strings, and not file paths, you may replace `template.load` with the simplest possible template loader there is (but be aware that if your templates use `{(file.html)}` includes, those are considered as strings too, in this case `file.html` will be the template string that is parsed):
+
+```lua
+local template = require "resty.template"
+template.load = function(s) return s end
 ```
 
 #### template.print
