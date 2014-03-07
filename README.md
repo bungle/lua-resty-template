@@ -257,6 +257,44 @@ template.render("precompiled-bin.html", {
 })
 ```
 
+#### template.load
+
+This field is used to load templates. `template.parse` calls this function before it starts parsing the template. By default there are two loaders in `lua-resty-template`: one for Lua and the other for Nginx / OpenResty. Users can overwrite this field with their own function. For example you may want to write a template loader function that loads templates from a database.
+
+Default `template.load` for Lua (attached as template.load when used directly with Lua):
+
+```lua
+local function load_lua(path)
+    -- read_file tries to open file from path, and return its content.
+    return read_file(path) or path
+end
+```
+
+Default `template.load` for Nginx / OpenResty (attached as template.load when used directly with Lua):
+
+```lua
+local function load_ngx(path)
+    local file, location = path, ngx.var.template_location
+    if file:sub(1)  == "/" then file = file:sub(2) end
+    if location and location ~= "" then
+        if location:sub(-1) == "/" then location = location:sub(1, -2) end
+        local res = ngx.location.capture(location .. '/' .. file)
+        if res.status == 200 then return res.body end
+    end
+    local root = ngx.var.template_root or ngx.var.document_root
+    if root:sub(-1) == "/" then root = root:sub(1, -2) end
+    -- read_file tries to open file from path, and return its content.
+    return read_file(root .. "/" .. file) or path
+end
+```
+
+As you can see, `lua-resty-template` always tries (by default) to load a template from a file (or with `ngx.location.capture`) even if you provided template as a string. `lua-resty-template` cannot easily differentiate when the provided template is a string or a file path (at least with an API that it currently has). But if you know that your templates are always strings, and not file paths, you may replace `template.load` with simplest possible template loader there is (but be aware that if your templates use `{(file.html)}` includes, those are considered as strings too, in this case `file.html` will be the template string that is parsed):
+
+```lua
+local template = require "resty.template"
+template.load = function(s) return s end
+```
+
 #### template.print
 
 This field contains a function that is used on `template.render()` or `template.new("example.html"):render()` to output the results. By default this holds either `ngx.print` (if available) or `print`. You may want to (and are allowed to) overwrite this field, if you want to use your own output function instead. This is also useful if you are using some other framework, e.g. Turbo.lua (http://turbolua.org/).
