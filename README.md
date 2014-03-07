@@ -288,7 +288,7 @@ local function load_ngx(path)
 end
 ```
 
-As you can see, `lua-resty-template` always tries (by default) to load a template from a file (or with `ngx.location.capture`) even if you provided template as a string. `lua-resty-template` cannot easily differentiate when the provided template is a string or a file path (at least with an API that it currently has). But if you know that your templates are always strings, and not file paths, you may replace `template.load` with simplest possible template loader there is (but be aware that if your templates use `{(file.html)}` includes, those are considered as strings too, in this case `file.html` will be the template string that is parsed):
+As you can see, `lua-resty-template` always tries (by default) to load a template from a file (or with `ngx.location.capture`) even if you provided template as a string. `lua-resty-template` cannot easily differentiate when the provided template is a string or a file path (at least with the API that it currently has). But if you know that your templates are always strings, and not file paths, you may replace `template.load` with the simplest possible template loader there is (but be aware that if your templates use `{(file.html)}` includes, those are considered as strings too, in this case `file.html` will be the template string that is parsed):
 
 ```lua
 local template = require "resty.template"
