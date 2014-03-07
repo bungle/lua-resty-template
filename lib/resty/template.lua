@@ -23,10 +23,31 @@ local CODE_ENTITIES = {
 local caching = true
 local template = { cache = {}, concat = concat }
 
+local function read_file(path)
+    local file = open(path, "rb")
+    if not file then return nil end
+    local content = file:read("*a")
+    file:close()
+    return content
+end
+
+local function load_lua(path)
+    return read_file(path) or path
+end
+
+local function load_ngx(path)
+    local root, file = ngx.var.template_root or ngx.var.document_root, path
+    if root:sub(-1) == "/" then root = root:sub(1, -2) end
+    if file:sub(1)  == "/" then file = file:sub(2)     end
+    return read_file(root .. "/" .. file) or path
+end
+
 if ngx then
     template.print = ngx.print or print
+    template.load  = load_ngx
 else
     template.print = print
+    template.load  = load_lua
 end
 
 local context = setmetatable({ context = {}, template = template }, {
@@ -100,11 +121,7 @@ end
 
 function template.parse(view)
     assert(view, "view was not provided for template.parse(view).")
-    local file = open(view, "r")
-    if file then
-        view = file:read("*a")
-        file:close()
-    end
+    view = template.load(view)
     if view:sub(1, 1):byte() == 27 then return view end
     local c = {
         "context=... or {}",
@@ -116,21 +133,21 @@ function template.parse(view)
         if t == "{{" then
             local x, y = view:find("}}", e + 2, true)
             if x then
-                if j ~= s then c[#c+1] = concat({"___[#___+1]=[=[", view:sub(j, s - 1), "]=]"}) end
-                c[#c+1] = concat({"___[#___+1]=template.escape(", view:sub(e + 2, x - 1) ,")"})
+                if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
+                c[#c+1] = "___[#___+1]=template.escape(" .. view:sub(e + 2, x - 1) .. ")"
                 i, j = y, y + 1
             end
         elseif t == "{*" then
             local x, y = view:find("*}", e + 2, true)
             if x then
-                if j ~= s then c[#c+1] = concat({"___[#___+1]=[=[", view:sub(j, s - 1), "]=]"}) end
-                c[#c+1] = concat({"___[#___+1]=template.output(", view:sub(e + 2, x - 1), ")"})
+                if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
+                c[#c+1] = "___[#___+1]=template.output(" .. view:sub(e + 2, x - 1) .. ")"
                 i, j = y, y + 1
             end
         elseif t == "{%" then
             local x, y = view:find("%}", e + 2, true)
             if x then
-                if j ~= s then c[#c+1] = concat({"___[#___+1]=[=[", view:sub(j, s - 1), "]=]"}) end
+                if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
                 c[#c+1] = view:sub(e + 2, x - 1)
                 if view:sub(y + 1, y + 1) == "\n" then
                     i, j = y + 1, y + 2
@@ -141,15 +158,15 @@ function template.parse(view)
         elseif t == "{(" then
             local x, y = view:find(")}", e + 2, true)
             if x then
-                if j ~= s then c[#c+1] = concat({"___[#___+1]=[=[", view:sub(j, s - 1), "]=]"}) end
-                c[#c+1] = concat({'___[#___+1]=template.compile("', view:sub(e + 2, x - 1), '")(context)'})
+                if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
+                c[#c+1] = '___[#___+1]=template.compile("' .. view:sub(e + 2, x - 1) .. '")(context)'
                 i, j = y, y + 1
             end
         end
         i = i + 1
         s, e = view:find("{", i, true)
     end
-    c[#c+1] = concat({"___[#___+1]=[=[", view:sub(j), "]=]"})
+    c[#c+1] = "___[#___+1]=[=[" .. view:sub(j) .. "]=]"
     c[#c+1] = "return template.concat(___)"
     return concat(c, "\n")
 end
