@@ -135,7 +135,77 @@ template.render("view.html")
 {(view.html)}
 ```
 
-**Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used. See also [`template.load`](#templateload)**
+**Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used. See also [`template.load`](#templateload).**
+
+
+## Nginx / OpenResty Configuration
+
+When `lua-resty-template` is used in context of Nginx / OpenResty there are a few configuration directives that you need to be aware:
+
+* `template_root` (`set $template_root /var/www/site/templates`)
+* `template_location` (`set $template_location /templates`)
+
+If none of these are set in Nginx configuration, `ngx.var.document_root` (aka root-directive) value is used. If `template_location` is set, it will be used first, and if the location returns anything but `200` as a status code, we do fallback to either `template_root` (if defined) or `document_root`.
+
+##### Using `document_root`
+
+This one tries to load file content with Lua code from `html` directory (relative to Nginx prefix).
+
+```nginx
+http {
+  server {
+    location / {
+      root html;
+      content_by_lua '
+        local template = require "resty.template"
+        template.render("view.html", { message = "Hello, World!" })
+      ';      
+    }
+  }
+}
+```
+
+##### Using `template_root`
+
+This one tries to load file content with Lua code from `/usr/local/openresty/nginx/html/templates` directory.
+
+```nginx
+http {
+  server {
+    set $template_root /usr/local/openresty/nginx/html/templates;
+    location / {
+      root html;
+      content_by_lua '
+        local template = require "resty.template"
+        template.render("view.html", { message = "Hello, World!" })
+      ';      
+    }
+  }
+}
+```
+
+##### Using `template_location`
+
+This one tries to load content with `ngx.location.capture` from `/templates` location (in this case this is served with `ngx_static` module).
+
+```nginx
+http {
+  server {
+    set $template_location /templates;
+    location / {
+      root html;
+      content_by_lua '
+        local template = require "resty.template"
+        template.render("view.html", { message = "Hello, World!" })
+      ';      
+    }
+    location /templates {
+      internal;
+      alias html/templates/;
+    }    
+  }
+}
+```
 
 ## Lua API
 
