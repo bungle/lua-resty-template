@@ -270,7 +270,7 @@ local function load_lua(path)
 end
 ```
 
-Default `template.load` for Nginx / OpenResty (attached as template.load when used directly with Lua):
+Default `template.load` for Nginx / OpenResty (attached as template.load when used in context of Nginx / OpenResty):
 
 ```lua
 local function load_ngx(path)
