@@ -165,7 +165,7 @@ function template.parse(view)
             local x, y = view:find(")}", e + 2, true)
             if x then
                 if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
-                c[#c+1] = '___[#___+1]=template.compile("' .. view:sub(e + 2, x - 1) .. '")(context)'
+                c[#c+1] = '___[#___+1]=template.compile([=[' .. view:sub(e + 2, x - 1) .. ']=])(context)'
                 i, j = y, y + 1
             end
         end
