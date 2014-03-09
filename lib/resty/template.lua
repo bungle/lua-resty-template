@@ -85,8 +85,7 @@ end
 
 function template.new(view, layout)
     assert(view, "view was not provided for template.new(view, layout).")
-    local render = template.render
-    local compile = template.compile
+    local render, compile = template.render, template.compile
     if layout then
         return setmetatable({ render = function(self, context)
             local context = context or self
