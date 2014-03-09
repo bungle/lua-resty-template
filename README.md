@@ -11,7 +11,7 @@
 * [Lua API](#lua-api)
   * [template.caching](#boolean-templatecachingboolean-or-nil)
   * [template.new](#table-templatenewview-layout)
-  * [template.compile](#function-templatecompileview-key)
+  * [template.compile](#function-boolean-templatecompileview-key)
   * [template.render](#templaterenderview-context-key)
   * [template.parse](#string-templateparseview)
   * [template.precompile](#string-templateprecompileview-path)
