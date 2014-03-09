@@ -11,7 +11,7 @@
 * [Lua API](#lua-api)
   * [template.caching](#boolean-templatecachingboolean-or-nil)
   * [template.new](#table-templatenewview-layout)
-  * [template.compile](#function-templatecompileview-key)
+  * [template.compile](#function-boolean-templatecompileview-key)
   * [template.render](#templaterenderview-context-key)
   * [template.parse](#string-templateparseview)
   * [template.precompile](#string-templateprecompileview-path)
@@ -290,7 +290,7 @@ view.render(setmetatable({ title = "Testing lua-resty-template" }, { __index = v
 local result = tostring(view)
 ```
 
-#### function template.compile(view, key)
+#### function, boolean template.compile(view, key)
 
 Parses, compiles and caches (if caching is enabled) a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string. Optionally you may pass `key` that is used as a cache key. If cache key is not provided `view` wil be used as a cache key.
 
@@ -307,6 +307,8 @@ local world    = func{ message = "Hello, World!" }
 local universe = func{ message = "Hello, Universe!" }
 print(world, universe)
 ```
+
+Also note the second return value which is a boolean. You may discard it, or use it to determine if the returned function was cached.
 
 #### template.render(view, context, key)
 
@@ -326,7 +328,7 @@ template.render("view.html", { message = "Hello, Universe!" })
 
 #### string template.parse(view)
 
-Parses template file or string, and generates a parsed template string. This may come useful when debugging templates. You should not that if you are trying to parse a binary chunk (e.g. one returned with `template.compile`), `template.parse` will return that binary chunk as is.
+Parses template file or string, and generates a parsed template string. This may come useful when debugging templates. You should note that if you are trying to parse a binary chunk (e.g. one returned with `template.compile`), `template.parse` will return that binary chunk as is.
 
 ```lua
 local t1 = template.parse("template.html")
