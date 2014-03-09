@@ -290,7 +290,7 @@ view.render(setmetatable({ title = "Testing lua-resty-template" }, { __index = v
 local result = tostring(view)
 ```
 
-#### function template.compile(view, key)
+#### function, boolean template.compile(view, key)
 
 Parses, compiles and caches (if caching is enabled) a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string. Optionally you may pass `key` that is used as a cache key. If cache key is not provided `view` wil be used as a cache key.
 
@@ -307,6 +307,8 @@ local world    = func{ message = "Hello, World!" }
 local universe = func{ message = "Hello, Universe!" }
 print(world, universe)
 ```
+
+Also note the second return value which is a boolean. You may discard it, or use it to determine if the returned function was cached.
 
 #### template.render(view, context, key)
 
