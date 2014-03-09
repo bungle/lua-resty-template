@@ -119,10 +119,10 @@ function template.compile(view, key)
     assert(view, "view was not provided for template.compile(view).")
     key = key or view
     local cache = template.cache
-    if cache[key] then return cache[key] end
+    if cache[key] then return cache[key], true end
     local func = assert(load(template.parse(view), nil, "tb", context))
     if caching then cache[key] = func end
-    return func
+    return func, false
 end
 
 function template.parse(view)
