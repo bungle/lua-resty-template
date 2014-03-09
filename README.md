@@ -328,7 +328,7 @@ template.render("view.html", { message = "Hello, Universe!" })
 
 #### string template.parse(view)
 
-Parses template file or string, and generates a parsed template string. This may come useful when debugging templates. You should not that if you are trying to parse a binary chunk (e.g. one returned with `template.compile`), `template.parse` will return that binary chunk as is.
+Parses template file or string, and generates a parsed template string. This may come useful when debugging templates. You should note that if you are trying to parse a binary chunk (e.g. one returned with `template.compile`), `template.parse` will return that binary chunk as is.
 
 ```lua
 local t1 = template.parse("template.html")
