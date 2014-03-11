@@ -116,7 +116,7 @@ function template.precompile(view, path)
 end
 
 function template.compile(view, key)
-    assert(view, "view was not provided for template.compile(view).")
+    assert(view, "view was not provided for template.compile(view, key).")
     key = key or view
     local cache = template.cache
     if cache[key] then return cache[key], true end
