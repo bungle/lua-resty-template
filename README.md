@@ -172,7 +172,7 @@ You can  load templates from "sub-directories" as well with `{(syntax)}`:
 
 ## Installation
 
-Just place [`template.lua`s](https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template.lua)` somewhere in your `package.path`. If you are using OpenResty, the default location would be `/usr/local/openresty/lualib/resty`.
+Just place [`template.lua`](https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template.lua) somewhere in your `package.path`. If you are using OpenResty, the default location would be `/usr/local/openresty/lualib/resty`.
 
 ## Nginx / OpenResty Configuration
 
