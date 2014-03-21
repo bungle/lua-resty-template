@@ -1,4 +1,4 @@
-local ok, ffi = pcall(require, "ffi")
+local ok = pcall(require, "ffi")
 
 if ok then
     return require "resty.template.crc32jit"
