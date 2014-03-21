@@ -2,31 +2,6 @@
 
 **lua-resty-template** is a compiling templating engine for OpenResty and Lua.
 
-## Contents
-
-* [Hello World with lua-resty-template](#hello-world-with-lua-resty-template)
-* [Template Syntax](#template-syntax)
-  * [Reserved Context Keys and Remarks](#reserved-context-keys-and-remarks)
-* [Nginx / OpenResty Configuration](#nginx--openresty-configuration)
-* [Lua API](#lua-api)
-  * [template.caching](#boolean-templatecachingboolean-or-nil)
-  * [template.new](#table-templatenewview-layout)
-  * [template.compile](#function-boolean-templatecompileview-key)
-  * [template.render](#templaterenderview-context-key)
-  * [template.parse](#string-templateparseview)
-  * [template.precompile](#string-templateprecompileview-path)
-  * [template.load](#templateload)
-  * [template.print](#templateprint)
-* [Template Precompilation](#template-precompilation)
-* [Template Helpers](#template-helpers)
-* [Usage Examples](#usage-examples)
-  * [Views with Layouts](#views-with-layouts)
-  * [Calling Methods in Templates](#calling-methods-in-templates)
-* [FAQ](#faq)
-* [Alternatives](#alternatives)
-* [Benchmarks](#benchmarks)
-* [License](#license)
-
 ## Hello World with lua-resty-template
 
 ```lua
@@ -66,6 +41,31 @@ template.render([[
 </body>
 </html>
 ```
+
+## Contents
+
+* [Template Syntax](#template-syntax)
+  * [Reserved Context Keys and Remarks](#reserved-context-keys-and-remarks)
+* [Installation](#installation)
+* [Nginx / OpenResty Configuration](#nginx--openresty-configuration)
+* [Lua API](#lua-api)
+  * [template.caching](#boolean-templatecachingboolean-or-nil)
+  * [template.new](#table-templatenewview-layout)
+  * [template.compile](#function-boolean-templatecompileview-key)
+  * [template.render](#templaterenderview-context-key)
+  * [template.parse](#string-templateparseview)
+  * [template.precompile](#string-templateprecompileview-path)
+  * [template.load](#templateload)
+  * [template.print](#templateprint)
+* [Template Precompilation](#template-precompilation)
+* [Template Helpers](#template-helpers)
+* [Usage Examples](#usage-examples)
+  * [Views with Layouts](#views-with-layouts)
+  * [Calling Methods in Templates](#calling-methods-in-templates)
+* [FAQ](#faq)
+* [Alternatives](#alternatives)
+* [Benchmarks](#benchmarks)
+* [License](#license)
 
 ## Template Syntax
 
@@ -169,6 +169,9 @@ You can  load templates from "sub-directories" as well with `{(syntax)}`:
 
 **Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used. See also [`template.load`](#templateload).**
 
+## Installation
+
+Just place [`template.lua`](https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template.lua) somewhere in your `package.path`, preferably under `resty` directory. If you are using OpenResty, the default location would be `/usr/local/openresty/lualib/resty`.
 
 ## Nginx / OpenResty Configuration
 
