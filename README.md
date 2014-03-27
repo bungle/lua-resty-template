@@ -54,7 +54,7 @@ template.render([[
   * [template.compile](#function-boolean-templatecompileview-key)
   * [template.render](#templaterenderview-context-key)
   * [template.parse](#string-templateparseview)
-  * [template.precompile](#string-templateprecompileview-path)
+  * [template.precompile](#string-templateprecompileview-path-strip)
   * [template.load](#templateload)
   * [template.print](#templateprint)
 * [Template Precompilation](#template-precompilation)
