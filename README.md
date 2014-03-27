@@ -338,9 +338,9 @@ local t1 = template.parse("template.html")
 local t2 = template.parse([[<h1>{{message}}</h1>]])
 ```
 
-#### string template.precompile(view, path)
+#### string template.precompile(view, path, strip)
 
-Precompiles template as a binary chunk. This binary chunk can be written out as a file (and you may use it directly with Lua's `load` and `loadfile`). For convenience you may optionally specify `path` argument to output binary chunk to file.
+Precompiles template as a binary chunk. This binary chunk can be written out as a file (and you may use it directly with Lua's `load` and `loadfile`). For convenience you may optionally specify `path` argument to output binary chunk to file. You may also supply `strip` parameter with value of `false` to make precompiled templates to have debug information as well (defaults to `true`).
 
 ```lua
 local view = [[
