@@ -585,8 +585,9 @@ template.render([[
 
 You may also look at these:
 
-* cgilua (http://keplerproject.github.io/cgilua/manual.html#templates)
 * etlua (https://github.com/leafo/etlua)
+* cgilua (http://keplerproject.github.io/cgilua/manual.html#templates)
+* turbolua mustache (http://turbolua.org/doc/web.html#mustache-templating)
 * lustache (https://github.com/Olivine-Labs/lustache)
 * lust (https://github.com/weshoke/Lust)
 * templet (http://colberg.org/lua-templet/)
