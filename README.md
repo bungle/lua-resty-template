@@ -587,6 +587,7 @@ You may also look at these:
 
 * etlua (https://github.com/leafo/etlua)
 * cgilua (http://keplerproject.github.io/cgilua/manual.html#templates)
+* orbit (http://keplerproject.github.io/orbit/pages.html)
 * turbolua mustache (http://turbolua.org/doc/web.html#mustache-templating)
 * pl.template (http://stevedonovan.github.io/Penlight/api/modules/pl.template.html)
 * lustache (https://github.com/Olivine-Labs/lustache)
