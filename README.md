@@ -585,6 +585,7 @@ template.render([[
 
 You may also look at these:
 
+* cgilua (http://keplerproject.github.io/cgilua/manual.html#templates)
 * etlua (https://github.com/leafo/etlua)
 * lustache (https://github.com/Olivine-Labs/lustache)
 * lust (https://github.com/weshoke/Lust)
@@ -597,6 +598,8 @@ You may also look at these:
 * groucho (https://github.com/hanjos/groucho)
 * simple lua preprocessor (http://lua-users.org/wiki/SimpleLuaPreprocessor)
 * slightly less simple lua preprocessor (http://lua-users.org/wiki/SlightlyLessSimpleLuaPreprocessor)
+* ltp (http://www.savarese.com/software/ltp/)
+* slt2 (https://github.com/henix/slt2)
 
 `lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thank you Tor, and Zed for your earlier contributions.*
 
