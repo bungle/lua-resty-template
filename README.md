@@ -588,6 +588,7 @@ You may also look at these:
 * etlua (https://github.com/leafo/etlua)
 * cgilua (http://keplerproject.github.io/cgilua/manual.html#templates)
 * turbolua mustache (http://turbolua.org/doc/web.html#mustache-templating)
+* pl.template (http://stevedonovan.github.io/Penlight/api/modules/pl.template.html)
 * lustache (https://github.com/Olivine-Labs/lustache)
 * lust (https://github.com/weshoke/Lust)
 * templet (http://colberg.org/lua-templet/)
@@ -601,6 +602,8 @@ You may also look at these:
 * slightly less simple lua preprocessor (http://lua-users.org/wiki/SlightlyLessSimpleLuaPreprocessor)
 * ltp (http://www.savarese.com/software/ltp/)
 * slt2 (https://github.com/henix/slt2)
+* luasp (http://luasp.org/)
+* view0 (https://bitbucket.org/jimstudt/view0)
 
 `lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thank you Tor, and Zed for your earlier contributions.*
 
