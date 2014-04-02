@@ -152,7 +152,7 @@ You should also not `{(view.html)}` recursively
 
 ##### Lua
 ```lua
-template.render("view.html")
+template.render "view.html"
 ```
 
 ##### view.html
@@ -286,7 +286,7 @@ local view = template.new("view.html")
 view.message  = "Hello, World!"
 view:render()
 -- You may also replace context on render
-view:render({ title = "Testing lua-resty-template" })
+view:render{ title = "Testing lua-resty-template" }
 -- If you want to include view context in  replacement context
 view:render(setmetatable({ title = "Testing lua-resty-template" }, { __index = view }))
 -- To get rendered template as a string, you can use tostring
