@@ -602,6 +602,7 @@ You may also look at these:
 * simple lua preprocessor (http://lua-users.org/wiki/SimpleLuaPreprocessor)
 * slightly less simple lua preprocessor (http://lua-users.org/wiki/SlightlyLessSimpleLuaPreprocessor)
 * ltp (http://www.savarese.com/software/ltp/)
+* slt (https://code.google.com/p/slt/)
 * slt2 (https://github.com/henix/slt2)
 * luasp (http://luasp.org/)
 * view0 (https://bitbucket.org/jimstudt/view0)
