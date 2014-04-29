@@ -608,6 +608,10 @@ You may also look at these:
 * view0 (https://bitbucket.org/jimstudt/view0)
 * leslie (https://code.google.com/p/leslie/)
 * fraudster (https://bitbucket.org/sphen_lee/fraudster)
+* lua-haml (https://github.com/norman/lua-haml)
+* lua-template (https://github.com/tgn14/Lua-template)
+* hige (https://github.com/nrk/hige)
+* lapis html generation (http://leafo.net/lapis/reference.html#html-generation)
 
 `lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thank you Tor, and Zed for your earlier contributions.*
 
