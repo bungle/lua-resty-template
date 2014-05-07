@@ -595,6 +595,7 @@ You may also look at these:
 * templet (http://colberg.org/lua-templet/)
 * luahtml (https://github.com/TheLinx/LuaHTML)
 * mixlua (https://github.com/LuaDist/mixlua)
+* lutem (https://github.com/daly88/lutem)
 * tirtemplate (https://github.com/torhve/LuaWeb/blob/master/tirtemplate.lua)
 * cosmo (http://cosmo.luaforge.net/)
 * lua-codegen (http://fperrad.github.io/lua-CodeGen/)
