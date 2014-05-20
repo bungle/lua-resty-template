@@ -1,6 +1,4 @@
-local ok = pcall(require, "ffi")
-
-if ok then
+if type(jit) == "table" then
     return require "resty.template.crc32jit"
 end
 

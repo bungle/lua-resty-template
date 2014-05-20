@@ -1,5 +1,6 @@
 local setmetatable = setmetatable
 local tostring = tostring
+local setfenv = setfenv
 local concat = table.concat
 local assert = assert
 local open = io.open
@@ -63,6 +64,20 @@ local context = setmetatable({ context = {}, template = template }, {
     end
 })
 
+local load_chunk
+
+if _VERSION == "Lua 5.1" and type(jit) ~= "table" then
+    load_chunk = function(view)
+        local func = assert(loadstring(view))
+        setfenv(func, context)
+        return func
+    end
+else
+    load_chunk = function(view)
+        return assert(load(view, nil, "tb", context))
+    end
+end
+
 function template.caching(enable)
     if enable ~= nil then caching = enable == true end
     return caching
@@ -120,7 +135,7 @@ function template.compile(view, key)
     key = key or view
     local cache = template.cache
     if cache[key] then return cache[key], true end
-    local func = assert(load(template.parse(view), nil, "tb", context))
+    local func = load_chunk(template.parse(view))
     if caching then cache[key] = func end
     return func, false
 end
