@@ -1,6 +1,6 @@
 # lua-resty-template
 
-**lua-resty-template** is a compiling (HTML) templating engine for OpenResty and Lua.
+**lua-resty-template** is a compiling (HTML) templating engine for Lua and OpenResty.
 
 ## Hello World with lua-resty-template
 
@@ -595,6 +595,7 @@ You may also look at these:
 * templet (http://colberg.org/lua-templet/)
 * luahtml (https://github.com/TheLinx/LuaHTML)
 * mixlua (https://github.com/LuaDist/mixlua)
+* lutem (https://github.com/daly88/lutem)
 * tirtemplate (https://github.com/torhve/LuaWeb/blob/master/tirtemplate.lua)
 * cosmo (http://cosmo.luaforge.net/)
 * lua-codegen (http://fperrad.github.io/lua-CodeGen/)
@@ -602,11 +603,16 @@ You may also look at these:
 * simple lua preprocessor (http://lua-users.org/wiki/SimpleLuaPreprocessor)
 * slightly less simple lua preprocessor (http://lua-users.org/wiki/SlightlyLessSimpleLuaPreprocessor)
 * ltp (http://www.savarese.com/software/ltp/)
+* slt (https://code.google.com/p/slt/)
 * slt2 (https://github.com/henix/slt2)
 * luasp (http://luasp.org/)
 * view0 (https://bitbucket.org/jimstudt/view0)
 * leslie (https://code.google.com/p/leslie/)
 * fraudster (https://bitbucket.org/sphen_lee/fraudster)
+* lua-haml (https://github.com/norman/lua-haml)
+* lua-template (https://github.com/tgn14/Lua-template)
+* hige (https://github.com/nrk/hige)
+* lapis html generation (http://leafo.net/lapis/reference.html#html-generation)
 
 `lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thank you Tor, and Zed for your earlier contributions.*
 
