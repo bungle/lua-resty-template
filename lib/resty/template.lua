@@ -85,10 +85,8 @@ end
 
 function template.output(s)
     if s == nil or s == ngx_null then return "" end
-    local t = type(s)
-    if t == "function" then return template.output(s()) end
-    if t == "table"    then return tostring(s)          end
-    return s
+    if type(s) == "function" then return template.output(s()) end
+    return tostring(s)
 end
 
 function template.escape(s, c)
