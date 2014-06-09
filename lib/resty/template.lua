@@ -21,7 +21,7 @@ local CODE_ENTITIES = {
     ["}"] = "&#125;"
 }
 
-local caching, ngx_var, ngx_capture = true
+local caching, ngx_var, ngx_capture, ngx_null = true
 local template = { cache = {}, concat = concat }
 
 local function read_file(path)
@@ -52,7 +52,7 @@ end
 if ngx then
     template.print = ngx.print or print
     template.load  = load_ngx
-    ngx_var, ngx_capture = ngx.var, ngx.location.capture
+    ngx_var, ngx_capture, ngx_null = ngx.var, ngx.location.capture, ngx.null
 else
     template.print = print
     template.load  = load_lua
@@ -84,7 +84,7 @@ function template.caching(enable)
 end
 
 function template.output(s)
-    if s == nil then return "" end
+    if s == nil or s == ngx_null then return "" end
     local t = type(s)
     if t == "function" then return template.output(s()) end
     if t == "table"    then return tostring(s)          end
