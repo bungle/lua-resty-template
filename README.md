@@ -371,7 +371,7 @@ template.render("precompiled-bin.html", {
 
 #### template.load
 
-This field is used to load templates. `template.parse` calls this function before it starts parsing the template. By default there are two loaders in `lua-resty-template`: one for Lua and the other for Nginx / OpenResty. Users can overwrite this field with their own function. For example you may want to write a template loader function that loads templates from a database.
+This field is used to load templates. `template.parse` calls this function before it starts parsing the template (assuming that optional `plain` parameter in `template.parse` evaluates false (the default). By default there are two loaders in `lua-resty-template`: one for Lua and the other for Nginx / OpenResty. Users can overwrite this field with their own function. For example you may want to write a template loader function that loads templates from a database.
 
 Default `template.load` for Lua (attached as template.load when used directly with Lua):
 
