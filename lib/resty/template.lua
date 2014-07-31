@@ -196,6 +196,12 @@ function template.parse(view, plain)
                     i, j = b, b + 1
                 end
             end
+        elseif t == "{#" then
+            local x, y = view:find("#}", e + 2, true)
+            if x then
+                if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
+                i, j = y, y + 1
+            end
         end
         i = i + 1
         s, e = view:find("{", i, true)
