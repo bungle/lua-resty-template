@@ -61,6 +61,7 @@ template.render([[
 * [Template Helpers](#template-helpers)
 * [Usage Examples](#usage-examples)
   * [Views with Layouts](#views-with-layouts)
+  * [Using Blocks](#using-blocks)
   * [Calling Methods in Templates](#calling-methods-in-templates)
 * [FAQ](#faq)
 * [Alternatives](#alternatives)
@@ -604,7 +605,7 @@ view:render()
 </html>
 ```
 
-#### Resulting Output
+##### Output
 
 ```html
 <!DOCTYPE html>
