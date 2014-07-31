@@ -202,7 +202,6 @@ function template.parse(view, plain)
     end
     c[#c+1] = "___[#___+1]=[=[" .. view:sub(j) .. "]=]"
     c[#c+1] = "return template.concat(___)"
-    print(concat(c, "\n"))
     return concat(c, "\n")
 end
 
