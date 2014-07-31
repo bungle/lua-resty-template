@@ -294,9 +294,9 @@ view:render(setmetatable({ title = "Testing lua-resty-template" }, { __index = v
 local result = tostring(view)
 ```
 
-#### function, boolean template.compile(view, key)
+#### function, boolean template.compile(view, key, plain)
 
-Parses, compiles and caches (if caching is enabled) a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string. Optionally you may pass `key` that is used as a cache key. If cache key is not provided `view` wil be used as a cache key.
+Parses, compiles and caches (if caching is enabled) a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string. Optionally you may pass `key` that is used as a cache key. If cache key is not provided `view` wil be used as a cache key. If cache key is `no-cache` the template cache will not be checked and the resulting function will not be cached. You may also optionally pass `plain` with a value of `true` if the `view` is plain text string (this will skip `template.load` and binary chunk detection in `template.parse` phase).
 
 ```lua
 local func = template.compile("template.html")          -- or
@@ -330,9 +330,9 @@ template.render("view.html", { message = "Hello, World!" })
 template.render("view.html", { message = "Hello, Universe!" })
 ```
 
-#### string template.parse(view)
+#### string template.parse(view, plain)
 
-Parses template file or string, and generates a parsed template string. This may come useful when debugging templates. You should note that if you are trying to parse a binary chunk (e.g. one returned with `template.compile`), `template.parse` will return that binary chunk as is.
+Parses template file or string, and generates a parsed template string. This may come useful when debugging templates. You should note that if you are trying to parse a binary chunk (e.g. one returned with `template.compile`), `template.parse` will return that binary chunk as is. If optional parameter `plain` evaluates to `true`, the `view` is considered to be plain string, and the `template.load` and binary chunk detection is skipped.
 
 ```lua
 local t1 = template.parse("template.html")
