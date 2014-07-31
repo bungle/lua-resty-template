@@ -61,6 +61,7 @@ template.render([[
 * [Template Helpers](#template-helpers)
 * [Usage Examples](#usage-examples)
   * [Views with Layouts](#views-with-layouts)
+  * [Using Blocks](#using-blocks)
   * [Calling Methods in Templates](#calling-methods-in-templates)
 * [FAQ](#faq)
 * [Alternatives](#alternatives)
@@ -143,6 +144,7 @@ It is adviced that you do not use these keys in your context tables:
 
 * `___`, holds the compiled template, if set you need to use `{{context.___}}`
 * `context`, holds the current context, if set you need to use `{{context.context}}`
+* `blocks`, holds the blocks, if set you need to use `{{context.blocks}}` (see: [Using Blocks](#using-blocks))
 * `template`, holds the template table, if set you need to use `{{context.template}}` (used in escaping, and compiling child templates)
 
 In addition to that with `template.new` you should not overwrite:
@@ -541,6 +543,11 @@ view.message   = "Hello, World!"
 view:render()
 ```
 
+##### view.html
+```html
+<h1>{{message}}</h1>
+```
+
 ##### layout.html
 ```html
 <!DOCTYPE html>
@@ -554,9 +561,73 @@ view:render()
 </html>
 ```
 
+### Using Blocks
+
+Blocks can be used to move different parts of the views to specific places in layouts. Layouts have placeholders for blocks.
+
+##### Lua
+```lua
+local view     = template.new("view.html", "layout.html")
+view.title     = "Testing lua-resty-template blocks"
+view.message   = "Hello, World!"
+view.keywords  = { "test", "lua", "template", "blocks" }
+view:render()
+```
+
 ##### view.html
 ```html
 <h1>{{message}}</h1>
+{-aside-}
+<ul>
+    {% for _, keyword in ipairs(keywords) do %}
+    <li>{{keyword}}</li>
+    {% end %}
+</ul>
+{-aside-}
+```
+
+##### layout.html
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<title>{*title*}</title>
+</head>
+<body>
+<article>
+    {*view*}
+</article>
+{% if blocks.aside then %}
+<aside>
+    {*blocks.aside*}
+</aside>
+{% end %}
+</body>
+</html>
+```
+
+##### Output
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<title>Testing lua-resty-template blocks</title>
+</head>
+<body>
+<article>
+    <h1>Hello, World!</h1>
+</article>
+<aside>
+    <ul>
+        <li>test</li>
+        <li>lua</li>
+        <li>template</li>
+        <li>blocks</li>
+    </ul>
+</aside>
+</body>
+</html>
 ```
 
 ### Calling Methods in Templates
