@@ -128,20 +128,25 @@ function template.precompile(view, path, strip)
     return chunk
 end
 
-function template.compile(view, key)
-    assert(view, "view was not provided for template.compile(view, key).")
+function template.compile(view, key, plain)
+    assert(view, "view was not provided for template.compile(view, key, plain).")
+    if key == "no-cache" then
+        return load_chunk(template.parse(view, plain)), false
+    end
     key = key or view
     local cache = template.cache
     if cache[key] then return cache[key], true end
-    local func = load_chunk(template.parse(view))
+    local func = load_chunk(template.parse(view, plain))
     if caching then cache[key] = func end
     return func, false
 end
 
-function template.parse(view)
-    assert(view, "view was not provided for template.parse(view).")
-    view = template.load(view)
-    if view:sub(1, 1):byte() == 27 then return view end
+function template.parse(view, plain)
+    assert(view, "view was not provided for template.parse(view, plain).")
+    if not plain then
+        view = template.load(view)
+        if view:sub(1, 1):byte() == 27 then return view end
+    end
     local c = {
         "context=... or {}",
         "local ___={}"
@@ -181,12 +186,23 @@ function template.parse(view)
                 c[#c+1] = '___[#___+1]=template.compile([=[' .. view:sub(e + 2, x - 1) .. ']=])(context)'
                 i, j = y, y + 1
             end
+        elseif t == "{-" then
+            local x, y = view:find("-}", e + 2, true)
+            if x then
+                local a, b = view:find(view:sub(e, y), y, true)
+                if a then
+                    if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
+                    c[#c+1] = 'local ' .. view:sub(e + 2, x - 1) .. '=template.compile([=[' .. view:sub(y + 1, a - 1) .. ']=], "no-cache", true)(context)'
+                    i, j = b, b + 1
+                end
+            end
         end
         i = i + 1
         s, e = view:find("{", i, true)
     end
     c[#c+1] = "___[#___+1]=[=[" .. view:sub(j) .. "]=]"
     c[#c+1] = "return template.concat(___)"
+    print(concat(c, "\n"))
     return concat(c, "\n")
 end
 
