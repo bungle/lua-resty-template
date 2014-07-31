@@ -144,6 +144,7 @@ It is adviced that you do not use these keys in your context tables:
 
 * `___`, holds the compiled template, if set you need to use `{{context.___}}`
 * `context`, holds the current context, if set you need to use `{{context.context}}`
+* `blocks`, holds the blocks, if set you need to use `{{context.blocks}}` (see: [Using Blocks](#using-blocks))
 * `template`, holds the template table, if set you need to use `{{context.template}}` (used in escaping, and compiling child templates)
 
 In addition to that with `template.new` you should not overwrite:
