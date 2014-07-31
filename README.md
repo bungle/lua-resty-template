@@ -316,9 +316,9 @@ print(world, universe)
 
 Also note the second return value which is a boolean. You may discard it, or use it to determine if the returned function was cached.
 
-#### template.render(view, context, key)
+#### template.render(view, context, key, plain)
 
-Parses, compiles, caches (if caching is enabled) and outputs template either with `ngx.print` if available, or `print`. You may optionally also pass `key` that is used as a cache key.
+Parses, compiles, caches (if caching is enabled) and outputs template either with `ngx.print` if available, or `print`. You may optionally also pass `key` that is used as a cache key. If `plain` evaluates to `true`, the `view` is considered to be plain string template (`template.load` and binary chunk detection is skipped on `template.parse`).
 
 ```lua
 template.render("template.html", { message = "Hello, World!" })          -- or
