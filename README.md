@@ -75,7 +75,7 @@ You may use the following tags in templates:
 * `{*expression*}`, writes result of expression 
 * `{% lua code %}`, executes Lua code
 * `{(template)}`, includes `template` file
-* `{-block-}...{-block-}`, wraps inside of `{-block-}` to variable called block (you can use any Lua syntax valid names instead of `block`)
+* `{-block-}...{-block-}`, wraps inside of a `{-block-}` to a Lua local variable `block` (you can use any Lua syntax valid names instead of `block`)
 
 From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
 
