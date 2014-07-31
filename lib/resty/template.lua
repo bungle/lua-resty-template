@@ -60,7 +60,7 @@ end
 
 local context = setmetatable({ context = {}, blocks = {}, template = template }, {
     __index = function(t, k)
-        return t.context[k] or t.blocks[k] or t.template[k] or _G[k]
+        return t.context[k] or t.template[k] or _G[k]
     end
 })
 
