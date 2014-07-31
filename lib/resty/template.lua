@@ -58,9 +58,9 @@ else
     template.load  = load_lua
 end
 
-local context = setmetatable({ context = {}, template = template }, {
+local context = setmetatable({ context = {}, blocks = {}, template = template }, {
     __index = function(t, k)
-        return t.context[k] or t.template[k] or _G[k]
+        return t.context[k] or t.blocks[k] or t.template[k] or _G[k]
     end
 })
 
@@ -192,7 +192,7 @@ function template.parse(view, plain)
                 local a, b = view:find(view:sub(e, y), y, true)
                 if a then
                     if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
-                    c[#c+1] = 'local ' .. view:sub(e + 2, x - 1) .. '=template.compile([=[' .. view:sub(y + 1, a - 1) .. ']=], "no-cache", true)(context)'
+                    c[#c+1] = 'blocks. ' .. view:sub(e + 2, x - 1) .. '=template.compile([=[' .. view:sub(y + 1, a - 1) .. ']=], "no-cache", true)(context)'
                     i, j = b, b + 1
                 end
             end
@@ -205,9 +205,9 @@ function template.parse(view, plain)
     return concat(c, "\n")
 end
 
-function template.render(view, context, key)
-    assert(view, "view was not provided for template.render(view, context, key).")
-    return template.print(template.compile(view, key)(context))
+function template.render(view, context, key, plain)
+    assert(view, "view was not provided for template.render(view, context, key, plain).")
+    return template.print(template.compile(view, key, plain)(context))
 end
 
 return template
