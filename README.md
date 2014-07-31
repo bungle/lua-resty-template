@@ -541,6 +541,11 @@ view.message   = "Hello, World!"
 view:render()
 ```
 
+##### view.html
+```html
+<h1>{{message}}</h1>
+```
+
 ##### layout.html
 ```html
 <!DOCTYPE html>
@@ -554,9 +559,73 @@ view:render()
 </html>
 ```
 
+### Using Blocks
+
+Blocks can be used to move different parts of the views to specific places in layouts. Layouts have placeholders for blocks.
+
+##### Lua
+```lua
+local view     = template.new("view.html", "layout.html")
+view.title     = "Testing lua-resty-template blocks"
+view.message   = "Hello, World!"
+view.keywords  = { "test", "lua", "template", "blocks" }
+view:render()
+```
+
 ##### view.html
 ```html
 <h1>{{message}}</h1>
+{-aside-}
+<ul>
+    {% for _, keyword in ipairs(keywords) do %}
+    <li>{{keyword}}</li>
+    {% end %}
+</ul>
+{-aside-}
+```
+
+##### layout.html
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<title>{*title*}</title>
+</head>
+<body>
+<article>
+    {*view*}
+</article>
+{% if blocks.aside then %}
+<aside>
+    {*blocks.aside*}
+</aside>
+{% end %}
+</body>
+</html>
+```
+
+#### Resulting Output
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<title>Testing lua-resty-template blocks</title>
+</head>
+<body>
+<article>
+    <h1>Hello, World!</h1>
+</article>
+<aside>
+    <ul>
+        <li>test</li>
+        <li>lua</li>
+        <li>template</li>
+        <li>blocks</li>
+    </ul>
+</aside>
+</body>
+</html>
 ```
 
 ### Calling Methods in Templates
