@@ -192,7 +192,7 @@ function template.parse(view, plain)
                 local a, b = view:find(view:sub(e, y), y, true)
                 if a then
                     if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
-                    c[#c+1] = 'blocks. ' .. view:sub(e + 2, x - 1) .. '=template.compile([=[' .. view:sub(y + 1, a - 1) .. ']=], "no-cache", true)(context)'
+                    c[#c+1] = 'blocks["' .. view:sub(e + 2, x - 1) .. '"]=template.compile([=[' .. view:sub(y + 1, a - 1) .. ']=], "no-cache", true)(context)'
                     i, j = b, b + 1
                 end
             end
