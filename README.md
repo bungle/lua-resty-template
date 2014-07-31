@@ -76,7 +76,7 @@ You may use the following tags in templates:
 * `{*expression*}`, writes result of expression 
 * `{% lua code %}`, executes Lua code
 * `{(template)}`, includes `template` file
-* `{-block-}...{-block-}`, wraps inside of a `{-block-}` to a Lua local variable `block` (you can use any Lua syntax valid names instead of `block`)
+* `{-block-}...{-block-}`, wraps inside of a `{-block-}` to a Lua key stored in `blocks` table (you can use any Lua syntax valid names instead of `block`)
 
 From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
 
@@ -316,9 +316,9 @@ print(world, universe)
 
 Also note the second return value which is a boolean. You may discard it, or use it to determine if the returned function was cached.
 
-#### template.render(view, context, key)
+#### template.render(view, context, key, plain)
 
-Parses, compiles, caches (if caching is enabled) and outputs template either with `ngx.print` if available, or `print`. You may optionally also pass `key` that is used as a cache key.
+Parses, compiles, caches (if caching is enabled) and outputs template either with `ngx.print` if available, or `print`. You may optionally also pass `key` that is used as a cache key. If `plain` evaluates to `true`, the `view` is considered to be plain string template (`template.load` and binary chunk detection is skipped on `template.parse`).
 
 ```lua
 template.render("template.html", { message = "Hello, World!" })          -- or
@@ -371,7 +371,7 @@ template.render("precompiled-bin.html", {
 
 #### template.load
 
-This field is used to load templates. `template.parse` calls this function before it starts parsing the template. By default there are two loaders in `lua-resty-template`: one for Lua and the other for Nginx / OpenResty. Users can overwrite this field with their own function. For example you may want to write a template loader function that loads templates from a database.
+This field is used to load templates. `template.parse` calls this function before it starts parsing the template (assuming that optional `plain` parameter in `template.parse` evaluates false (the default). By default there are two loaders in `lua-resty-template`: one for Lua and the other for Nginx / OpenResty. Users can overwrite this field with their own function. For example you may want to write a template loader function that loads templates from a database.
 
 Default `template.load` for Lua (attached as template.load when used directly with Lua):
 
