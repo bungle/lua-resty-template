@@ -598,6 +598,21 @@ view:render()
 </html>
 ```
 
+##### Output
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Testing lua-resty-template</title>
+</head>
+<body>
+<div id="section">
+    <h1>Hello, World!</h1>
+</div>
+</body>
+</html>
+```
+
 ### Using Blocks
 
 Blocks can be used to move different parts of the views to specific places in layouts. Layouts have placeholders for blocks.
