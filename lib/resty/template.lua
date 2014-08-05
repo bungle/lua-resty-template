@@ -149,7 +149,7 @@ function template.parse(view, plain)
     end
     local c = {
         "context=... or {}",
-        "local ___={}"
+        "local ___,layout={}"
     }
     local i, j, s, e = 0, 0, view:find("{", 1, true)
     while s do
@@ -207,7 +207,9 @@ function template.parse(view, plain)
         s, e = view:find("{", i, true)
     end
     c[#c+1] = "___[#___+1]=[=[" .. view:sub(j) .. "]=]"
-    c[#c+1] = "return template.concat(___)"
+    c[#c+1] = "if not layout then return template.concat(___) end"
+    c[#c+1] = "context.view=template.concat(___);"
+    c[#c+1] = "return template.compile(layout)(context)"
     return concat(c, "\n")
 end
 
