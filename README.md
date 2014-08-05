@@ -145,6 +145,7 @@ It is adviced that you do not use these keys in your context tables:
 
 * `___`, holds the compiled template, if set you need to use `{{context.___}}`
 * `context`, holds the current context, if set you need to use `{{context.context}}`
+* `layout`, holds the view defined layout by which the view will be decorated, if set you need to use `{{context.layout}}`
 * `blocks`, holds the blocks, if set you need to use `{{context.blocks}}` (see: [using blocks](#using-blocks))
 * `template`, holds the template table, if set you need to use `{{context.template}}` (used in escaping, and compiling child templates)
 
