@@ -752,7 +752,7 @@ https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template/micr
 ```lua
 local benchmark = require "resty.template.microbenchmark"
 benchmark.run()
--- You may also pass iteration count (by default it is 10000)
+-- You may also pass iteration count (by default it is 1,000)
 benchmark.run(100)
 ```
 
