@@ -563,7 +563,7 @@ view:render()
 </html>
 ```
 
-Alternatively you can define the layout in a view as well:
+##### Alternatively you can define the layout in a view as well:
 
 ```lua
 local view     = template.new("view.html", "layout.html")
