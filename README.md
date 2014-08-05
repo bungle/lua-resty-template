@@ -563,6 +563,41 @@ view:render()
 </html>
 ```
 
+Alternatively you can define the layout in a view as well:
+
+```lua
+local view     = template.new("view.html", "layout.html")
+view.title     = "Testing lua-resty-template"
+view.message   = "Hello, World!"
+view:render()
+```
+
+##### view.html
+```html
+{%layout="section.html"%}
+<h1>{{message}}</h1>
+```
+
+##### section.html
+```html
+<div id="section">
+    {*view*}
+</div>
+```
+
+##### layout.html
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{title}}</title>
+</head>
+<body>
+    {*view*}
+</body>
+</html>
+```
+
 ### Using Blocks
 
 Blocks can be used to move different parts of the views to specific places in layouts. Layouts have placeholders for blocks.
