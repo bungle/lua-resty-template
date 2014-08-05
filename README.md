@@ -565,6 +565,8 @@ view:render()
 
 ##### Alternatively you can define the layout in a view as well:
 
+
+##### Lua
 ```lua
 local view     = template.new("view.html", "layout.html")
 view.title     = "Testing lua-resty-template"
