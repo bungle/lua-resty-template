@@ -565,7 +565,6 @@ view:render()
 
 ##### Alternatively you can define the layout in a view as well:
 
-
 ##### Lua
 ```lua
 local view     = template.new("view.html", "layout.html")
@@ -576,7 +575,7 @@ view:render()
 
 ##### view.html
 ```html
-{%layout="section.html"%}
+{% layout="section.html" %}
 <h1>{{message}}</h1>
 ```
 
