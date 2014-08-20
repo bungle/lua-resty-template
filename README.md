@@ -76,7 +76,7 @@ You may use the following tags in templates:
 * `{*expression*}`, writes result of expression 
 * `{% lua code %}`, executes Lua code
 * `{(template)}`, includes `template` file
-* `{-block-}...{-block-}`, wraps inside of a `{-block-}` to a value stored in a `blocks` table with key `block` (in this case, see [using blocks](https://github.com/bungle/lua-resty-template#using-blocks)), please do not nest the blocks (i.e. blocks inside blocks).
+* `{-block-}...{-block-}`, wraps inside of a `{-block-}` to a value stored in a `blocks` table with a key `block` (in this case), see [using blocks](https://github.com/bungle/lua-resty-template#using-blocks).
 * `{# comments #}` everything between `{#` and `#}` is considered to be commented out (i.e. not outputted or executed)
 
 From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
@@ -145,8 +145,9 @@ It is adviced that you do not use these keys in your context tables:
 
 * `___`, holds the compiled template, if set you need to use `{{context.___}}`
 * `context`, holds the current context, if set you need to use `{{context.context}}`
+* `layout`, holds the layout by which the view will be decorated, if set you need to use `{{context.layout}}`
 * `blocks`, holds the blocks, if set you need to use `{{context.blocks}}` (see: [using blocks](#using-blocks))
-* `template`, holds the template table, if set you need to use `{{context.template}}` (used in escaping, and compiling child templates)
+* `template`, holds the template table, if set you need to use `{{context.template}}`
 
 In addition to that with `template.new` you should not overwrite:
 
@@ -562,6 +563,57 @@ view:render()
 </html>
 ```
 
+##### Alternatively you can define the layout in a view as well:
+
+##### Lua
+```lua
+local view     = template.new("view.html", "layout.html")
+view.title     = "Testing lua-resty-template"
+view.message   = "Hello, World!"
+view:render()
+```
+
+##### view.html
+```html
+{% layout="section.html" %}
+<h1>{{message}}</h1>
+```
+
+##### section.html
+```html
+<div id="section">
+    {*view*}
+</div>
+```
+
+##### layout.html
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{title}}</title>
+</head>
+<body>
+    {*view*}
+</body>
+</html>
+```
+
+##### Output
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Testing lua-resty-template</title>
+</head>
+<body>
+<div id="section">
+    <h1>Hello, World!</h1>
+</div>
+</body>
+</html>
+```
+
 ### Using Blocks
 
 Blocks can be used to move different parts of the views to specific places in layouts. Layouts have placeholders for blocks.
@@ -699,7 +751,7 @@ https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template/micr
 ```lua
 local benchmark = require "resty.template.microbenchmark"
 benchmark.run()
--- You may also pass iteration count (by default it is 10000)
+-- You may also pass iteration count (by default it is 1,000)
 benchmark.run(100)
 ```
 
