@@ -75,7 +75,7 @@ You may use the following tags in templates:
 * `{{expression}}`, writes result of expression - html escaped
 * `{*expression*}`, writes result of expression 
 * `{% lua code %}`, executes Lua code
-* `{(template)}`, includes `template` file, you may also supply context for include file `{(file.html, { message = Hello, World" } )}`
+* `{(template)}`, includes `template` file, you may also supply context for include file `{(file.html, { message = "Hello, World" } )}`
 * `{-block-}...{-block-}`, wraps inside of a `{-block-}` to a value stored in a `blocks` table with a key `block` (in this case), see [using blocks](https://github.com/bungle/lua-resty-template#using-blocks).
 * `{# comments #}` everything between `{#` and `#}` is considered to be commented out (i.e. not outputted or executed)
 
