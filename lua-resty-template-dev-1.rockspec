@@ -5,9 +5,7 @@ source = {
 }
 description = {
     summary = "Templating Engine (HTML) for Lua and OpenResty",
-    detailed = [[
-        lua-resty-template is a compiling (HTML) templating engine for Lua and OpenResty.
-    ]],
+    detailed = "lua-resty-template is a compiling (HTML) templating engine for Lua and OpenResty.",
     homepage = "https://github.com/bungle/lua-resty-template",
     maintainer = "Aapo Talvensaari <aapo.talvensaari@gmail.com>",
     license = "BSD"
