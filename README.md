@@ -178,6 +178,22 @@ You can  load templates from "sub-directories" as well with `{(syntax)}`:
 
 Just place [`template.lua`](https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template.lua) somewhere in your `package.path`, preferably under `resty` directory. If you are using OpenResty, the default location would be `/usr/local/openresty/lualib/resty`.
 
+### Using LuaRocks or Moonrocks
+
+If you are using LuaRocks >= 2.2:
+
+```bash
+luarocks install lua-resty-template
+```
+
+If you are using LuaRocks < 2.2:
+
+```bash
+luarocks install --server=http://rocks.moonscript.org moonrocks
+moonrocks install lua-resty-template
+```
+
+
 ## Nginx / OpenResty Configuration
 
 When `lua-resty-template` is used in context of Nginx / OpenResty there are a few configuration directives that you need to be aware:
