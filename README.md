@@ -732,6 +732,7 @@ You may also look at these:
 * turbolua mustache (http://turbolua.org/doc/web.html#mustache-templating)
 * pl.template (http://stevedonovan.github.io/Penlight/api/modules/pl.template.html)
 * lustache (https://github.com/Olivine-Labs/lustache)
+* luvstache (https://github.com/james2doyle/luvstache)
 * lust (https://github.com/weshoke/Lust)
 * templet (http://colberg.org/lua-templet/)
 * luahtml (https://github.com/TheLinx/LuaHTML)
