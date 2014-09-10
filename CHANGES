@@ -1,0 +1,14 @@
+
+Changes with lua-resty-template 1.1                              10 Sep 2014
+
+    *) Feature: Added _VERSION information to the module.
+
+    *) Change: Lua > 5.1 uses _ENV instead of _G (Lua 5.1 uses _G).
+       Future Proofing if Lua is deprecating _G in Lua 5.3.
+
+    *) Feature: Added CHANGES file to the project (this file).
+
+
+Changes with lua-resty-template 1.0                              28 Aug 2014
+
+    *) Feature: LuaRocks Support via MoonRocks.

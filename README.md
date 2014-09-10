@@ -67,6 +67,7 @@ template.render([[
 * [FAQ](#faq)
 * [Alternatives](#alternatives)
 * [Benchmarks](#benchmarks)
+* [Changes](#changes)
 * [License](#license)
 
 ## Template Syntax
@@ -817,6 +818,10 @@ Compilation Time: 0.000077 (template cached)
 ```
 
 I have not yet compared the results against the alternatives.
+
+## Changes
+
+The changes of every release of this module is recorded in [CHANGES](https://github.com/bungle/lua-resty-template/blob/master/CHANGES) file.
 
 ## License
 

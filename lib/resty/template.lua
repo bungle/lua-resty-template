@@ -22,7 +22,7 @@ local CODE_ENTITIES = {
 }
 
 local caching, ngx_var, ngx_capture, ngx_null = true
-local template = { cache = {}, concat = concat }
+local template = { _VERSION = "1.1", cache = {}, concat = concat }
 
 local function read_file(path)
     local file = open(path, "rb")
@@ -58,21 +58,28 @@ else
     template.load  = load_lua
 end
 
-local context = setmetatable({ context = {}, blocks = {}, template = template }, {
-    __index = function(t, k)
-        return t.context[k] or t.template[k] or _G[k]
-    end
-})
-
+local context = { context = {}, blocks = {}, template = template }
 local load_chunk
 
-if _VERSION == "Lua 5.1" and type(jit) ~= "table" then
-    load_chunk = function(view)
-        local func = assert(loadstring(view))
-        setfenv(func, context)
-        return func
+if _VERSION == "Lua 5.1" then
+    setmetatable(context, { __index = function(t, k)
+        return t.context[k] or t.template[k] or _G[k]
+    end })
+    if jit then
+        load_chunk = function(view)
+            return assert(load(view, nil, "tb", context))
+        end
+    else
+        load_chunk = function(view)
+            local func = assert(loadstring(view))
+            setfenv(func, context)
+            return func
+        end
     end
 else
+    setmetatable(context, { __index = function(t, k)
+        return t.context[k] or t.template[k] or _ENV[k]
+    end })
     load_chunk = function(view)
         return assert(load(view, nil, "tb", context))
     end
