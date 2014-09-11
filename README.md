@@ -195,6 +195,8 @@ $ luarocks install --server=http://rocks.moonscript.org moonrocks
 $ moonrocks install lua-resty-template
 ```
 
+MoonRocks repository for `lua-resty-template`  is located here: https://rocks.moonscript.org/modules/bungle/lua-resty-template.
+
 ## Nginx / OpenResty Configuration
 
 When `lua-resty-template` is used in context of Nginx / OpenResty there are a few configuration directives that you need to be aware:
