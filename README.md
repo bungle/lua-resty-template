@@ -156,7 +156,7 @@ In addition to that with `template.new` you should not overwrite:
 
 * `render`, the function that renders a view, obviously ;-)
 
-You should also not `{(view.html)}` recursively
+You should also not `{(view.html)}` recursively:
 
 ##### Lua
 ```lua
@@ -393,7 +393,7 @@ template.render("precompiled-bin.html", {
 
 #### template.load
 
-This field is used to load templates. `template.parse` calls this function before it starts parsing the template (assuming that optional `plain` parameter in `template.parse` evaluates false (the default). By default there are two loaders in `lua-resty-template`: one for Lua and the other for Nginx / OpenResty. Users can overwrite this field with their own function. For example you may want to write a template loader function that loads templates from a database.
+This field is used to load templates. `template.parse` calls this function before it starts parsing the template (assuming that optional `plain` argument in `template.parse` evaluates false (the default). By default there are two loaders in `lua-resty-template`: one for Lua and the other for Nginx / OpenResty. Users can overwrite this field with their own function. For example you may want to write a template loader function that loads templates from a database.
 
 Default `template.load` for Lua (attached as template.load when used directly with Lua):
 
@@ -422,7 +422,7 @@ local function load_ngx(path)
 end
 ```
 
-As you can see, `lua-resty-template` always tries (by default) to load a template from a file (or with `ngx.location.capture`) even if you provided template as a string. `lua-resty-template` cannot easily differentiate when the provided template is a string or a file path (at least with the API that it currently has). But if you know that your templates are always strings, and not file paths, you may replace `template.load` with the simplest possible template loader there is (but be aware that if your templates use `{(file.html)}` includes, those are considered as strings too, in this case `file.html` will be the template string that is parsed):
+As you can see, `lua-resty-template` always tries (by default) to load a template from a file (or with `ngx.location.capture`) even if you provided template as a string. `lua-resty-template`. But if you know that your templates are always strings, and not file paths, you may use `plain` argument in `template.compile`, `template.render`, and `template.parse` OR replace `template.load` with the simplest possible template loader there is (but be aware that if your templates use `{(file.html)}` includes, those are considered as strings too, in this case `file.html` will be the template string that is parsed) - you could also setup a loader that finds templates in some database system, e.g. Redis:
 
 ```lua
 local template = require "resty.template"
