@@ -61,6 +61,7 @@ template.render([[
 * [Template Precompilation](#template-precompilation)
 * [Template Helpers](#template-helpers)
 * [Usage Examples](#usage-examples)
+  * [Template Including](#template-including)
   * [Views with Layouts](#views-with-layouts)
   * [Using Blocks](#using-blocks)
   * [Calling Methods in Templates](#calling-methods-in-templates)
@@ -540,6 +541,53 @@ template.render([[
 ```
 
 ## Usage Examples
+
+### Template Including
+
+You may include templates inside templates with `{(template)}` and `{(template, context)}` syntax. The first one uses the current context as a context for included template, and the second one replaces it with a new context. Here is example of using includes and passing a different context to include file:
+
+##### Lua
+
+```lua
+local template = require "resty.template"
+template.render("include.html", { users = {
+    { name = "Jane", age = 29 },
+    { name = "John", age = 25 }
+}})
+```
+
+##### include.html
+
+```html
+<html>
+<body>
+<ul>
+{% for _, user in ipairs(users) do %}
+    {(user.html, user)}
+{% end %}
+</ul>
+</body>
+</html>
+```
+
+##### user.html
+
+```html
+<li>User {{name}} is of age {{age}}</li>
+```
+
+##### Outut
+
+```html
+<html>
+<body>
+<ul>
+    <li>User Jane is of age 29</li>
+    <li>User John is of age 25</li>
+</ul>
+</body>
+</html>
+```
 
 ### Views with Layouts
 
