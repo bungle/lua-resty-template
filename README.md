@@ -108,7 +108,7 @@ template.render("view.html", {
   title   = "Testing lua-resty-template",
   message = "Hello, World!",
   names   = { "James", "Jack", "Anne" },
-  jquery  = '<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>' 
+  jquery  = '<script src="js/jquery.min.js"></script>' 
 })
 ```
 
@@ -557,7 +557,8 @@ template.render("layout.html", {
   title = "Testing lua-resty-template",
   view  = template.compile("view.html"){ message = "Hello, World!" }
 })
--- Or maybe you like this style more (but please remember that view.view is overwritten on render)
+-- Or maybe you like this style more
+-- (but please remember that context.view is overwritten on rendering the layout.html)
 local view     = template.new("view.html", "layout.html")
 view.title     = "Testing lua-resty-template"
 view.message   = "Hello, World!"
