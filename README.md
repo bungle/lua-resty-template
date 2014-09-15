@@ -785,6 +785,7 @@ You may also look at these:
 * pl.template (http://stevedonovan.github.io/Penlight/api/modules/pl.template.html)
 * lustache (https://github.com/Olivine-Labs/lustache)
 * luvstache (https://github.com/james2doyle/luvstache)
+* lub.Template (http://doc.lubyk.org/lub.Template.html)
 * lust (https://github.com/weshoke/Lust)
 * templet (http://colberg.org/lua-templet/)
 * luahtml (https://github.com/TheLinx/LuaHTML)
