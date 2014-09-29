@@ -22,7 +22,7 @@ local CODE_ENTITIES = {
 }
 
 local caching, ngx_var, ngx_capture, ngx_null = true
-local template = { _VERSION = "1.1", cache = {}, concat = concat }
+local template = { _VERSION = "1.2", cache = {}, concat = concat }
 
 local function read_file(path)
     local file = open(path, "rb")
@@ -58,30 +58,29 @@ else
     template.load  = load_lua
 end
 
-local context = { context = {}, blocks = {}, template = template }
 local load_chunk
 
 if _VERSION == "Lua 5.1" then
-    setmetatable(context, { __index = function(t, k)
+    local context = { __index = function(t, k)
         return t.context[k] or t.template[k] or _G[k]
-    end })
+    end }
     if jit then
         load_chunk = function(view)
-            return assert(load(view, nil, "tb", context))
+            return assert(load(view, nil, "tb", setmetatable({ template = template }, context)))
         end
     else
         load_chunk = function(view)
             local func = assert(loadstring(view))
-            setfenv(func, context)
+            setfenv(func, setmetatable({ template = template }, context))
             return func
         end
     end
 else
-    setmetatable(context, { __index = function(t, k)
+    local context = { __index = function(t, k)
         return t.context[k] or t.template[k] or _ENV[k]
-    end })
+    end }
     load_chunk = function(view)
-        return assert(load(view, nil, "tb", context))
+        return assert(load(view, nil, "tb", setmetatable({ template = template }, context)))
     end
 end
 
@@ -156,7 +155,7 @@ function template.parse(view, plain)
     end
     local c = {
         "context=... or {}",
-        "local ___,layout={}"
+        "local ___,blocks,layout={},blocks or {}"
     }
     local i, j, s, e = 0, 0, view:find("{", 1, true)
     while s do
@@ -221,7 +220,7 @@ function template.parse(view, plain)
     end
     c[#c+1] = "___[#___+1]=[=[" .. view:sub(j) .. "]=]"
     c[#c+1] = "if not layout then return template.concat(___) end"
-    c[#c+1] = "context.view=template.concat(___);"
+    c[#c+1] = "if next(blocks) then return template.compile(layout)(setmetatable({view=template.concat(___),blocks=blocks},{__index=context})) end"
     c[#c+1] = "return template.compile(layout)(context)"
     return concat(c, "\n")
 end
