@@ -61,6 +61,7 @@ template.render([[
 * [Template Precompilation](#template-precompilation)
 * [Template Helpers](#template-helpers)
 * [Usage Examples](#usage-examples)
+  * [Template Including](#template-including)
   * [Views with Layouts](#views-with-layouts)
   * [Using Blocks](#using-blocks)
   * [Calling Methods in Templates](#calling-methods-in-templates)
@@ -108,7 +109,7 @@ template.render("view.html", {
   title   = "Testing lua-resty-template",
   message = "Hello, World!",
   names   = { "James", "Jack", "Anne" },
-  jquery  = '<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>' 
+  jquery  = '<script src="js/jquery.min.js"></script>' 
 })
 ```
 
@@ -155,7 +156,7 @@ In addition to that with `template.new` you should not overwrite:
 
 * `render`, the function that renders a view, obviously ;-)
 
-You should also not `{(view.html)}` recursively
+You should also not `{(view.html)}` recursively:
 
 ##### Lua
 ```lua
@@ -194,6 +195,8 @@ If you are using LuaRocks < 2.2:
 $ luarocks install --server=http://rocks.moonscript.org moonrocks
 $ moonrocks install lua-resty-template
 ```
+
+MoonRocks repository for `lua-resty-template`  is located here: https://rocks.moonscript.org/modules/bungle/lua-resty-template.
 
 ## Nginx / OpenResty Configuration
 
@@ -390,7 +393,7 @@ template.render("precompiled-bin.html", {
 
 #### template.load
 
-This field is used to load templates. `template.parse` calls this function before it starts parsing the template (assuming that optional `plain` parameter in `template.parse` evaluates false (the default). By default there are two loaders in `lua-resty-template`: one for Lua and the other for Nginx / OpenResty. Users can overwrite this field with their own function. For example you may want to write a template loader function that loads templates from a database.
+This field is used to load templates. `template.parse` calls this function before it starts parsing the template (assuming that optional `plain` argument in `template.parse` evaluates false (the default). By default there are two loaders in `lua-resty-template`: one for Lua and the other for Nginx / OpenResty. Users can overwrite this field with their own function. For example you may want to write a template loader function that loads templates from a database.
 
 Default `template.load` for Lua (attached as template.load when used directly with Lua):
 
@@ -419,7 +422,7 @@ local function load_ngx(path)
 end
 ```
 
-As you can see, `lua-resty-template` always tries (by default) to load a template from a file (or with `ngx.location.capture`) even if you provided template as a string. `lua-resty-template` cannot easily differentiate when the provided template is a string or a file path (at least with the API that it currently has). But if you know that your templates are always strings, and not file paths, you may replace `template.load` with the simplest possible template loader there is (but be aware that if your templates use `{(file.html)}` includes, those are considered as strings too, in this case `file.html` will be the template string that is parsed):
+As you can see, `lua-resty-template` always tries (by default) to load a template from a file (or with `ngx.location.capture`) even if you provided template as a string. `lua-resty-template`. But if you know that your templates are always strings, and not file paths, you may use `plain` argument in `template.compile`, `template.render`, and `template.parse` OR replace `template.load` with the simplest possible template loader there is (but be aware that if your templates use `{(file.html)}` includes, those are considered as strings too, in this case `file.html` will be the template string that is parsed) - you could also setup a loader that finds templates in some database system, e.g. Redis:
 
 ```lua
 local template = require "resty.template"
@@ -539,6 +542,53 @@ template.render([[
 
 ## Usage Examples
 
+### Template Including
+
+You may include templates inside templates with `{(template)}` and `{(template, context)}` syntax. The first one uses the current context as a context for included template, and the second one replaces it with a new context. Here is example of using includes and passing a different context to include file:
+
+##### Lua
+
+```lua
+local template = require "resty.template"
+template.render("include.html", { users = {
+    { name = "Jane", age = 29 },
+    { name = "John", age = 25 }
+}})
+```
+
+##### include.html
+
+```html
+<html>
+<body>
+<ul>
+{% for _, user in ipairs(users) do %}
+    {(user.html, user)}
+{% end %}
+</ul>
+</body>
+</html>
+```
+
+##### user.html
+
+```html
+<li>User {{name}} is of age {{age}}</li>
+```
+
+##### Outut
+
+```html
+<html>
+<body>
+<ul>
+    <li>User Jane is of age 29</li>
+    <li>User John is of age 25</li>
+</ul>
+</body>
+</html>
+```
+
 ### Views with Layouts
 
 Layouts (or Master Pages) can be used to wrap a view inside another view (aka layout).
@@ -555,7 +605,8 @@ template.render("layout.html", {
   title = "Testing lua-resty-template",
   view  = template.compile("view.html"){ message = "Hello, World!" }
 })
--- Or maybe you like this style more (but please remember that view.view is overwritten on render)
+-- Or maybe you like this style more
+-- (but please remember that context.view is overwritten on rendering the layout.html)
 local view     = template.new("view.html", "layout.html")
 view.title     = "Testing lua-resty-template"
 view.message   = "Hello, World!"
@@ -734,6 +785,7 @@ You may also look at these:
 * pl.template (http://stevedonovan.github.io/Penlight/api/modules/pl.template.html)
 * lustache (https://github.com/Olivine-Labs/lustache)
 * luvstache (https://github.com/james2doyle/luvstache)
+* lub.Template (http://doc.lubyk.org/lub.Template.html)
 * lust (https://github.com/weshoke/Lust)
 * templet (http://colberg.org/lua-templet/)
 * luahtml (https://github.com/TheLinx/LuaHTML)
