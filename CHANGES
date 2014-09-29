@@ -1,4 +1,11 @@
 
+Changes with lua-resty-template 1.2                              29 Sep 2014
+
+    *) Bugfix: Fixes nasty recursion bug (reported in bug #5) where
+       sub-templates modify the context table. Thank you for reporting
+       this @DDarko.
+
+
 Changes with lua-resty-template 1.1                              10 Sep 2014
 
     *) Feature: Added _VERSION information to the module.
