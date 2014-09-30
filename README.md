@@ -768,7 +768,6 @@ template.render("macro.html", {
 And the `macro-example.html`:
 
 ```lua
-<h1>String Macro</h1>
 {% local string_macro = [[
 <div>{{item}}</div>
 ]] %}
