@@ -754,7 +754,7 @@ view:render()
 
 ### Macros
 
-@DDarko mentioned in an issue #5 that he has a use case where he needs to have macros or parameterized views. That is a nice feature that you can use with `lua-resty-template`.
+[@DDarko](https://github.com/DDarko) mentioned in an [issue #5](https://github.com/bungle/lua-resty-template/issues/5) that he has a use case where he needs to have macros or parameterized views. That is a nice feature that you can use with `lua-resty-template`.
 
 To use macros, let's first define some Lua code:
 
