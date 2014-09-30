@@ -64,6 +64,7 @@ template.render([[
   * [Template Including](#template-including)
   * [Views with Layouts](#views-with-layouts)
   * [Using Blocks](#using-blocks)
+  * [Macros](#macros)
   * [Calling Methods in Templates](#calling-methods-in-templates)
 * [FAQ](#faq)
 * [Alternatives](#alternatives)
@@ -750,6 +751,95 @@ view:render()
 </body>
 </html>
 ```
+
+### Macros
+
+@DDarko mentioned in an issue #5 that he has a use case where he needs to have macros or parameterized views. That is a nice feature that you can use with `lua-resty-template`.
+
+To use macros, let's first define some Lua code:
+
+```lua
+template.render("macro.html", {
+    item = "original",
+    items = { a = "original-a", b = "original-b" } 
+})
+```
+
+And the `macro-example.html`:
+
+```
+<h1>String Macro</h1>
+{% local string_macro = [[
+<div>{{item}}</div>
+]] %}
+{* template.compile(string_macro)(context) *}
+{* template.compile(string_macro){ item = "string-macro-context" } *}
+```
+
+This will output:
+
+```html
+<div>original</div>
+<div>string-macro-context</div>
+```
+
+Now let's add function macro, in `macro-example.html` (you can omit `local` if you want):
+
+```lua
+{% local function_macro = function(var)
+    return "<div>{{" .. var .. "}}</div>\n"
+end %}
+
+{* template.compile(function_macro("item"))(context) *}
+{* template.compile(function_macro("a"))(items) *}
+```
+
+This will output:
+
+```html
+<div>original</div>
+<div>original-a</div>
+```
+
+But this is even more flexible, let's try another function macro:
+
+```lua
+{% local function function_macro2(var)
+    return template.compile("<div>{{" .. var .. "}}</div>\n")
+end %}
+{* function_macro2 "item" (context) *}
+{* function_macro2 "b" (items) *}
+```
+
+This will output:
+
+```html
+<div>original</div>
+<div>original-b</div>
+```
+
+And here is another one:
+
+```lua
+{% function function_macro3(var, ctx)
+    return template.compile("<div>{{" .. var .. "}}</div>\n")(ctx or context)
+end %}
+{* function_macro3("item") *}
+{* function_macro3("a", items) *}
+{* function_macro3("b", items) *}
+{* function_macro3("b", { b = "b-from-new-context" }) *}
+```
+
+This will output:
+
+```html
+<div>original</div>
+<div>original-a</div>
+<div>original-b</div>
+<div>b-from-new-context</div>
+```
+
+Macros are really flexible. You may have form-renderers and other helper-macros to have a reusable and parameterized template output. One thing you should know is that inside code blocks (between `{%` and `%}`) you cannot have `%}`, but you can work around this using string concatenation `"%" .. "}"`.
 
 ### Calling Methods in Templates
 
