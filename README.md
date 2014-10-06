@@ -786,7 +786,7 @@ Now let's add function macro, in `macro-example.html` (you can omit `local` if y
 
 ```lua
 {% local function_macro = function(var, el)
-    el = el or div
+    el = el or "div"
     return "<" .. el .. ">{{" .. var .. "}}</" .. el .. ">\n"
 end %}
 
