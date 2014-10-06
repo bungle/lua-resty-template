@@ -785,19 +785,20 @@ This will output:
 Now let's add function macro, in `macro-example.html` (you can omit `local` if you want):
 
 ```lua
-{% local function_macro = function(var)
-    return "<div>{{" .. var .. "}}</div>\n"
+{% local function_macro = function(var, el)
+    el = el or div
+    return "<" .. el .. ">{{" .. var .. "}}</" .. el .. ">\n"
 end %}
 
 {* template.compile(function_macro("item"))(context) *}
-{* template.compile(function_macro("a"))(items) *}
+{* template.compile(function_macro("a", "span"))(items) *}
 ```
 
 This will output:
 
 ```html
 <div>original</div>
-<div>original-a</div>
+<span>original-a</span>
 ```
 
 But this is even more flexible, let's try another function macro:
