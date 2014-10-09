@@ -866,8 +866,9 @@ template.render([[
 
 ## Alternatives
 
-You may also look at these:
+You may also look at these (as alternatives, or to mix them with `lua-resty-template`):
 
+* lua-resty-hoedown (https://github.com/bungle/lua-resty-hoedown)
 * etlua (https://github.com/leafo/etlua)
 * cgilua (http://keplerproject.github.io/cgilua/manual.html#templates)
 * orbit (http://keplerproject.github.io/orbit/pages.html)
