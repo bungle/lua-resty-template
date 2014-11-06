@@ -67,6 +67,7 @@ template.render([[
   * [Macros](#macros)
   * [Calling Methods in Templates](#calling-methods-in-templates)
   * [Embedding Markdown inside the Templates](#embedding-markdown-inside-the-templates)
+  * [Lua Server Pages (LSP) with OpenResty](#)
 * [FAQ](#faq)
 * [Alternatives](#alternatives)
 * [Benchmarks](#benchmarks)
@@ -928,6 +929,85 @@ Testing Markdown with "SmartyPants"...
 ```
 
 You may also want to add caching layer for your Markdowns, or a helper functions instead of placing Hoedown library directly  as a template helper function in `template`.   
+
+### Lua Server Pages (LSP) with OpenResty
+
+Lua Server Pages or LSPs is similar to traditional PHP or Microsoft Active Server Pages (ASP) where you can just place source code files in your document root (of your web server) and have them processed by compilers of the respective languages (PHP, VBScript, JScript, etc.). You can emulate quite closely this, sometimes called spaghetti-style of develoment, easily with `lua-resty-template`. Those that have been doing ASP.NET Web Forms development, know a concept of Code Behind files. There is something similar, but this time we call it Layout in Front here. To help you understand the concepts, let's have a small example:
+
+##### nginx.conf:
+
+```nginx
+http {
+  init_by_lua '
+    require "resty.core"
+    template = require "resty.template"
+    template.caching(false); -- you may remove this on production
+  ';
+  server {
+    location ~ \.lsp$ {
+      default_type text/html;
+      content_by_lua 'template.render(ngx.var.uri)';
+    }
+  }
+}
+```
+
+The above configuration creates a global `template` variable in Lua environment (you may not want this).
+We also created location to match all `.lsp` files (or locations), and then we just render the template.
+
+Let's imagine that the request is for `index.lsp`.
+
+##### index.lsp
+
+```lua
+{%
+layout = "layouts/default.lsp"
+local title = "Hello, World!"
+%}
+<h1>{{title}}</h1>
+```
+
+Here you can see that this file includes a little bit of a view (`<h1>{{title}}</h1>`) in addition to some Lua code that we want to run. If you want to have a pure code file with Layout in Front, then just don't write any view code in this file. The `layout` variable is already defined in views as documented else where in this documentation. Now let's see the other files too.
+
+##### layouts/default.lsp
+
+```html
+<html>
+{(include/header.lsp)}
+<body>
+{*view*}
+</body>
+</html>
+```
+
+Here we have a layout to decorate the `index.lsp`, but we also have include here, so let's look at it.
+
+##### include/header.lsp
+
+```html
+<head>
+  <title>Testing Lua Server Pages</title>
+</head>
+```
+
+Static stuff here only.
+
+##### Output
+
+The final output will look like this:
+
+```html
+<html>
+<head>
+  <title>Testing Lua Server Pages</title>
+</head>
+<body>
+  <h1>Hello, World!</h1>
+</body>
+</html>
+```
+
+As you can see, `lua-resty-template` can be quite flexibile and easy to start with. Just place files under your document root and use the normal save-and-refresh style of development. The server will automatically pick the new files and reload the templates (if the caching is turned of) on save.
 
 ## FAQ
 
