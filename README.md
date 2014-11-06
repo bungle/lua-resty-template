@@ -64,7 +64,9 @@ template.render([[
   * [Template Including](#template-including)
   * [Views with Layouts](#views-with-layouts)
   * [Using Blocks](#using-blocks)
+  * [Macros](#macros)
   * [Calling Methods in Templates](#calling-methods-in-templates)
+  * [Embedding Markdown inside the Templates](#embedding-markdown-inside-the-templates)
 * [FAQ](#faq)
 * [Alternatives](#alternatives)
 * [Benchmarks](#benchmarks)
@@ -751,6 +753,95 @@ view:render()
 </html>
 ```
 
+### Macros
+
+[@DDarko](https://github.com/DDarko) mentioned in an [issue #5](https://github.com/bungle/lua-resty-template/issues/5) that he has a use case where he needs to have macros or parameterized views. That is a nice feature that you can use with `lua-resty-template`.
+
+To use macros, let's first define some Lua code:
+
+```lua
+template.render("macro.html", {
+    item = "original",
+    items = { a = "original-a", b = "original-b" } 
+})
+```
+
+And the `macro-example.html`:
+
+```lua
+{% local string_macro = [[
+<div>{{item}}</div>
+]] %}
+{* template.compile(string_macro)(context) *}
+{* template.compile(string_macro){ item = "string-macro-context" } *}
+```
+
+This will output:
+
+```html
+<div>original</div>
+<div>string-macro-context</div>
+```
+
+Now let's add function macro, in `macro-example.html` (you can omit `local` if you want):
+
+```lua
+{% local function_macro = function(var, el)
+    el = el or "div"
+    return "<" .. el .. ">{{" .. var .. "}}</" .. el .. ">\n"
+end %}
+
+{* template.compile(function_macro("item"))(context) *}
+{* template.compile(function_macro("a", "span"))(items) *}
+```
+
+This will output:
+
+```html
+<div>original</div>
+<span>original-a</span>
+```
+
+But this is even more flexible, let's try another function macro:
+
+```lua
+{% local function function_macro2(var)
+    return template.compile("<div>{{" .. var .. "}}</div>\n")
+end %}
+{* function_macro2 "item" (context) *}
+{* function_macro2 "b" (items) *}
+```
+
+This will output:
+
+```html
+<div>original</div>
+<div>original-b</div>
+```
+
+And here is another one:
+
+```lua
+{% function function_macro3(var, ctx)
+    return template.compile("<div>{{" .. var .. "}}</div>\n")(ctx or context)
+end %}
+{* function_macro3("item") *}
+{* function_macro3("a", items) *}
+{* function_macro3("b", items) *}
+{* function_macro3("b", { b = "b-from-new-context" }) *}
+```
+
+This will output:
+
+```html
+<div>original</div>
+<div>original-a</div>
+<div>original-b</div>
+<div>b-from-new-context</div>
+```
+
+Macros are really flexible. You may have form-renderers and other helper-macros to have a reusable and parameterized template output. One thing you should know is that inside code blocks (between `{%` and `%}`) you cannot have `%}`, but you can work around this using string concatenation `"%" .. "}"`.
+
 ### Calling Methods in Templates
 
 You can call string methods (or other table functions) in templates too.
@@ -768,6 +859,76 @@ template.render([[
 <h1>HELLO, WORLD!</h1>
 ```
 
+### Embedding Markdown inside the Templates
+
+If you want to embed Markdown (and SmartyPants) syntax inside your templates you can do it by using for example [`lua-resty-hoedown`](https://github.com/bungle/lua-resty-hoedown) (it depends on LuaJIT). Here is an example of using that:
+
+##### Lua
+
+```lua
+local template = require "resty.template"
+template.markdown = require "resty.hoedown"
+
+template.render[=[
+<html>
+<body>
+{*markdown[[
+#Hello, World
+
+Testing Markdown.
+]]*}
+</body>
+</html>
+]=]
+```
+
+##### Output
+
+```html
+<html>
+<body>
+<h1>Hello, World</h1>
+
+<p>Testing Markdown.</p>
+</body>
+</html>
+```
+
+You may also add config parameters that are documented in `lua-resty-hoedown` project. Say you want also to use SmartyPants:
+
+##### Lua
+
+```lua
+local template = require "resty.template"
+template.markdown = require "resty.hoedown"
+
+template.render[=[
+<html>
+<body>
+{*markdown([[
+#Hello, World
+
+Testing Markdown with "SmartyPants"...
+]], { smartypants = true })*}
+</body>
+</html>
+]=]
+```
+
+##### Output
+
+```html
+<html>
+<body>
+<h1>Hello, World</h1>
+
+<p>Testing Markdown with &ldquo;SmartyPants&rdquo;&hellip;</p>
+</body>
+</html>
+```
+
+You may also want to add caching layer for your Markdowns, or a helper functions instead of placing Hoedown library directly  as a template helper function in `template`.   
+
 ## FAQ
 
 ### How Do I Clear the Template Cache
@@ -776,8 +937,9 @@ template.render([[
 
 ## Alternatives
 
-You may also look at these:
+You may also look at these (as alternatives, or to mix them with `lua-resty-template`):
 
+* lua-resty-hoedown (https://github.com/bungle/lua-resty-hoedown)
 * etlua (https://github.com/leafo/etlua)
 * cgilua (http://keplerproject.github.io/cgilua/manual.html#templates)
 * orbit (http://keplerproject.github.io/orbit/pages.html)
