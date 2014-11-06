@@ -67,7 +67,7 @@ template.render([[
   * [Macros](#macros)
   * [Calling Methods in Templates](#calling-methods-in-templates)
   * [Embedding Markdown inside the Templates](#embedding-markdown-inside-the-templates)
-  * [Lua Server Pages (LSP) with OpenResty](#)
+  * [Lua Server Pages (LSP) with OpenResty](#lua-server-pages-lsp-with-openresty)
 * [FAQ](#faq)
 * [Alternatives](#alternatives)
 * [Benchmarks](#benchmarks)
