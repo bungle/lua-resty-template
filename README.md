@@ -952,7 +952,7 @@ http {
 }
 ```
 
-The above configuration creates a global `template` variable in Lua environment (you may not want this).
+The above configuration creates a global `template` variable in Lua environment (you may not want that).
 We also created location to match all `.lsp` files (or locations), and then we just render the template.
 
 Let's imagine that the request is for `index.lsp`.
@@ -1008,6 +1008,17 @@ The final output will look like this:
 ```
 
 As you can see, `lua-resty-template` can be quite flexibile and easy to start with. Just place files under your document root and use the normal save-and-refresh style of development. The server will automatically pick the new files and reload the templates (if the caching is turned of) on save.
+
+If you want to pass variables to layouts or includes you can add stuff to context table (in the example below see `context.title`):
+
+```lua
+{%
+layout = "layouts/default.lsp"
+local title = "Hello, World!"
+context.title = 'My Application - ' .. title
+%}
+<h1>{{title}}</h1>
+```
 
 ## FAQ
 
