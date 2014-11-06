@@ -22,7 +22,7 @@ local CODE_ENTITIES = {
 }
 
 local caching, ngx_var, ngx_capture, ngx_null = true
-local template = { _VERSION = "1.2", cache = {}, concat = concat }
+local template = { _VERSION = "1.3", cache = {}, concat = concat }
 
 local function read_file(path)
     local file = open(path, "rb")
