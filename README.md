@@ -869,7 +869,7 @@ If you want to embed Markdown (and SmartyPants) syntax inside your templates you
 local template = require "resty.template"
 template.markdown = require "resty.hoedown"
 
-template.render([=[
+template.render[=[
 <html>
 <body>
 {*markdown[[
@@ -879,7 +879,7 @@ Testing Markdown.
 ]]*}
 </body>
 </html>
-]=])
+]=]
 ```
 
 ##### Output
@@ -902,7 +902,7 @@ You may also add config parameters that are documented in `lua-resty-hoedown` pr
 local template = require "resty.template"
 template.markdown = require "resty.hoedown"
 
-template.render([=[
+template.render[=[
 <html>
 <body>
 {*markdown([[
@@ -912,7 +912,7 @@ Testing Markdown with "SmartyPants"...
 ]], { smartypants = true })*}
 </body>
 </html>
-]=])
+]=]
 ```
 
 ##### Output
