@@ -858,6 +858,76 @@ template.render([[
 <h1>HELLO, WORLD!</h1>
 ```
 
+### Embedding Markdown inside the Templates
+
+If you want to embed Markdown (and SmartyPants) syntax inside your templates you can do it by using for example `[lua-resty-hoedown](https://github.com/bungle/lua-resty-hoedown)`. Here is an example of using that:
+
+##### Lua
+
+```lua
+local template = require "resty.template"
+template.markdown = require "resty.hoedown"
+
+template.render([=[
+<html>
+<body>
+{*markdown[[
+#Hello, World
+
+Testing Markdown.
+]]*}
+</body>
+</html>
+]=])
+```
+
+##### Output
+
+```html
+<html>
+<body>
+<h1>Hello, World</h1>
+
+<p>Testing Markdown.</p>
+</body>
+</html>
+```
+
+You may also add config parameters that are documented in `lua-resty-hoedown` project. Say you want also to use SmartyPants:
+
+##### Lua
+
+```lua
+local template = require "resty.template"
+template.markdown = require "resty.hoedown"
+
+template.render([=[
+<html>
+<body>
+{*markdown([[
+#Hello, World
+
+Testing Markdown with "SmartyPants"...
+]], { smartypants = true })*}
+</body>
+</html>
+]=])
+```
+
+##### Output
+
+```html
+<html>
+<body>
+<h1>Hello, World</h1>
+
+<p>Testing Markdown with &ldquo;SmartyPants&rdquo;&hellip;</p>
+</body>
+</html>
+```
+
+You may also want to add caching layer for your Markdowns, or a helper functions instead of placing Hoedown library directly  as a template helper function in `template`.   
+
 ## FAQ
 
 ### How Do I Clear the Template Cache
