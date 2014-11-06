@@ -10,7 +10,11 @@ local function tag(name, content, attr)
     r[#r + 1] = name
     if attr then
         for k, v in pairs(attr) do
-            a[#a + 1] = k .. '="' .. escape(v) .. '"'
+            if type(k) == "number" then
+                a[#a + 1] = escape(v)
+            else
+                a[#a + 1] = k .. '="' .. escape(v) .. '"'
+            end
         end
         if #a > 0 then
             r[#r + 1] = " "
