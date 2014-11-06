@@ -66,6 +66,7 @@ template.render([[
   * [Using Blocks](#using-blocks)
   * [Macros](#macros)
   * [Calling Methods in Templates](#calling-methods-in-templates)
+  * [Embedding Markdown inside the Templates](#embedding-markdown-inside-the-templates)
 * [FAQ](#faq)
 * [Alternatives](#alternatives)
 * [Benchmarks](#benchmarks)
@@ -860,7 +861,7 @@ template.render([[
 
 ### Embedding Markdown inside the Templates
 
-If you want to embed Markdown (and SmartyPants) syntax inside your templates you can do it by using for example `[lua-resty-hoedown](https://github.com/bungle/lua-resty-hoedown)`. Here is an example of using that:
+If you want to embed Markdown (and SmartyPants) syntax inside your templates you can do it by using for example [`lua-resty-hoedown`](https://github.com/bungle/lua-resty-hoedown) (it depends on LuaJIT). Here is an example of using that:
 
 ##### Lua
 
