@@ -932,7 +932,7 @@ You may also want to add caching layer for your Markdowns, or a helper functions
 
 ### Lua Server Pages (LSP) with OpenResty
 
-Lua Server Pages or LSPs is similar to traditional PHP or Microsoft Active Server Pages (ASP) where you can just place source code files in your document root (of your web server) and have them processed by compilers of the respective languages (PHP, VBScript, JScript, etc.). You can emulate quite closely this, sometimes called spaghetti-style of develoment, easily with `lua-resty-template`. Those that have been doing ASP.NET Web Forms development, know a concept of Code Behind files. There is something similar, but this time we call it Layout in Front here. To help you understand the concepts, let's have a small example:
+Lua Server Pages or LSPs is similar to traditional PHP or Microsoft Active Server Pages (ASP) where you can just place source code files in your document root (of your web server) and have them processed by compilers of the respective languages (PHP, VBScript, JScript, etc.). You can emulate quite closely this, sometimes called spaghetti-style of develoment, easily with `lua-resty-template`. Those that have been doing ASP.NET Web Forms development, know a concept of Code Behind files. There is something similar, but this time we call it Layout in Front here (you may include Lua modules with normal `require` calls if you wish in LSPs). To help you understand the concepts, let's have a small example:
 
 ##### nginx.conf:
 
