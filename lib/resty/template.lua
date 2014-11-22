@@ -3,6 +3,7 @@ local tostring = tostring
 local setfenv = setfenv
 local concat = table.concat
 local assert = assert
+local write = io.write
 local open = io.open
 local load = load
 local type = type
@@ -50,11 +51,11 @@ local function load_ngx(path)
 end
 
 if ngx then
-    template.print = ngx.print or print
+    template.print = ngx.print or write
     template.load  = load_ngx
     ngx_var, ngx_capture, ngx_null = ngx.var, ngx.location.capture, ngx.null
 else
-    template.print = print
+    template.print = write
     template.load  = load_lua
 end
 
@@ -153,74 +154,92 @@ function template.parse(view, plain)
         view = template.load(view)
         if view:sub(1, 1):byte() == 27 then return view end
     end
-    local c = {
-        "context=... or {}",
-        "local ___,blocks,layout={},blocks or {}"
-    }
-    local i, j, s, e = 0, 0, view:find("{", 1, true)
+    local c = {[[
+context=... or {}
+local function include(v, c)
+    return template.compile(v)(c or context)
+end
+local ___,blocks,layout={},blocks or {}
+]]}
+    local i, s = 1, (view:find("{", 1, true))
     while s do
-        local t = view:sub(s, e + 1)
-        if t == "{{" then
-            local x, y = view:find("}}", e + 2, true)
-            if x then
-                if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
-                c[#c+1] = "___[#___+1]=template.escape(" .. view:sub(e + 2, x - 1) .. ")"
-                i, j = y, y + 1
+        local t, p, d, z = view:sub(s + 1, s + 1), s + 2
+        if t == "{" then
+            local e = (view:find("}}", p, true))
+            if e then
+                d = concat{"___[#___+1]=template.escape(", view:sub(p, e - 1), ")\n" }
+                z = e + 1
             end
-        elseif t == "{*" then
-            local x, y = view:find("*}", e + 2, true)
-            if x then
-                if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
-                c[#c+1] = "___[#___+1]=template.output(" .. view:sub(e + 2, x - 1) .. ")"
-                i, j = y, y + 1
+        elseif t == "*" then
+            local e = (view:find("*}", p, true))
+            if e then
+                d = concat{"___[#___+1]=template.output(", view:sub(p, e - 1), ")\n" }
+                z = e + 1
             end
-        elseif t == "{%" then
-            local x, y = view:find("%}", e + 2, true)
-            if x then
-                if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
-                c[#c+1] = view:sub(e + 2, x - 1)
-                if view:sub(y + 1, y + 1) == "\n" then
-                    i, j = y + 1, y + 2
+        elseif t == "%" then
+            local e = (view:find("%}", p, true))
+            if e then
+                local n = e + 2
+                if view:sub(n, n) == "\n" then
+                    n = n + 1
+                end
+                d = concat{view:sub(p, e - 1), "\n" }
+                z = n - 1
+            end
+        elseif t == "(" then
+            local e = (view:find(")}", p, true))
+            if e then
+                local f = view:sub(p, e - 1)
+                local x = (f:find(",", 2, true))
+                if x then
+                    d = concat{"___[#___+1]=include([=[", f:sub(1, x - 1), "]=],", f:sub(x + 1), ")\n"}
                 else
-                    i, j = y, y + 1
+                    d = concat{"___[#___+1]=include([=[", f, "]=])\n" }
+                end
+                z = e + 1
+            end
+        elseif t == "[" then
+            local e = (view:find("]}", p, true))
+            if e then
+                d = concat{"___[#___+1]=include(", view:sub(p, s - 2), ")\n" }
+                z = e + 1
+            end
+        elseif t == "-" then
+            local e = (view:find("-}", p, true))
+            if e then
+                local x, y = view:find(view:sub(s, e + 1), e + 2, true)
+                if x then
+                    y = y + 1
+                    if view:sub(y, y) == "\n" then
+                        y = y + 1
+                    end
+                    d = concat{'blocks["', view:sub(p, e - 1), '"]=include[=[', view:sub(e + 2, x - 1), "]=]\n"}
+                    z = y - 1
                 end
             end
-        elseif t == "{(" then
-            local x, y = view:find(")}", e + 2, true)
-            if x then
-                if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
-                local file = view:sub(e + 2, x - 1)
-                local a, b = file:find(',', 2, true)
-                if a then
-                    c[#c+1] = '___[#___+1]=template.compile([=[' .. file:sub(1, a - 1) .. ']=])(' .. file:sub(b + 1) .. ')'
-                else
-                    c[#c+1] = '___[#___+1]=template.compile([=[' .. file .. ']=])(context)'
+        elseif t == "#" then
+            local e = (view:find("#}", p, true))
+            if e then
+                e = e + 2
+                if view:sub(e, e) == "\n" then
+                    e = e + 1
                 end
-                i, j = y, y + 1
-            end
-        elseif t == "{-" then
-            local x, y = view:find("-}", e + 2, true)
-            if x then
-                local a, b = view:find(view:sub(e, y), y, true)
-                if a then
-                    if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
-                    c[#c+1] = 'blocks["' .. view:sub(e + 2, x - 1) .. '"]=template.compile([=[' .. view:sub(y + 1, a - 1) .. ']=], "no-cache", true)(context)'
-                    i, j = b, b + 1
-                end
-            end
-        elseif t == "{#" then
-            local x, y = view:find("#}", e + 2, true)
-            if x then
-                if j ~= s then c[#c+1] = "___[#___+1]=[=[" .. view:sub(j, s - 1) .. "]=]" end
-                i, j = y, y + 1
+                d = ""
+                z = e - 1
             end
         end
-        i = i + 1
-        s, e = view:find("{", i, true)
+        if d then
+            c[#c+1] = concat{"___[#___+1]=[=[\n", view:sub(i, s - 1), "]=]\n" }
+            if d ~= "" then
+                c[#c+1] = d
+            end
+            s, i = z, z + 1
+        end
+        s = (view:find("{", s + 1, true))
     end
-    c[#c+1] = "___[#___+1]=[=[" .. view:sub(j) .. "]=]"
+    c[#c+1] = concat{"___[#___+1]=[=[\n", view:sub(i), "]=]\n"}
     c[#c+1] = "return layout and template.compile(layout)(setmetatable({view=template.concat(___),blocks=blocks},{__index=context})) or template.concat(___)"
-    return concat(c, "\n")
+    return concat(c)
 end
 
 function template.render(view, context, key, plain)
