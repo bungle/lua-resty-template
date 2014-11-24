@@ -6,7 +6,7 @@ if not ok then
 end
 
 local function run(iterations)
-    local  print, compile, iterations = print, template.compile, iterations or 1000
+    local  print, parse, compile, iterations = print, template.parse, template.compile, iterations or 1000
 
     local view = [[
     <ul>
@@ -16,6 +16,12 @@ local function run(iterations)
     </ul>]]
 
     print(string.format("Running %d iterations in each test", iterations))
+
+    local x = os.clock()
+    for i = 1, iterations do
+        parse(view)
+    end
+    print(string.format("    Parsing Time: %.6f", os.clock() - x))
 
     local x = os.clock()
     for i = 1, iterations do

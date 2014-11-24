@@ -23,7 +23,7 @@ local CODE_ENTITIES = {
 }
 
 local caching, ngx_var, ngx_capture, ngx_null = true
-local template = { _VERSION = "1.4-rc1", cache = {}, concat = concat }
+local template = { _VERSION = "1.4-rc2", cache = {}, concat = concat }
 
 local function read_file(path)
     local file = open(path, "rb")
@@ -110,10 +110,12 @@ function template.new(view, layout)
     if layout then
         return setmetatable({ render = function(self, context)
             local context = context or self
+            context.blocks = context.blocks or {}
             context.view = compile(view)(context)
             render(layout, context)
         end }, { __tostring = function(self)
             local context = context or self
+            context.blocks = context.blocks or {}
             context.view = compile(view)(context)
             return compile(layout)(context)
         end })
@@ -161,11 +163,11 @@ local function include(v, c)
 end
 local ___,blocks,layout={},blocks or {}
 ]]}
-    local i, s = 1, (view:find("{", 1, true))
+    local i, s = 1, view:find("{", 1, true)
     while s do
         local t, p, d, z = view:sub(s + 1, s + 1), s + 2
         if t == "{" then
-            local e = (view:find("}}", p, true))
+            local e = view:find("}}", p, true)
             if e then
                 d = concat{"___[#___+1]=template.escape(", view:sub(p, e - 1), ")\n" }
                 z = e + 1
@@ -177,7 +179,7 @@ local ___,blocks,layout={},blocks or {}
                 z = e + 1
             end
         elseif t == "%" then
-            local e = (view:find("%}", p, true))
+            local e = view:find("%}", p, true)
             if e then
                 local n = e + 2
                 if view:sub(n, n) == "\n" then
@@ -187,7 +189,7 @@ local ___,blocks,layout={},blocks or {}
                 z = n - 1
             end
         elseif t == "(" then
-            local e = (view:find(")}", p, true))
+            local e = view:find(")}", p, true)
             if e then
                 local f = view:sub(p, e - 1)
                 local x = (f:find(",", 2, true))
@@ -199,13 +201,13 @@ local ___,blocks,layout={},blocks or {}
                 z = e + 1
             end
         elseif t == "[" then
-            local e = (view:find("]}", p, true))
+            local e = view:find("]}", p, true)
             if e then
-                d = concat{"___[#___+1]=include(", view:sub(p, s - 2), ")\n" }
+                d = concat{"___[#___+1]=include(", view:sub(p, e - 1), ")\n" }
                 z = e + 1
             end
         elseif t == "-" then
-            local e = (view:find("-}", p, true))
+            local e = view:find("-}", p, true)
             if e then
                 local x, y = view:find(view:sub(s, e + 1), e + 2, true)
                 if x then
@@ -218,7 +220,7 @@ local ___,blocks,layout={},blocks or {}
                 end
             end
         elseif t == "#" then
-            local e = (view:find("#}", p, true))
+            local e = view:find("#}", p, true)
             if e then
                 e = e + 2
                 if view:sub(e, e) == "\n" then
@@ -235,10 +237,10 @@ local ___,blocks,layout={},blocks or {}
             end
             s, i = z, z + 1
         end
-        s = (view:find("{", s + 1, true))
+        s = view:find("{", s + 1, true)
     end
     c[#c+1] = concat{"___[#___+1]=[=[\n", view:sub(i), "]=]\n"}
-    c[#c+1] = "return layout and template.compile(layout)(setmetatable({view=template.concat(___),blocks=blocks},{__index=context})) or template.concat(___)"
+    c[#c+1] = "return layout and include(layout,setmetatable({view=template.concat(___),blocks=blocks},{__index=context})) or template.concat(___)"
     return concat(c)
 end
 

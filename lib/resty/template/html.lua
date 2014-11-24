@@ -30,7 +30,6 @@ local function tag(name, content, attr)
     else
         r[#r + 1] = " />"
     end
-    r[#r + 1] = "\n"
     return concat(r)
 end
 
