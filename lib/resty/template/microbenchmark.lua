@@ -19,13 +19,13 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        parse(view)
+        parse(view, true)
     end
     print(string.format("    Parsing Time: %.6f", os.clock() - x))
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(view)
+        compile(view, nil, true)
         template.cache = {}
     end
     print(string.format("Compilation Time: %.6f (template)", os.clock() - x))
@@ -34,7 +34,7 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(view, 1)
+        compile(view, 1, true)
     end
     print(string.format("Compilation Time: %.6f (template cached)", os.clock() - x))
 
@@ -44,7 +44,7 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(view, 1)(context)
+        compile(view, 1, true)(context)
         template.cache = {}
     end
     print(string.format("  Execution Time: %.6f (same template)", os.clock() - x))
@@ -54,7 +54,7 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(view, 1)(context)
+        compile(view, 1, true)(context)
     end
     print(string.format("  Execution Time: %.6f (same template cached)", os.clock() - x))
 
@@ -67,13 +67,13 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(views[i], i)(context)
+        compile(views[i], i, true)(context)
     end
     print(string.format("  Execution Time: %.6f (different template)", os.clock() - x))
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(views[i], i)(context)
+        compile(views[i], i, true)(context)
     end
     print(string.format("  Execution Time: %.6f (different template cached)", os.clock() - x))
 
@@ -86,13 +86,13 @@ local function run(iterations)
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(views[i], i)(contexts[i])
+        compile(views[i], i, true)(contexts[i])
     end
     print(string.format("  Execution Time: %.6f (different template, different context)", os.clock() - x))
 
     local x = os.clock()
     for i = 1, iterations do
-        compile(views[i], i)(contexts[i])
+        compile(views[i], i, true)(contexts[i])
     end
     print(string.format("  Execution Time: %.6f (different template, different context cached)", os.clock() - x))
 end

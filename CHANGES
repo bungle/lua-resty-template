@@ -1,4 +1,15 @@
 
+Changes with lua-resty-template 1.4                               3 Dec 2014
+
+    *) Feature: Added support for {[expression include]} syntax.
+
+    *) Change: Rewrote template.parse (cleaned up, less repetition of code,
+       and better handling of new lines - i.e. doesn't eat newlines anymore.
+       Also some adjustments to preceding spaces (space, tab, NUL-byte,
+       and vertical tabs) on some tags ({% ... %}, {-block-} ... {-block-},
+       and {# ... #}) for a cleaner output.
+                          
+
 Changes with lua-resty-template 1.3                               6 Nov 2014
 
     *) Bugfix: Fixed a bug when a view was missing from context when using

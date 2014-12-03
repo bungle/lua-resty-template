@@ -23,7 +23,19 @@ local CODE_ENTITIES = {
 }
 
 local caching, ngx_var, ngx_capture, ngx_null = true
-local template = { _VERSION = "1.4-rc2", cache = {}, concat = concat }
+local template = { _VERSION = "1.4", cache = {}, concat = concat }
+
+local function rpos(view, s)
+    while s > 0 do
+        local c = view:sub(s, s)
+        if c == " " or c == "\t" or c == "\0" or c == "\x0B" then
+            s = s - 1
+        else
+            break;
+        end
+    end
+    return s
+end
 
 local function read_file(path)
     local file = open(path, "rb")
@@ -165,7 +177,7 @@ local ___,blocks,layout={},blocks or {}
 ]]}
     local i, s = 1, view:find("{", 1, true)
     while s do
-        local t, p, d, z = view:sub(s + 1, s + 1), s + 2
+        local t, p, d, z, r = view:sub(s + 1, s + 1), s + 2
         if t == "{" then
             local e = view:find("}}", p, true)
             if e then
@@ -186,7 +198,7 @@ local ___,blocks,layout={},blocks or {}
                     n = n + 1
                 end
                 d = concat{view:sub(p, e - 1), "\n" }
-                z = n - 1
+                z, r = n - 1, true
             end
         elseif t == "(" then
             local e = view:find(")}", p, true)
@@ -212,11 +224,15 @@ local ___,blocks,layout={},blocks or {}
                 local x, y = view:find(view:sub(s, e + 1), e + 2, true)
                 if x then
                     y = y + 1
+                    x = x - 1
                     if view:sub(y, y) == "\n" then
                         y = y + 1
                     end
-                    d = concat{'blocks["', view:sub(p, e - 1), '"]=include[=[', view:sub(e + 2, x - 1), "]=]\n"}
-                    z = y - 1
+                    if view:sub(x, x) == "\n" then
+                        x = x - 1
+                    end
+                    d = concat{'blocks["', view:sub(p, e - 1), '"]=include[=[', view:sub(e + 2, x), "]=]\n"}
+                    z, r = y - 1, true
                 end
             end
         elseif t == "#" then
@@ -227,11 +243,11 @@ local ___,blocks,layout={},blocks or {}
                     e = e + 1
                 end
                 d = ""
-                z = e - 1
+                z, r = e - 1, true
             end
         end
         if d then
-            c[#c+1] = concat{"___[#___+1]=[=[\n", view:sub(i, s - 1), "]=]\n" }
+            c[#c+1] = concat{"___[#___+1]=[=[\n", view:sub(i, r and rpos(view, s - 1) or s - 1), "]=]\n" }
             if d ~= "" then
                 c[#c+1] = d
             end
