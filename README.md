@@ -1013,7 +1013,7 @@ As you can see, `lua-resty-template` can be quite flexibile and easy to start wi
 
 If you want to pass variables to layouts or includes you can add stuff to context table (in the example below see `context.title`):
 
-```lua
+```html
 {%
 layout = "layouts/default.lsp"
 local title = "Hello, World!"
