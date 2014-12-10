@@ -961,7 +961,7 @@ Let's imagine that the request is for `index.lsp`.
 
 ##### index.lsp
 
-```lua
+```html
 {%
 layout = "layouts/default.lsp"
 local title = "Hello, World!"
