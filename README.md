@@ -1087,77 +1087,81 @@ Here are some results from my laptop.
 
 ```
 Running 1000 iterations in each test
-    Parsing Time: 0.018642
-Compilation Time: 0.054206 (template)
-Compilation Time: 0.000447 (template cached)
-  Execution Time: 0.074479 (same template)
-  Execution Time: 0.008050 (same template cached)
-  Execution Time: 0.086463 (different template)
-  Execution Time: 0.013802 (different template cached)
-  Execution Time: 0.107120 (different template, different context)
-  Execution Time: 0.009764 (different template, different context cached)
+    Parsing Time: 0.015122
+Compilation Time: 0.056889 (template)
+Compilation Time: 0.000283 (template cached)
+  Execution Time: 0.065662 (same template)
+  Execution Time: 0.007642 (same template cached)
+  Execution Time: 0.089193 (different template)
+  Execution Time: 0.012040 (different template cached)
+  Execution Time: 0.089345 (different template, different context)
+  Execution Time: 0.009352 (different template, different context cached)
+      Total Time: 0.345528
 ```
 
 ##### Lua 5.2.3  Copyright (C) 1994-2013 Lua.org, PUC-Rio
 
 ```
 Running 1000 iterations in each test
-    Parsing Time: 0.019293
-Compilation Time: 0.065961 (template)
-Compilation Time: 0.000303 (template cached)
-  Execution Time: 0.080639 (same template)
-  Execution Time: 0.008394 (same template cached)
-  Execution Time: 0.073271 (different template)
-  Execution Time: 0.009678 (different template cached)
-  Execution Time: 0.083753 (different template, different context)
-  Execution Time: 0.010524 (different template, different context cached)
+    Parsing Time: 0.018174
+Compilation Time: 0.057711 (template)
+Compilation Time: 0.000641 (template cached)
+  Execution Time: 0.073134 (same template)
+  Execution Time: 0.008268 (same template cached)
+  Execution Time: 0.073124 (different template)
+  Execution Time: 0.009122 (different template cached)
+  Execution Time: 0.076488 (different template, different context)
+  Execution Time: 0.010532 (different template, different context cached)
+      Total Time: 0.327194
 ```
 
 ##### LuaJIT 2.0.2 -- Copyright (C) 2005-2013 Mike Pall. http://luajit.org/
 
 ```
 Running 1000 iterations in each test
-    Parsing Time: 0.007444
-Compilation Time: 0.027150 (template)
-Compilation Time: 0.000115 (template cached)
-  Execution Time: 0.033798 (same template)
-  Execution Time: 0.003631 (same template cached)
-  Execution Time: 0.065908 (different template)
-  Execution Time: 0.009486 (different template cached)
-  Execution Time: 0.065836 (different template, different context)
-  Execution Time: 0.006490 (different template, different context cached)
+    Parsing Time: 0.007033
+Compilation Time: 0.025629 (template)
+Compilation Time: 0.000088 (template cached)
+  Execution Time: 0.037289 (same template)
+  Execution Time: 0.003504 (same template cached)
+  Execution Time: 0.062916 (different template)
+  Execution Time: 0.009832 (different template cached)
+  Execution Time: 0.085920 (different template, different context)
+  Execution Time: 0.005960 (different template, different context cached)
+      Total Time: 0.238171
 ```
 
 ##### LuaJIT 2.1.0-alpha -- Copyright (C) 2005-2014 Mike Pall. http://luajit.org/
 
 ```
 Running 1000 iterations in each test
-    Parsing Time: 0.004774
-Compilation Time: 0.028318 (template)
-Compilation Time: 0.000108 (template cached)
-  Execution Time: 0.032852 (same template)
-  Execution Time: 0.003144 (same template cached)
-  Execution Time: 0.067233 (different template)
-  Execution Time: 0.012592 (different template cached)
-  Execution Time: 0.095777 (different template, different context)
-  Execution Time: 0.009055 (different template, different context cached)
+    Parsing Time: 0.005303
+Compilation Time: 0.026526 (template)
+Compilation Time: 0.000081 (template cached)
+  Execution Time: 0.032381 (same template)
+  Execution Time: 0.003093 (same template cached)
+  Execution Time: 0.067692 (different template)
+  Execution Time: 0.017352 (different template cached)
+  Execution Time: 0.080708 (different template, different context)
+  Execution Time: 0.008069 (different template, different context cached)
+      Total Time: 0.241205
 ```
 
 ##### resty (nginx version: openresty/1.7.7.1rc2)
 
 ```
 Running 1000 iterations in each test
-    Parsing Time: 0.003543
-Compilation Time: 0.032019 (template)
-Compilation Time: 0.000124 (template cached)
-  Execution Time: 0.038099 (same template)
-  Execution Time: 0.003726 (same template cached)
-  Execution Time: 0.059295 (different template)
-  Execution Time: 0.009257 (different template cached)
-  Execution Time: 0.068367 (different template, different context)
-  Execution Time: 0.006318 (different template, different context cached)
+    Parsing Time: 0.003399
+Compilation Time: 0.024299 (template)
+Compilation Time: 0.000069 (template cached)
+  Execution Time: 0.031916 (same template)
+  Execution Time: 0.003695 (same template cached)
+  Execution Time: 0.063388 (different template)
+  Execution Time: 0.009231 (different template cached)
+  Execution Time: 0.074184 (different template, different context)
+  Execution Time: 0.006725 (different template, different context cached)
+      Total Time: 0.216906
 ```
-
 
 I have not yet compared the results against the alternatives.
 
