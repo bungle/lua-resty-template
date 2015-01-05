@@ -12,14 +12,6 @@ view.message  = "Hello, World!"
 view:render()
 -- Using template.render
 template.render("view.html", { message = "Hello, World!" })
--- Using template string
-template.render([[
-<!DOCTYPE html>
-<html>
-<body>
-  <h1>{{message}}</h1>
-</body>
-</html>]], { message = "Hello, World!" })
 ```
 
 ##### view.html
@@ -40,6 +32,19 @@ template.render([[
   <h1>Hello, World!</h1>
 </body>
 </html>
+```
+
+The same can be done with inline template string:
+
+```lua
+-- Using template string
+template.render([[
+<!DOCTYPE html>
+<html>
+<body>
+  <h1>{{message}}</h1>
+</body>
+</html>]], { message = "Hello, World!" })
 ```
 
 ## Contents
