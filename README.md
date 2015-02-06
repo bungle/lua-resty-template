@@ -7,19 +7,11 @@
 ```lua
 local template = require "resty.template"
 -- Using template.new
-local view = template.new("view.html")
+local view = template.new"view.html"
 view.message  = "Hello, World!"
 view:render()
 -- Using template.render
 template.render("view.html", { message = "Hello, World!" })
--- Using template string
-template.render([[
-<!DOCTYPE html>
-<html>
-<body>
-  <h1>{{message}}</h1>
-</body>
-</html>]], { message = "Hello, World!" })
 ```
 
 ##### view.html
@@ -40,6 +32,19 @@ template.render([[
   <h1>Hello, World!</h1>
 </body>
 </html>
+```
+
+The same can be done with inline template string:
+
+```lua
+-- Using template string
+template.render([[
+<!DOCTYPE html>
+<html>
+<body>
+  <h1>{{message}}</h1>
+</body>
+</html>]], { message = "Hello, World!" })
 ```
 
 ## Contents
@@ -297,9 +302,9 @@ Please note that if the template was already cached when compiling a template, t
 Creates a new template instance that is used as a (default) context when `render`ed.
 
 ```lua
-local view = template.new("template.html")            -- or
+local view = template.new"template.html"              -- or
 local view = template.new("view.html", "layout.html") -- or
-local view = template.new([[<h1>{{message}}</h1>]])   -- or
+local view = template.new[[<h1>{{message}}</h1>]]     -- or
 local view = template.new([[<h1>{{message}}</h1>]], [[
 <html>
 <body>
@@ -312,7 +317,7 @@ local view = template.new([[<h1>{{message}}</h1>]], [[
 ##### Example
 ```lua
 local template = require "resty.template"
-local view = template.new("view.html")
+local view = template.new"view.html"
 view.message  = "Hello, World!"
 view:render()
 -- You may also replace context on render
@@ -601,7 +606,7 @@ Layouts (or Master Pages) can be used to wrap a view inside another view (aka la
 ##### Lua
 ```lua
 local template = require "resty.template"
-local layout   = template.new("layout.html")
+local layout   = template.new"layout.html"
 layout.title   = "Testing lua-resty-template"
 layout.view    = template.compile("view.html"){ message = "Hello, World!" }
 layout:render()

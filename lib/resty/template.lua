@@ -7,6 +7,7 @@ local write = io.write
 local open = io.open
 local load = load
 local type = type
+local dump = string.dump
 local find = string.find
 local gsub = string.gsub
 local byte = string.byte
@@ -23,11 +24,24 @@ local HTML_ENTITIES = {
 
 local CODE_ENTITIES = {
     ["{"] = "&#123;",
-    ["}"] = "&#125;"
+    ["}"] = "&#125;",
+    ["&"] = "&amp;",
+    ["<"] = "&lt;",
+    [">"] = "&gt;",
+    ['"'] = "&quot;",
+    ["'"] = "&#39;",
+    ["/"] = "&#47;"
 }
 
+local ok, newtab = pcall(require, "table.new")
+if not ok then newtab = function() return {} end end
+
 local caching, ngx_var, ngx_capture, ngx_null = true
-local template = { _VERSION = "1.5-dev", cache = {}, concat = concat }
+local template = newtab(0, 13);
+
+template._VERSION = "1.5-dev"
+template.cache    = {}
+template.concat   = concat
 
 local function rpos(view, s)
     while s > 0 do
@@ -114,7 +128,7 @@ end
 
 function template.escape(s, c)
     if type(s) == "string" then
-        if c then s = gsub(s, "[}{]", CODE_ENTITIES) end
+        if c then return gsub(s, "[}{\">/<'&]", CODE_ENTITIES) end
         return gsub(s, "[\">/<'&]", HTML_ENTITIES)
     end
     return template.output(s)
@@ -144,9 +158,9 @@ function template.new(view, layout)
 end
 
 function template.precompile(view, path, strip)
-    local chunk = string.dump(template.compile(view), strip ~= false)
+    local chunk = dump(template.compile(view), strip ~= false)
     if path then
-        local file = io.open(path, "wb")
+        local file = open(path, "wb")
         file:write(chunk)
         file:close()
     end
