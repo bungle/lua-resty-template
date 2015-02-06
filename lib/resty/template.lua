@@ -174,7 +174,7 @@ function template.parse(view, plain)
         if byte(sub(view, 1, 1)) == 27 then return view end
     end
     local c = {[[
-context=... or {}
+context=(...) or {}
 local function include(v, c)
     return template.compile(v)(c or context)
 end
