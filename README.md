@@ -107,7 +107,7 @@ local ctx = {["foo:bar"] = "foobar"}
 
 And you want to render the `ctx["foo:bar"]`'s value `foobar` in your template.  You have to specify it explicitly by referencing the `context` in your template:
 
-```lua
+```html
 {# {*["foo:bar"]*} won't work, you need to use: #}
 {*context["foo:bar"]*}
 ```
