@@ -99,7 +99,7 @@ From templates you may access everything in `context` table, and everything in `
 
 ##### A Word About Complex Keys in Context Table
 
-Say you have this kind of context table:
+Say you have this kind of a context table:
 
 ```lua
 local ctx = {["foo:bar"] = "foobar"}
