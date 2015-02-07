@@ -116,7 +116,7 @@ Or altogether:
 
 ```lua
 template.render([[
-{*["foo:bar"]*}
+{*context["foo:bar"]*}
 ]], {["foo:bar"] = "foobar"})
 ```
 
