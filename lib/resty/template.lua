@@ -255,7 +255,7 @@ local ___,blocks,layout={},blocks or {}
                         if sub(view, x, x) == "\n" then
                             x = x - 1
                         end
-                        d = concat{'blocks["', sub(view, p, e - 1), '"]=include[=[', sub(view, e + 2, x), "]=]\n" }
+                        d = concat{'blocks["', b, '"]=include[=[', sub(view, e + 2, x), "]=]\n" }
                         z, r = y - 1, true
                     end
 
