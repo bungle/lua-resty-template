@@ -247,11 +247,18 @@ local ___,blocks,layout={},blocks or {}
                     if sub(view, y, y) == "\n" then
                         y = y + 1
                     end
-                    if sub(view, x, x) == "\n" then
-                        x = x - 1
+                    local b = sub(view, p, e - 1)
+                    if b == "verbatim" then
+                        d = concat{"___[#___+1]=[=[", sub(view, e + 2, x), "]=]\n" }
+                        z, r = y - 1, false
+                    else
+                        if sub(view, x, x) == "\n" then
+                            x = x - 1
+                        end
+                        d = concat{'blocks["', sub(view, p, e - 1), '"]=include[=[', sub(view, e + 2, x), "]=]\n" }
+                        z, r = y - 1, true
                     end
-                    d = concat{'blocks["', sub(view, p, e - 1), '"]=include[=[', sub(view, e + 2, x), "]=]\n"}
-                    z, r = y - 1, true
+
                 end
             end
         elseif t == "#" then
