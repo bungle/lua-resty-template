@@ -97,6 +97,29 @@ From templates you may access everything in `context` table, and everything in `
 <h1>{{message}}</h1> == <h1>{{context.message}}</h1>
 ```
 
+##### A Word About Complex Keys in Context Table
+
+Say you have this kind of a context table:
+
+```lua
+local ctx = {["foo:bar"] = "foobar"}
+```
+
+And you want to render the `ctx["foo:bar"]`'s value `foobar` in your template.  You have to specify it explicitly by referencing the `context` in your template:
+
+```html
+{# {*["foo:bar"]*} won't work, you need to use: #}
+{*context["foo:bar"]*}
+```
+
+Or altogether:
+
+```lua
+template.render([[
+{*context["foo:bar"]*}
+]], {["foo:bar"] = "foobar"})
+```
+
 ##### A Word About HTML Escaping
 
 Only strings are escaped, functions are called without arguments (recursively) and results are returned as is, other types are `tostring`ified. `nil`s and `ngx.null`s are converted to empty strings `""`.
