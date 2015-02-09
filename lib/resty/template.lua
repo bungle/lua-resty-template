@@ -248,7 +248,7 @@ local ___,blocks,layout={},blocks or {}
                         y = y + 1
                     end
                     local b = sub(view, p, e - 1)
-                    if b == "verbatim" then
+                    if b == "verbatim" or b == "raw" then
                         d = concat{"___[#___+1]=[=[", sub(view, e + 2, x), "]=]\n" }
                         z, r = y - 1, false
                     else
