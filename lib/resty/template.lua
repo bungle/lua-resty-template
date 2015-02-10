@@ -39,7 +39,7 @@ if not ok then newtab = function() return {} end end
 local caching, ngx_var, ngx_capture, ngx_null = true
 local template = newtab(0, 13);
 
-template._VERSION = "1.5-dev"
+template._VERSION = "1.5"
 template.cache    = {}
 template.concat   = concat
 

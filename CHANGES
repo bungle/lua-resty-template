@@ -1,4 +1,15 @@
 
+Changes with lua-resty-template 1.5                               10 Feb 2015
+
+    *) Feature: Added support for {-verbatim-}...{-verbatim-}, and
+       {-raw-}...{-raw-} blocks (contents is not processed by template).
+       Please note that this could break your templates if you have used
+       blocks with names "verbatim" or "raw".
+
+    *) Bugfix: Fixes issue #8: not returning value when using template.new
+       and its render function.
+
+
 Changes with lua-resty-template 1.4                               3 Dec 2014
 
     *) Feature: Added support for {[expression include]} syntax.
