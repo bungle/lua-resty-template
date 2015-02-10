@@ -142,7 +142,7 @@ function template.new(view, layout)
             local context = context or self
             context.blocks = context.blocks or {}
             context.view = compile(view)(context)
-            render(layout, context)
+            return render(layout, context)
         end }, { __tostring = function(self)
             local context = context or self
             context.blocks = context.blocks or {}
@@ -151,7 +151,7 @@ function template.new(view, layout)
         end })
     end
     return setmetatable({ render = function(self, context)
-        render(view, context or self)
+        return render(view, context or self)
     end }, { __tostring = function(self)
         return compile(view)(context or self)
     end })

@@ -323,7 +323,8 @@ Please note that if the template was already cached when compiling a template, t
 
 #### table template.new(view, layout)
 
-Creates a new template instance that is used as a (default) context when `render`ed.
+Creates a new template instance that is used as a (default) context when `render`ed. A table that gets created has
+only one method `render`, but the table also has metatable with `__tostring` defined. See the example below.
 
 ```lua
 local view = template.new"template.html"              -- or
