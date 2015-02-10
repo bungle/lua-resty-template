@@ -891,6 +891,62 @@ template.render([[
 ```html
 <h1>HELLO, WORLD!</h1>
 ```
+### Embedding Angular or other tags / templating inside the Templates
+ 
+Sometimes you need to mix and match other templates (say client side Javascript templates like Angular) with
+server side lua-resty-templates. Say you have this kind of Angular template:
+
+```html
+<html ng-app>
+ <body ng-controller="MyController">
+   <input ng-model="foo" value="bar">
+   <button ng-click="changeFoo()">{{buttonText}}</button>
+   <script src="angular.js">
+ </body>
+</html>
+```
+
+Now you can see that there is `{{buttonText}}` that is really for Angular templating, and not for lua-resty-template.
+You can fix this by wrapping either the whole code with `{-verbatim-}` or `{-raw-}` or only the parts that you want:
+
+```html
+{-raw-}
+<html ng-app>
+ <body ng-controller="MyController">
+   <input ng-model="foo" value="bar">
+   <button ng-click="changeFoo()">{{buttonText}}</button>
+   <script src="angular.js">
+ </body>
+</html>
+{-raw-}
+```
+
+or (see the `{(head.html)}` is processed by lua-resty-template):
+
+```html
+<html ng-app>
+ {(head.html)}
+ <body ng-controller="MyController">
+   <input ng-model="foo" value="bar">
+   <button ng-click="changeFoo()">{-raw-}{{buttonText}}{-raw-}</button>
+   <script src="angular.js">
+ </body>
+</html>
+```
+
+I'm also looking forward to make it even easier to mix-and-match other templates with server side lua-resty-templates.
+We could for example introduce escape syntax with prefixing the tags with `\`, so the above example would just go like
+this:
+
+```html
+...
+<button ng-click="changeFoo()">\{{buttonText}}</button>
+...
+```
+
+But then we would need to possibly support ``\\{{buttonText}}`` syntax as well (aka escaping the escape) or you need to
+do ``{{ "\\" .. buttonText }}``. But I kinda like this short escaping syntax, so it might get implemented in a next
+version.
 
 ### Embedding Markdown inside the Templates
 
@@ -1204,7 +1260,7 @@ The changes of every release of this module is recorded in [CHANGES](https://git
 `lua-resty-template` uses three clause BSD license (because it was originally forked from one that uses it).
 
 ```
-Copyright (c) 2014, Aapo Talvensaari
+Copyright (c) 2014, 2015, Aapo Talvensaari
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
