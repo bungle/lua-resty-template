@@ -71,6 +71,7 @@ template.render([[
   * [Using Blocks](#using-blocks)
   * [Macros](#macros)
   * [Calling Methods in Templates](#calling-methods-in-templates)
+  * [Embedding Angular or other tags / templating inside the Templates](#embedding-angular-or-other-tags--templating-inside-the-templates)
   * [Embedding Markdown inside the Templates](#embedding-markdown-inside-the-templates)
   * [Lua Server Pages (LSP) with OpenResty](#lua-server-pages-lsp-with-openresty)
 * [FAQ](#faq)
