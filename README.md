@@ -1128,6 +1128,7 @@ You may also look at these (as alternatives, or to mix them with `lua-resty-temp
 * pl.template (http://stevedonovan.github.io/Penlight/api/modules/pl.template.html)
 * lustache (https://github.com/Olivine-Labs/lustache)
 * luvstache (https://github.com/james2doyle/luvstache)
+* luaghetti (https://github.com/AterCattus/luaghetti)
 * lub.Template (http://doc.lubyk.org/lub.Template.html)
 * lust (https://github.com/weshoke/Lust)
 * templet (http://colberg.org/lua-templet/)
