@@ -1,5 +1,5 @@
 
-Changes with lua-resty-template 1.5                               10 Feb 2015
+Changes with lua-resty-template 1.5                              10 Feb 2015
 
     *) Feature: Added support for {-verbatim-}...{-verbatim-}, and
        {-raw-}...{-raw-} blocks (contents is not processed by template).
