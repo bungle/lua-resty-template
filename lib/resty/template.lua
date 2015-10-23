@@ -235,7 +235,7 @@ local ___,blocks,layout={},blocks or {}
                     n = n + 1
                 end
                 local r = rpos(view, s - 1)
-                if i < r then
+                if i <= r then
                     c[j] = "___[#___+1]=[=[\n"
                     c[j+1] = sub(view, i, r)
                     c[j+2] = "]=]\n"
@@ -314,7 +314,7 @@ local ___,blocks,layout={},blocks or {}
                             x = x - 1
                         end
                         local r = rpos(view, s - 1)
-                        if i < r then
+                        if i <= r then
                             c[j] = "___[#___+1]=[=[\n"
                             c[j+1] = sub(view, i, r)
                             c[j+2] = "]=]\n"
