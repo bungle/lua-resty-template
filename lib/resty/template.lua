@@ -182,32 +182,44 @@ end
 
 function template.parse(view, plain)
     assert(view, "view was not provided for template.parse(view, plain).")
-    local concat, rpos, find, byte, sub = concat, rpos, find, byte, sub
     if not plain then
         view = template.load(view)
         if byte(sub(view, 1, 1)) == 27 then return view end
     end
+    local j = 2
     local c = {[[
 context=(...) or {}
 local function include(v, c)
     return template.compile(v)(c or context)
 end
-local ___,blocks,layout={},blocks or {}
+local __i,___,blocks,layout=1,{},blocks or {}
 ]]}
     local i, s = 1, find(view, "{", 1, true)
     while s do
-        local t, p, d, z, r = sub(view, s + 1, s + 1), s + 2
+        local t, p = sub(view, s + 1, s + 1), s + 2
         if t == "{" then
             local e = find(view, "}}", p, true)
             if e then
-                d = concat{"___[#___+1]=template.escape(", sub(view, p, e - 1), ")\n" }
-                z = e + 1
+                c[j] = "__i,___[__i]=__i+1,[=[\n"
+                c[j+1] = sub(view, i, s - 1)
+                c[j+2] = "]=]\n"
+                c[j+3] = "__i,___[__i]=__i+1,template.escape("
+                c[j+4] = sub(view, p, e - 1)
+                c[j+5] = ")\n"
+                j=j+6
+                s, i = e + 1, e + 2
             end
         elseif t == "*" then
             local e = (find(view, "*}", p, true))
             if e then
-                d = concat{"___[#___+1]=template.output(", sub(view, p, e - 1), ")\n" }
-                z = e + 1
+                c[j] = "__i,___[__i]=__i+1,[=[\n"
+                c[j+1] = sub(view, i, s - 1)
+                c[j+2] = "]=]\n"
+                c[j+3] = "__i,___[__i]=__i+1,template.output("
+                c[j+4] = "sub(view, p, e - 1)"
+                c[j+5] = ")\n"
+                j=j+6
+                s, i = e + 1, e + 2
             end
         elseif t == "%" then
             local e = find(view, "%}", p, true)
@@ -216,26 +228,48 @@ local ___,blocks,layout={},blocks or {}
                 if sub(view, n, n) == "\n" then
                     n = n + 1
                 end
-                d = concat{sub(view, p, e - 1), "\n" }
-                z, r = n - 1, true
+                c[j] = "__i,___[__i]=__i+1,[=[\n"
+                c[j+1] = sub(view, i, rpos(view, s - 1) or s - 1)
+                c[j+2] = "]=]\n"
+                c[j+3] = sub(view, p, e - 1)
+                c[j+4] = "\n"
+                j=j+5
+                s, i = n - 1, n
             end
         elseif t == "(" then
             local e = find(view, ")}", p, true)
             if e then
                 local f = sub(view, p, e - 1)
                 local x = (find(f, ",", 2, true))
+                c[j] = "__i,___[__i]=__i+1,[=[\n"
+                c[j+1] = sub(view, i, s - 1)
+                c[j+2] = "]=]\n"
                 if x then
-                    d = concat{"___[#___+1]=include([=[", sub(f, 1, x - 1), "]=],", sub(f, x + 1), ")\n"}
+                    c[j+3] = "__i,___[__i]=__i+1,include([=["
+                    c[j+4] = sub(f, 1, x - 1)
+                    c[j+5] = "]=],"
+                    c[j+6] = sub(f, x + 1)
+                    c[j+7] = ")\n"
+                    j=j+8
                 else
-                    d = concat{"___[#___+1]=include([=[", f, "]=])\n" }
+                    c[j+3] = "__i,___[__i]=__i+1,include([=["
+                    c[j+4] = f
+                    c[j+5] = "]=])\n"
+                    j=j+6
                 end
-                z = e + 1
+                s, i = e + 1, e + 2
             end
         elseif t == "[" then
             local e = find(view, "]}", p, true)
             if e then
-                d = concat{"___[#___+1]=include(", sub(view, p, e - 1), ")\n" }
-                z = e + 1
+                c[j] = "__i,___[__i]=__i+1,[=[\n"
+                c[j+1] = sub(view, i, s - 1)
+                c[j+2] = "]=]\n"
+                c[j+3] = "__i,___[__i]=__i+1,include("
+                c[j+4] = sub(view, p, e - 1)
+                c[j+5] = ")\n"
+                j=j+6
+                s, i = e + 1, e + 2
             end
         elseif t == "-" then
             local e = find(view, "-}", p, true)
@@ -249,16 +283,28 @@ local ___,blocks,layout={},blocks or {}
                     end
                     local b = sub(view, p, e - 1)
                     if b == "verbatim" or b == "raw" then
-                        d = concat{"___[#___+1]=[=[", sub(view, e + 2, x), "]=]\n" }
-                        z, r = y - 1, false
+                        c[j] = "__i,___[__i]=__i+1,[=[\n"
+                        c[j+1] = sub(view, i, s - 1)
+                        c[j+2] = "]=]\n"
+                        c[j+3] = "__i,___[__i]=__i+1,[=["
+                        c[j+4] = sub(view, e + 2, x)
+                        c[j+5] = "]=]\n"
+                        j=j+6
                     else
                         if sub(view, x, x) == "\n" then
                             x = x - 1
                         end
-                        d = concat{'blocks["', b, '"]=include[=[', sub(view, e + 2, x), "]=]\n" }
-                        z, r = y - 1, true
+                        c[j] = "__i,___[__i]=__i+1,[=[\n"
+                        c[j+1] = sub(view, i, rpos(view, s - 1))
+                        c[j+2] = "]=]\n"
+                        c[j+3] = 'blocks["'
+                        c[j+4] = b
+                        c[j+5] = '"]=include[=['
+                        c[j+6] = sub(view, e + 2, x)
+                        c[j+7] = "]=]\n"
+                        j=j+8
                     end
-
+                    s, i = y - 1, y
                 end
             end
         elseif t == "#" then
@@ -268,21 +314,15 @@ local ___,blocks,layout={},blocks or {}
                 if sub(view, e, e) == "\n" then
                     e = e + 1
                 end
-                d = ""
-                z, r = e - 1, true
+                s, i = e - 1, e
             end
-        end
-        if d then
-            c[#c+1] = concat{"___[#___+1]=[=[\n", sub(view, i, r and rpos(view, s - 1) or s - 1), "]=]\n" }
-            if d ~= "" then
-                c[#c+1] = d
-            end
-            s, i = z, z + 1
         end
         s = find(view, "{", s + 1, true)
     end
-    c[#c+1] = concat{"___[#___+1]=[=[\n", sub(view, i), "]=]\n"}
-    c[#c+1] = "return layout and include(layout,setmetatable({view=template.concat(___),blocks=blocks},{__index=context})) or template.concat(___)"
+    c[j] = "___[__i]=[=[\n"
+    c[j+1] = sub(view, i)
+    c[j+2] = "]=]\n"
+    c[j+3] = "return layout and include(layout,setmetatable({view=template.concat(___),blocks=blocks},{__index=context})) or template.concat(___)"
     return concat(c)
 end
 
