@@ -192,7 +192,7 @@ context=(...) or {}
 local function include(v, c)
     return template.compile(v)(c or context)
 end
-local __i,___,blocks,layout=1,{},blocks or {}
+local ___,blocks,layout={},blocks or {}
 ]]}
     local i, s = 1, find(view, "{", 1, true)
     while s do
@@ -200,10 +200,10 @@ local __i,___,blocks,layout=1,{},blocks or {}
         if t == "{" then
             local e = find(view, "}}", p, true)
             if e then
-                c[j] = "__i,___[__i]=__i+1,[=[\n"
+                c[j] = "___[#___+1]=[=[\n"
                 c[j+1] = sub(view, i, s - 1)
                 c[j+2] = "]=]\n"
-                c[j+3] = "__i,___[__i]=__i+1,template.escape("
+                c[j+3] = "___[#___+1]=template.escape("
                 c[j+4] = sub(view, p, e - 1)
                 c[j+5] = ")\n"
                 j=j+6
@@ -212,11 +212,11 @@ local __i,___,blocks,layout=1,{},blocks or {}
         elseif t == "*" then
             local e = (find(view, "*}", p, true))
             if e then
-                c[j] = "__i,___[__i]=__i+1,[=[\n"
+                c[j] = "___[#___+1]=[=[\n"
                 c[j+1] = sub(view, i, s - 1)
                 c[j+2] = "]=]\n"
-                c[j+3] = "__i,___[__i]=__i+1,template.output("
-                c[j+4] = "sub(view, p, e - 1)"
+                c[j+3] = "___[#___+1]=template.output("
+                c[j+4] = sub(view, p, e - 1)
                 c[j+5] = ")\n"
                 j=j+6
                 s, i = e + 1, e + 2
@@ -228,7 +228,7 @@ local __i,___,blocks,layout=1,{},blocks or {}
                 if sub(view, n, n) == "\n" then
                     n = n + 1
                 end
-                c[j] = "__i,___[__i]=__i+1,[=[\n"
+                c[j] = "___[#___+1]=[=[\n"
                 c[j+1] = sub(view, i, rpos(view, s - 1) or s - 1)
                 c[j+2] = "]=]\n"
                 c[j+3] = sub(view, p, e - 1)
@@ -241,18 +241,18 @@ local __i,___,blocks,layout=1,{},blocks or {}
             if e then
                 local f = sub(view, p, e - 1)
                 local x = (find(f, ",", 2, true))
-                c[j] = "__i,___[__i]=__i+1,[=[\n"
+                c[j] = "___[#___+1]=[=[\n"
                 c[j+1] = sub(view, i, s - 1)
                 c[j+2] = "]=]\n"
                 if x then
-                    c[j+3] = "__i,___[__i]=__i+1,include([=["
+                    c[j+3] = "___[#___+1]=include([=["
                     c[j+4] = sub(f, 1, x - 1)
                     c[j+5] = "]=],"
                     c[j+6] = sub(f, x + 1)
                     c[j+7] = ")\n"
                     j=j+8
                 else
-                    c[j+3] = "__i,___[__i]=__i+1,include([=["
+                    c[j+3] = "___[#___+1]=include([=["
                     c[j+4] = f
                     c[j+5] = "]=])\n"
                     j=j+6
@@ -262,10 +262,10 @@ local __i,___,blocks,layout=1,{},blocks or {}
         elseif t == "[" then
             local e = find(view, "]}", p, true)
             if e then
-                c[j] = "__i,___[__i]=__i+1,[=[\n"
+                c[j] = "___[#___+1]=[=[\n"
                 c[j+1] = sub(view, i, s - 1)
                 c[j+2] = "]=]\n"
-                c[j+3] = "__i,___[__i]=__i+1,include("
+                c[j+3] = "___[#___+1]=include("
                 c[j+4] = sub(view, p, e - 1)
                 c[j+5] = ")\n"
                 j=j+6
@@ -283,10 +283,10 @@ local __i,___,blocks,layout=1,{},blocks or {}
                     end
                     local b = sub(view, p, e - 1)
                     if b == "verbatim" or b == "raw" then
-                        c[j] = "__i,___[__i]=__i+1,[=[\n"
+                        c[j] = "___[#___+1]=[=[\n"
                         c[j+1] = sub(view, i, s - 1)
                         c[j+2] = "]=]\n"
-                        c[j+3] = "__i,___[__i]=__i+1,[=["
+                        c[j+3] = "___[#___+1]=[=["
                         c[j+4] = sub(view, e + 2, x)
                         c[j+5] = "]=]\n"
                         j=j+6
@@ -294,7 +294,7 @@ local __i,___,blocks,layout=1,{},blocks or {}
                         if sub(view, x, x) == "\n" then
                             x = x - 1
                         end
-                        c[j] = "__i,___[__i]=__i+1,[=[\n"
+                        c[j] = "___[#___+1]=[=[\n"
                         c[j+1] = sub(view, i, rpos(view, s - 1))
                         c[j+2] = "]=]\n"
                         c[j+3] = 'blocks["'
@@ -319,7 +319,7 @@ local __i,___,blocks,layout=1,{},blocks or {}
         end
         s = find(view, "{", s + 1, true)
     end
-    c[j] = "___[__i]=[=[\n"
+    c[j] = "___[#___+1]=[=[\n"
     c[j+1] = sub(view, i)
     c[j+2] = "]=]\n"
     c[j+3] = "return layout and include(layout,setmetatable({view=template.concat(___),blocks=blocks},{__index=context})) or template.concat(___)"
