@@ -180,9 +180,7 @@ function template.compile(view, key, plain)
     end
     key = key or view
     local cache = template.cache
-    if cache[key] then
-        return cache[key], true
-    end
+    if cache[key] then return cache[key], true end
     local func = load_chunk(template.parse(view, plain))
     if caching then cache[key] = func end
     return func, false
