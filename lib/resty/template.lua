@@ -43,6 +43,11 @@ template._VERSION = "1.5"
 template.cache    = {}
 template.concat   = concat
 
+local function enabled(val)
+    if val == nil then return true end
+    return val == true or (val == "1" or val == "true" or val == "on")
+end
+
 local function rpos(view, s)
     while s > 0 do
         local c = sub(view, s, s)
@@ -84,6 +89,7 @@ if ngx then
     template.print = ngx.print or write
     template.load  = load_ngx
     ngx_var, ngx_capture, ngx_null = ngx.var, ngx.location.capture, ngx.null
+    caching = enabled(ngx_var.template_cache)
 else
     template.print = write
     template.load  = load_lua
@@ -174,7 +180,9 @@ function template.compile(view, key, plain)
     end
     key = key or view
     local cache = template.cache
-    if cache[key] then return cache[key], true end
+    if cache[key] then
+        return cache[key], true
+    end
     local func = load_chunk(template.parse(view, plain))
     if caching then cache[key] = func end
     return func, false
