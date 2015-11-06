@@ -199,7 +199,7 @@ local function include(v, c)
     return template.compile(v)(c or context)
 end
 local ___,blocks,layout={},blocks or {}
-]]}
+]] }
     local i, s = 1, find(view, "{", 1, true)
     while s do
         local t, p = sub(view, s + 1, s + 1), s + 2
@@ -312,9 +312,9 @@ local ___,blocks,layout={},blocks or {}
                             j=j+3
                         end
                         c[j] = "___[#___+1]=[=["
-                        c[j+2] = sub(view, e + 2, x)
-                        c[j+3] = "]=]\n"
-                        j=j+4
+                        c[j+1] = sub(view, e + 2, x)
+                        c[j+2] = "]=]\n"
+                        j=j+3
                     else
                         if sub(view, x, x) == "\n" then
                             x = x - 1
@@ -349,7 +349,7 @@ local ___,blocks,layout={},blocks or {}
         s = find(view, "{", s + 1, true)
     end
     local rest = sub(view, i)
-    if rest ~= "" then
+    if rest and rest ~= "" then
         c[j] = "___[#___+1]=[=[\n"
         c[j+1] = rest
         c[j+2] = "]=]\n"
