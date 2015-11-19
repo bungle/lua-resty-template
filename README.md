@@ -1117,6 +1117,12 @@ context.title = 'My Application - ' .. title
 
 `lua-resty-template` automatically caches (if caching is enabled) the resulting template functions in `template.cache` table. You can clear the cache by issuing `template.cache = {}`.
 
+### Where is `lua-resty-template` Used
+
+* [jd.com](http://www.jd.com/) – Jingdong Mall (Chinese: 京东商城; pinyin: Jīngdōng Shāngchéng), formerly 360Buy, is a Chinese electronic commerce company
+
+Please let me know if there are errors or old information in this list. 
+
 ## Alternatives
 
 You may also look at these (as alternatives, or to mix them with `lua-resty-template`):
