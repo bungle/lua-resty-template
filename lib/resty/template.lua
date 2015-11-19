@@ -48,6 +48,10 @@ local function enabled(val)
     return val == true or (val == "1" or val == "true" or val == "on")
 end
 
+local function trim(s)
+    return gsub(gsub(s, "^%s+", ""), "%s+$", "")
+end
+
 local function rpos(view, s)
     while s > 0 do
         local c = sub(view, s, s)
@@ -198,7 +202,7 @@ context=(...) or {}
 local function include(v, c)
     return template.compile(v)(c or context)
 end
-local ___,blocks,layout={},blocks or {}
+local ___,blocks,layout={},blocks or {},nil
 ]] }
     local i, s = 1, find(view, "{", 1, true)
     while s do
@@ -213,7 +217,7 @@ local ___,blocks,layout={},blocks or {}
                     j=j+3
                 end
                 c[j] = "___[#___+1]=template.escape("
-                c[j+1] = sub(view, p, e - 1)
+                c[j+1] = trim(sub(view, p, e - 1))
                 c[j+2] = ")\n"
                 j=j+3
                 s, i = e + 1, e + 2
@@ -228,7 +232,7 @@ local ___,blocks,layout={},blocks or {}
                     j=j+3
                 end
                 c[j] = "___[#___+1]=template.output("
-                c[j+1] = sub(view, p, e - 1)
+                c[j+1] = trim(sub(view, p, e - 1))
                 c[j+2] = ")\n"
                 j=j+3
                 s, i = e + 1, e + 2
@@ -247,7 +251,7 @@ local ___,blocks,layout={},blocks or {}
                     c[j+2] = "]=]\n"
                     j=j+3
                 end
-                c[j] = sub(view, p, e - 1)
+                c[j] = trim(sub(view, p, e - 1))
                 c[j+1] = "\n"
                 j=j+2
                 s, i = n - 1, n
@@ -265,14 +269,14 @@ local ___,blocks,layout={},blocks or {}
                 end
                 if x then
                     c[j] = "___[#___+1]=include([=["
-                    c[j+1] = sub(f, 1, x - 1)
+                    c[j+1] = trim(sub(f, 1, x - 1))
                     c[j+2] = "]=],"
-                    c[j+3] = sub(f, x + 1)
+                    c[j+3] = trim(sub(f, x + 1))
                     c[j+4] = ")\n"
                     j=j+5
                 else
                     c[j] = "___[#___+1]=include([=["
-                    c[j+1] = f
+                    c[j+1] = trim(f)
                     c[j+2] = "]=])\n"
                     j=j+3
                 end
@@ -288,7 +292,7 @@ local ___,blocks,layout={},blocks or {}
                     j=j+3
                 end
                 c[j] = "___[#___+1]=include("
-                c[j+1] = sub(view, p, e - 1)
+                c[j+1] = trim(sub(view, p, e - 1))
                 c[j+2] = ")\n"
                 j=j+3
                 s, i = e + 1, e + 2
@@ -303,7 +307,7 @@ local ___,blocks,layout={},blocks or {}
                     if sub(view, y, y) == "\n" then
                         y = y + 1
                     end
-                    local b = sub(view, p, e - 1)
+                    local b = trim(sub(view, p, e - 1))
                     if b == "verbatim" or b == "raw" then
                         if i < s then
                             c[j] = "___[#___+1]=[=[\n"
