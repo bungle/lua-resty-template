@@ -1,9 +1,16 @@
 local setmetatable = setmetatable
+local loadstring = loadstring
+local loadchunk
 local tostring = tostring
 local setfenv = setfenv
+local require = require
+local capture
 local concat = table.concat
 local assert = assert
+local prefix
 local write = io.write
+local pcall = pcall
+local phase
 local open = io.open
 local load = load
 local type = type
@@ -11,7 +18,15 @@ local dump = string.dump
 local find = string.find
 local gsub = string.gsub
 local byte = string.byte
+local null
 local sub = string.sub
+local ngx = ngx
+local jit = jit
+local var
+
+local _VERSION = _VERSION
+local _ENV = _ENV
+local _G = _G
 
 local HTML_ENTITIES = {
     ["&"] = "&amp;",
@@ -33,13 +48,23 @@ local CODE_ENTITIES = {
     ["/"] = "&#47;"
 }
 
+local VAR_PHASES = {
+    set_by_lua           = true,
+    rewrite_by_lua       = true,
+    access_by_lua        = true,
+    content_by_lua       = true,
+    header_filter_by_lua = true,
+    body_filter_by_lua   = true,
+    log_by_lua           = true
+}
+
 local ok, newtab = pcall(require, "table.new")
 if not ok then newtab = function() return {} end end
 
-local caching, ngx_var, ngx_capture, ngx_null = true
+local caching = true
 local template = newtab(0, 13);
 
-template._VERSION = "1.5"
+template._VERSION = "1.6-dev"
 template.cache    = {}
 template.concat   = concat
 
@@ -64,7 +89,7 @@ local function rpos(view, s)
     return s
 end
 
-local function read_file(path)
+local function readfile(path)
     local file = open(path, "rb")
     if not file then return nil end
     local content = file:read "*a"
@@ -72,56 +97,59 @@ local function read_file(path)
     return content
 end
 
-local function load_lua(path)
-    return read_file(path) or path
+local function loadlua(path)
+    return readfile(path) or path
 end
 
-local function load_ngx(path)
-    local file, location = path, ngx_var.template_location
+local function loadngx(path)
+    local vars = VAR_PHASES[phase()]
+    local file, location = path, vars and var.template_location
     if sub(file, 1)  == "/" then file = sub(file, 2) end
     if location and location ~= "" then
         if sub(location, -1) == "/" then location = sub(location, 1, -2) end
-        local res = ngx_capture(location .. '/' .. file)
+        local res = capture(concat{ location, '/', file})
         if res.status == 200 then return res.body end
     end
-    local root = ngx_var.template_root or ngx_var.document_root
+    local root = vars and (var.template_root or var.document_root) or prefix
     if sub(root, -1) == "/" then root = sub(root, 1, -2) end
-    return read_file(root .. "/" .. file) or path
+    return readfile(concat{ root, "/", file }) or path
 end
 
-if ngx then
-    template.print = ngx.print or write
-    template.load  = load_ngx
-    ngx_var, ngx_capture, ngx_null = ngx.var, ngx.location.capture, ngx.null
-    caching = enabled(ngx_var.template_cache)
-else
-    template.print = write
-    template.load  = load_lua
-end
-
-local load_chunk
-
-if _VERSION == "Lua 5.1" then
-    local context = { __index = function(t, k)
-        return t.context[k] or t.template[k] or _G[k]
-    end }
-    if jit then
-        load_chunk = function(view)
-            return assert(load(view, nil, "tb", setmetatable({ template = template }, context)))
+do
+    if ngx then
+        template.print = ngx.print or write
+        template.load  = loadngx
+        prefix, var, capture, null, phase = ngx.config.prefix, ngx.var, ngx.location.capture, ngx.null, ngx.get_phase
+        if VAR_PHASES[phase()] then
+            caching = enabled(var.template_cache)
         end
     else
-        load_chunk = function(view)
-            local func = assert(loadstring(view))
-            setfenv(func, setmetatable({ template = template }, context))
-            return func
-        end
+        template.print = write
+        template.load  = loadlua
     end
-else
-    local context = { __index = function(t, k)
-        return t.context[k] or t.template[k] or _ENV[k]
-    end }
-    load_chunk = function(view)
-        return assert(load(view, nil, "tb", setmetatable({ template = template }, context)))
+
+    if _VERSION == "Lua 5.1" then
+        local context = { __index = function(t, k)
+            return t.context[k] or t.template[k] or _G[k]
+        end }
+        if jit then
+            loadchunk = function(view)
+                return assert(load(view, nil, "tb", setmetatable({ template = template }, context)))
+            end
+        else
+            loadchunk = function(view)
+                local func = assert(loadstring(view))
+                setfenv(func, setmetatable({ template = template }, context))
+                return func
+            end
+        end
+    else
+        local context = { __index = function(t, k)
+            return t.context[k] or t.template[k] or _ENV[k]
+        end }
+        loadchunk = function(view)
+            return assert(load(view, nil, "tb", setmetatable({ template = template }, context)))
+        end
     end
 end
 
@@ -131,7 +159,7 @@ function template.caching(enable)
 end
 
 function template.output(s)
-    if s == nil or s == ngx_null then return "" end
+    if s == nil or s == null then return "" end
     if type(s) == "function" then return template.output(s()) end
     return tostring(s)
 end
@@ -154,7 +182,7 @@ function template.new(view, layout)
             context.view = compile(view)(context)
             return render(layout, context)
         end }, { __tostring = function(self)
-            local context = context or self
+            local context = self
             context.blocks = context.blocks or {}
             context.view = compile(view)(context)
             return compile(layout)(context)
@@ -163,7 +191,7 @@ function template.new(view, layout)
     return setmetatable({ render = function(self, context)
         return render(view, context or self)
     end }, { __tostring = function(self)
-        return compile(view)(context or self)
+        return compile(view)(self)
     end })
 end
 
@@ -180,12 +208,12 @@ end
 function template.compile(view, key, plain)
     assert(view, "view was not provided for template.compile(view, key, plain).")
     if key == "no-cache" then
-        return load_chunk(template.parse(view, plain)), false
+        return loadchunk(template.parse(view, plain)), false
     end
     key = key or view
     local cache = template.cache
     if cache[key] then return cache[key], true end
-    local func = load_chunk(template.parse(view, plain))
+    local func = loadchunk(template.parse(view, plain))
     if caching then cache[key] = func end
     return func, false
 end
