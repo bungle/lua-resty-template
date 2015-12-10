@@ -48,15 +48,7 @@ local CODE_ENTITIES = {
     ["/"] = "&#47;"
 }
 
-local VAR_PHASES = {
-    set_by_lua           = true,
-    rewrite_by_lua       = true,
-    access_by_lua        = true,
-    content_by_lua       = true,
-    header_filter_by_lua = true,
-    body_filter_by_lua   = true,
-    log_by_lua           = true
-}
+local VAR_PHASES
 
 local ok, newtab = pcall(require, "table.new")
 if not ok then newtab = function() return {} end end
@@ -117,9 +109,18 @@ end
 
 do
     if ngx then
+        VAR_PHASES = {
+            set_by_lua           = true,
+            rewrite_by_lua       = true,
+            access_by_lua        = true,
+            content_by_lua       = true,
+            header_filter_by_lua = true,
+            body_filter_by_lua   = true,
+            log_by_lua           = true
+        }
         template.print = ngx.print or write
         template.load  = loadngx
-        prefix, var, capture, null, phase = ngx.config.prefix, ngx.var, ngx.location.capture, ngx.null, ngx.get_phase
+        prefix, var, capture, null, phase = ngx.config.prefix(), ngx.var, ngx.location.capture, ngx.null, ngx.get_phase
         if VAR_PHASES[phase()] then
             caching = enabled(var.template_cache)
         end
@@ -127,7 +128,6 @@ do
         template.print = write
         template.load  = loadlua
     end
-
     if _VERSION == "Lua 5.1" then
         local context = { __index = function(t, k)
             return t.context[k] or t.template[k] or _G[k]
