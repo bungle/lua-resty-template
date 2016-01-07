@@ -1129,6 +1129,7 @@ You may also look at these (as alternatives, or to mix them with `lua-resty-temp
 
 * lua-resty-hoedown (https://github.com/bungle/lua-resty-hoedown)
 * lua-template (https://github.com/dannote/lua-template)
+* lua-resty-template (https://github.com/lloydzhou/lua-resty-template) (a fork of the [lua-template](https://github.com/dannote/lua-template), and has a conflicting name with the project you are looking right now)
 * etlua (https://github.com/leafo/etlua)
 * cgilua (http://keplerproject.github.io/cgilua/manual.html#templates)
 * orbit (http://keplerproject.github.io/orbit/pages.html)
