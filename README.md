@@ -1128,9 +1128,10 @@ Please let me know if there are errors or old information in this list.
 You may also look at these (as alternatives, or to mix them with `lua-resty-template`):
 
 * lua-resty-hoedown (https://github.com/bungle/lua-resty-hoedown)
+* etlua (https://github.com/leafo/etlua)
 * lua-template (https://github.com/dannote/lua-template)
 * lua-resty-template (https://github.com/lloydzhou/lua-resty-template) (a fork of the [lua-template](https://github.com/dannote/lua-template), and has a conflicting name with the project you are looking right now)
-* etlua (https://github.com/leafo/etlua)
+* htmlua (https://github.com/benglard/htmlua)
 * cgilua (http://keplerproject.github.io/cgilua/manual.html#templates)
 * orbit (http://keplerproject.github.io/orbit/pages.html)
 * turbolua mustache (http://turbolua.org/doc/web.html#mustache-templating)
