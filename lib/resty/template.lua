@@ -104,19 +104,20 @@ local function loadngx(path)
     end
     local root = vars and (var.template_root or var.document_root) or prefix
     if sub(root, -1) == "/" then root = sub(root, 1, -2) end
-    return readfile(concat{ root, "/", file }) or path
+    local fullpath = concat{ root, "/", file } 
+    return readfile(fullpath) or fullpath
 end
 
 do
     if ngx then
         VAR_PHASES = {
-            set_by_lua           = true,
-            rewrite_by_lua       = true,
-            access_by_lua        = true,
-            content_by_lua       = true,
-            header_filter_by_lua = true,
-            body_filter_by_lua   = true,
-            log_by_lua           = true
+            set           = true,
+            rewrite       = true,
+            access        = true,
+            content       = true,
+            header_filter = true,
+            body_filter   = true,
+            log           = true
         }
         template.print = ngx.print or write
         template.load  = loadngx
