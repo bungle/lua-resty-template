@@ -1127,6 +1127,7 @@ Please let me know if there are errors or old information in this list.
 
 You may also look at these (as alternatives, or to mix them with `lua-resty-template`):
 
+* lemplate (https://github.com/openresty/lemplate)
 * lua-resty-hoedown (https://github.com/bungle/lua-resty-hoedown)
 * etlua (https://github.com/leafo/etlua)
 * lua-template (https://github.com/dannote/lua-template)
