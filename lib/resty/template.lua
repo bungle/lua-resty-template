@@ -54,11 +54,10 @@ local ok, newtab = pcall(require, "table.new")
 if not ok then newtab = function() return {} end end
 
 local caching = true
-local template = newtab(0, 13);
+local template = newtab(0, 12)
 
 template._VERSION = "1.6-dev"
 template.cache    = {}
-template.concat   = concat
 
 local function enabled(val)
     if val == nil then return true end
@@ -75,7 +74,7 @@ local function rpos(view, s)
         if c == " " or c == "\t" or c == "\0" or c == "\x0B" then
             s = s - 1
         else
-            break;
+            break
         end
     end
     return s
@@ -227,11 +226,9 @@ function template.parse(view, plain)
     end
     local j = 2
     local c = {[[
-context=(...) or {}
-local function include(v, c)
-    return template.compile(v)(c or context)
-end
-local ___,blocks,layout={},blocks or {},nil
+context=... or {}
+local function include(v, c) return template.compile(v)(c or context) end
+local ___,blocks,layout={},blocks or {}
 ]] }
     local i, s = 1, find(view, "{", 1, true)
     while s do
@@ -252,7 +249,7 @@ local ___,blocks,layout={},blocks or {},nil
                 s, i = e + 1, e + 2
             end
         elseif t == "*" then
-            local e = (find(view, "*}", p, true))
+            local e = find(view, "*}", p, true)
             if e then
                 if i < s then
                     c[j] = "___[#___+1]=[=[\n"
@@ -288,14 +285,14 @@ local ___,blocks,layout={},blocks or {},nil
         elseif t == "(" then
             local e = find(view, ")}", p, true)
             if e then
-                local f = sub(view, p, e - 1)
-                local x = (find(f, ",", 2, true))
                 if i < s then
                     c[j] = "___[#___+1]=[=[\n"
                     c[j+1] = sub(view, i, s - 1)
                     c[j+2] = "]=]\n"
                     j=j+3
                 end
+                local f = sub(view, p, e - 1)
+                local x = find(f, ",", 2, true)
                 if x then
                     c[j] = "___[#___+1]=include([=["
                     c[j+1] = trim(sub(f, 1, x - 1))
@@ -381,14 +378,14 @@ local ___,blocks,layout={},blocks or {},nil
         end
         s = find(view, "{", s + 1, true)
     end
-    local rest = sub(view, i)
-    if rest and rest ~= "" then
+    s = sub(view, i)
+    if s and s ~= "" then
         c[j] = "___[#___+1]=[=[\n"
-        c[j+1] = rest
+        c[j+1] = s
         c[j+2] = "]=]\n"
         j=j+3
     end
-    c[j] = "return layout and include(layout,setmetatable({view=template.concat(___),blocks=blocks},{__index=context})) or template.concat(___)"
+    c[j] = "return layout and include(layout,setmetatable({view=table.concat(___),blocks=blocks},{__index=context})) or table.concat(___)"
     return concat(c)
 end
 
