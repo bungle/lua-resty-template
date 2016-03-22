@@ -80,6 +80,17 @@ local function rpos(view, s)
     return s
 end
 
+local function escaped(view, s)
+    if s > 1 and sub(view, s - 1, s - 1) == "\\" then
+        if s > 2 and sub(view, s - 2, s - 2) == "\\" then
+            return false, 1
+        else
+            return true, 1
+        end
+    end
+    return false, 0
+end
+
 local function readfile(path)
     local file = open(path, "rb")
     if not file then return nil end
@@ -236,144 +247,197 @@ local ___,blocks,layout={},blocks or {}
         if t == "{" then
             local e = find(view, "}}", p, true)
             if e then
-                if i < s then
+                local z, w = escaped(view, s)
+                if i < s - w then
                     c[j] = "___[#___+1]=[=[\n"
-                    c[j+1] = sub(view, i, s - 1)
+                    c[j+1] = sub(view, i, s - 1 - w)
                     c[j+2] = "]=]\n"
                     j=j+3
                 end
-                c[j] = "___[#___+1]=template.escape("
-                c[j+1] = trim(sub(view, p, e - 1))
-                c[j+2] = ")\n"
-                j=j+3
-                s, i = e + 1, e + 2
+                if z then
+                    i = s
+                else
+                    c[j] = "___[#___+1]=template.escape("
+                    c[j+1] = trim(sub(view, p, e - 1))
+                    c[j+2] = ")\n"
+                    j=j+3
+                    s, i = e + 1, e + 2
+                end
             end
         elseif t == "*" then
             local e = find(view, "*}", p, true)
             if e then
-                if i < s then
+                local z, w = escaped(view, s)
+                if i < s - w then
                     c[j] = "___[#___+1]=[=[\n"
-                    c[j+1] = sub(view, i, s - 1)
+                    c[j+1] = sub(view, i, s - 1 - w)
                     c[j+2] = "]=]\n"
                     j=j+3
                 end
-                c[j] = "___[#___+1]=template.output("
-                c[j+1] = trim(sub(view, p, e - 1))
-                c[j+2] = ")\n"
-                j=j+3
-                s, i = e + 1, e + 2
+                if z then
+                    i = s
+                else
+                    c[j] = "___[#___+1]=template.output("
+                    c[j+1] = trim(sub(view, p, e - 1))
+                    c[j+2] = ")\n"
+                    j=j+3
+                    s, i = e + 1, e + 2
+                end
             end
         elseif t == "%" then
             local e = find(view, "%}", p, true)
             if e then
-                local n = e + 2
-                if sub(view, n, n) == "\n" then
-                    n = n + 1
+                local z, w = escaped(view, s)
+                if z then
+                    if i < s - w then
+                        c[j] = "___[#___+1]=[=[\n"
+                        c[j+1] = sub(view, i, s - 1 - w)
+                        c[j+2] = "]=]\n"
+                        j=j+3
+                    end
+                    i = s
+                else
+                    local n = e + 2
+                    if sub(view, n, n) == "\n" then
+                        n = n + 1
+                    end
+                    local r = rpos(view, s - 1)
+                    if i <= r then
+                        c[j] = "___[#___+1]=[=[\n"
+                        c[j+1] = sub(view, i, r)
+                        c[j+2] = "]=]\n"
+                        j=j+3
+                    end
+                    c[j] = trim(sub(view, p, e - 1))
+                    c[j+1] = "\n"
+                    j=j+2
+                    s, i = n - 1, n
                 end
-                local r = rpos(view, s - 1)
-                if i <= r then
-                    c[j] = "___[#___+1]=[=[\n"
-                    c[j+1] = sub(view, i, r)
-                    c[j+2] = "]=]\n"
-                    j=j+3
-                end
-                c[j] = trim(sub(view, p, e - 1))
-                c[j+1] = "\n"
-                j=j+2
-                s, i = n - 1, n
             end
         elseif t == "(" then
             local e = find(view, ")}", p, true)
             if e then
-                if i < s then
+                local z, w = escaped(view, s)
+                if i < s - w then
                     c[j] = "___[#___+1]=[=[\n"
-                    c[j+1] = sub(view, i, s - 1)
+                    c[j+1] = sub(view, i, s - 1 - w)
                     c[j+2] = "]=]\n"
                     j=j+3
                 end
-                local f = sub(view, p, e - 1)
-                local x = find(f, ",", 2, true)
-                if x then
-                    c[j] = "___[#___+1]=include([=["
-                    c[j+1] = trim(sub(f, 1, x - 1))
-                    c[j+2] = "]=],"
-                    c[j+3] = trim(sub(f, x + 1))
-                    c[j+4] = ")\n"
-                    j=j+5
+                if z then
+                    i = s
                 else
-                    c[j] = "___[#___+1]=include([=["
-                    c[j+1] = trim(f)
-                    c[j+2] = "]=])\n"
-                    j=j+3
+                    local f = sub(view, p, e - 1)
+                    local x = find(f, ",", 2, true)
+                    if x then
+                        c[j] = "___[#___+1]=include([=["
+                        c[j+1] = trim(sub(f, 1, x - 1))
+                        c[j+2] = "]=],"
+                        c[j+3] = trim(sub(f, x + 1))
+                        c[j+4] = ")\n"
+                        j=j+5
+                    else
+                        c[j] = "___[#___+1]=include([=["
+                        c[j+1] = trim(f)
+                        c[j+2] = "]=])\n"
+                        j=j+3
+                    end
+                    s, i = e + 1, e + 2
                 end
-                s, i = e + 1, e + 2
             end
         elseif t == "[" then
             local e = find(view, "]}", p, true)
             if e then
-                if i < s then
+                local z, w = escaped(view, s)
+                if i < s - w then
                     c[j] = "___[#___+1]=[=[\n"
-                    c[j+1] = sub(view, i, s - 1)
+                    c[j+1] = sub(view, i, s - 1 - w)
                     c[j+2] = "]=]\n"
                     j=j+3
                 end
-                c[j] = "___[#___+1]=include("
-                c[j+1] = trim(sub(view, p, e - 1))
-                c[j+2] = ")\n"
-                j=j+3
-                s, i = e + 1, e + 2
+                if z then
+                    i = s
+                else
+                    c[j] = "___[#___+1]=include("
+                    c[j+1] = trim(sub(view, p, e - 1))
+                    c[j+2] = ")\n"
+                    j=j+3
+                    s, i = e + 1, e + 2
+                end
             end
         elseif t == "-" then
             local e = find(view, "-}", p, true)
             if e then
                 local x, y = find(view, sub(view, s, e + 1), e + 2, true)
                 if x then
-                    y = y + 1
-                    x = x - 1
-                    if sub(view, y, y) == "\n" then
-                        y = y + 1
-                    end
-                    local b = trim(sub(view, p, e - 1))
-                    if b == "verbatim" or b == "raw" then
-                        if i < s then
+                    local z, w = escaped(view, s)
+                    if z then
+                        if i < s - w then
                             c[j] = "___[#___+1]=[=[\n"
-                            c[j+1] = sub(view, i, s - 1)
+                            c[j+1] = sub(view, i, s - 1 - w)
                             c[j+2] = "]=]\n"
                             j=j+3
                         end
-                        c[j] = "___[#___+1]=[=["
-                        c[j+1] = sub(view, e + 2, x)
-                        c[j+2] = "]=]\n"
-                        j=j+3
+                        i = s
                     else
-                        if sub(view, x, x) == "\n" then
-                            x = x - 1
+                        y = y + 1
+                        x = x - 1
+                        if sub(view, y, y) == "\n" then
+                            y = y + 1
                         end
-                        local r = rpos(view, s - 1)
-                        if i <= r then
-                            c[j] = "___[#___+1]=[=[\n"
-                            c[j+1] = sub(view, i, r)
+                        local b = trim(sub(view, p, e - 1))
+                        if b == "verbatim" or b == "raw" then
+                            if i < s - w then
+                                c[j] = "___[#___+1]=[=[\n"
+                                c[j+1] = sub(view, i, s - 1 - w)
+                                c[j+2] = "]=]\n"
+                                j=j+3
+                            end
+                            c[j] = "___[#___+1]=[=["
+                            c[j+1] = sub(view, e + 2, x)
                             c[j+2] = "]=]\n"
                             j=j+3
+                        else
+                            if sub(view, x, x) == "\n" then
+                                x = x - 1
+                            end
+                            local r = rpos(view, s - 1)
+                            if i <= r then
+                                c[j] = "___[#___+1]=[=[\n"
+                                c[j+1] = sub(view, i, r)
+                                c[j+2] = "]=]\n"
+                                j=j+3
+                            end
+                            c[j] = 'blocks["'
+                            c[j+1] = b
+                            c[j+2] = '"]=include[=['
+                            c[j+3] = sub(view, e + 2, x)
+                            c[j+4] = "]=]\n"
+                            j=j+5
                         end
-                        c[j] = 'blocks["'
-                        c[j+1] = b
-                        c[j+2] = '"]=include[=['
-                        c[j+3] = sub(view, e + 2, x)
-                        c[j+4] = "]=]\n"
-                        j=j+5
+                        s, i = y - 1, y
                     end
-                    s, i = y - 1, y
                 end
             end
         elseif t == "#" then
             local e = find(view, "#}", p, true)
             if e then
-                e = e + 2
-                if sub(view, e, e) == "\n" then
-                    e = e + 1
+                local z, w = escaped(view, s)
+                if i < s - w then
+                    c[j] = "___[#___+1]=[=[\n"
+                    c[j+1] = sub(view, i, s - 1 - w)
+                    c[j+2] = "]=]\n"
+                    j=j+3
                 end
-                s, i = e - 1, e
+                if z then
+                    i = s
+                else
+                    e = e + 2
+                    if sub(view, e, e) == "\n" then
+                        e = e + 1
+                    end
+                    s, i = e - 1, e
+                end
             end
         end
         s = find(view, "{", s + 1, true)

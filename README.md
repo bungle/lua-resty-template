@@ -101,6 +101,32 @@ From templates you may access everything in `context` table, and everything in `
 <h1>{{message}}</h1> == <h1>{{context.message}}</h1>
 ```
 
+##### Short Escaping Syntax
+
+If you don't want a particular template tag to be processed you may escape the starting tag with backslash `\`:
+
+```html
+<h1>\{{message}}</h1>
+```
+
+This will output (instead of evaluating the message):
+
+```html
+<h1>{{message}}</h1>
+```
+
+If you want to add backslash char just before template tag, you need to escape that as well:
+
+```html
+<h1>\\{{message}}</h1>
+```
+
+This will output:
+
+```html
+<h1>\[message-variables-content-here]</h1>
+```
+
 ##### A Word About Complex Keys in Context Table
 
 Say you have this kind of a context table:
@@ -937,19 +963,13 @@ or (see the `{(head.html)}` is processed by lua-resty-template):
 </html>
 ```
 
-I'm also looking forward to make it even easier to mix-and-match other templates with server side lua-resty-templates.
-We could for example introduce escape syntax with prefixing the tags with `\`, so the above example would just go like
-this:
+You may also use short escaping syntax (currently implemented in development version:
 
 ```html
 ...
 <button ng-click="changeFoo()">\{{buttonText}}</button>
 ...
 ```
-
-But then we would need to possibly support ``\\{{buttonText}}`` syntax as well (aka escaping the escape) or you need to
-do ``{{ "\\" .. buttonText }}``. But I kinda like this short escaping syntax, so it might get implemented in a next
-version.
 
 ### Embedding Markdown inside the Templates
 
@@ -1289,7 +1309,7 @@ The changes of every release of this module is recorded in [CHANGES](https://git
 `lua-resty-template` uses three clause BSD license (because it was originally forked from one that uses it).
 
 ```
-Copyright (c) 2014, 2015, Aapo Talvensaari
+Copyright (c) 2016, Aapo Talvensaari
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,

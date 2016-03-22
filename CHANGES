@@ -1,4 +1,9 @@
 
+Changes with lua-resty-template 1.5                              xx Xxx 2016
+
+    *) Feature: Added short escaping syntax.
+
+
 Changes with lua-resty-template 1.5                              10 Feb 2015
 
     *) Feature: Added support for {-verbatim-}...{-verbatim-}, and
