@@ -1182,6 +1182,7 @@ You may also look at these (as alternatives, or to mix them with `lua-resty-temp
 * lua-haml (https://github.com/norman/lua-haml)
 * lua-template (https://github.com/tgn14/Lua-template)
 * hige (https://github.com/nrk/hige)
+* mod_pLua (https://sourceforge.net/p/modplua/wiki/Home/)
 * lapis html generation (http://leafo.net/lapis/reference.html#html-generation)
 
 `lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thank you Tor, and Zed for your earlier contributions.*
