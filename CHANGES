@@ -1,5 +1,4 @@
-
-Changes with lua-resty-template 1.5                              xx Xxx 2016
+Changes with lua-resty-template 1.6                              25 Apr 2016
 
     *) Feature: Added short escaping syntax.
 
