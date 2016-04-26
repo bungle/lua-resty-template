@@ -114,7 +114,7 @@ local function run(iterations)
     local contexts = new_tab(iterations, 0)
 
     for i = 1, iterations do
-        contexts[i] = {"Emma " .. i, "James " .. i, "Nicholas " .. i, "Mary " .. i }
+        contexts[i] = { "Emma", "James", "Nicholas", "Mary" }
     end
 
     template.cache = {}
