@@ -6,7 +6,7 @@ if not ok then
 end
 
 local function run(iterations)
-    local total, print, parse, compile, iterations, clock, format = 0, ngx and ngx.say or print, template.parse, template.compile, iterations or 1000, os.clock, string.format
+    local gc, total, print, parse, compile, iterations, clock, format = collectgarbage, 0, ngx and ngx.say or print, template.parse, template.compile, iterations or 1000, os.clock, string.format
     local view = [[
     <ul>
     {% for _, v in ipairs(context) do %}
@@ -16,6 +16,9 @@ local function run(iterations)
 
     print(format("Running %d iterations in each test", iterations))
 
+    gc()
+    gc()
+
     local x = clock()
     for _ = 1, iterations do
         parse(view, true)
@@ -23,6 +26,9 @@ local function run(iterations)
     local z = clock() - x
     print(format("    Parsing Time: %.6f", z))
     total = total + z
+
+    gc()
+    gc()
 
     x = clock()
     for _ = 1, iterations do
@@ -35,17 +41,23 @@ local function run(iterations)
 
     compile(view, nil, true)
 
+    gc()
+    gc()
+
     x = clock()
     for _ = 1, iterations do
         compile(view, 1, true)
     end
     z = clock() - x
-    print(format("Compilation Time: %.6f (template cached)", z))
+    print(format("Compilation Time: %.6f (template, cached)", z))
     total = total + z
 
     local context = { "Emma", "James", "Nicholas", "Mary" }
 
     template.cache = {}
+
+    gc()
+    gc()
 
     x = clock()
     for _ = 1, iterations do
@@ -59,12 +71,15 @@ local function run(iterations)
     template.cache = {}
     compile(view, 1, true)
 
+    gc()
+    gc()
+
     x = clock()
     for _ = 1, iterations do
         compile(view, 1, true)(context)
     end
     z = clock() - x
-    print(format("  Execution Time: %.6f (same template cached)", z))
+    print(format("  Execution Time: %.6f (same template, cached)", z))
     total = total + z
 
     template.cache = {}
@@ -74,6 +89,9 @@ local function run(iterations)
         views[i] = "<h1>Iteration " .. i .. "</h1>\n" .. view
     end
 
+    gc()
+    gc()
+
     x = clock()
     for i = 1, iterations do
         compile(views[i], i, true)(context)
@@ -82,20 +100,27 @@ local function run(iterations)
     print(format("  Execution Time: %.6f (different template)", z))
     total = total + z
 
+    gc()
+    gc()
+
     x = clock()
     for i = 1, iterations do
         compile(views[i], i, true)(context)
     end
     z = clock() - x
-    print(format("  Execution Time: %.6f (different template cached)", z))
+    print(format("  Execution Time: %.6f (different template, cached)", z))
     total = total + z
 
-    template.cache = {}
     local contexts = new_tab(iterations, 0)
 
     for i = 1, iterations do
         contexts[i] = {"Emma " .. i, "James " .. i, "Nicholas " .. i, "Mary " .. i }
     end
+
+    template.cache = {}
+
+    gc()
+    gc()
 
     x = clock()
     for i = 1, iterations do
@@ -105,12 +130,15 @@ local function run(iterations)
     print(format("  Execution Time: %.6f (different template, different context)", z))
     total = total + z
 
+    gc()
+    gc()
+
     x = clock()
-    for i = 1, 1000 do
+    for i = 1, iterations do
         compile(views[i], i, true)(contexts[i])
     end
     z = clock() - x
-    print(format("  Execution Time: %.6f (different template, different context cached)", z))
+    print(format("  Execution Time: %.6f (different template, different context, cached)", z))
     total = total + z
     print(format("      Total Time: %.6f", total))
 end
