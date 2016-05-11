@@ -56,7 +56,7 @@ if not ok then newtab = function() return {} end end
 local caching = true
 local template = newtab(0, 12)
 
-template._VERSION = "1.6"
+template._VERSION = "1.7"
 template.cache    = {}
 
 local function enabled(val)

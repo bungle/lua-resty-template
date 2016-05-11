@@ -1,3 +1,11 @@
+Changes with lua-resty-template 1.7                              11 May 2016
+
+    *) Bugfix: loadngx was not working properly on non-file input.
+
+       See also: https://github.com/bungle/lua-resty-template/pull/19
+
+       Thanks @zhoukk
+
 Changes with lua-resty-template 1.6                              25 Apr 2016
 
     *) Feature: Added short escaping syntax.
