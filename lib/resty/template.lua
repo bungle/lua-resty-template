@@ -115,7 +115,7 @@ local function loadngx(path)
     local root = vars and (var.template_root or var.document_root) or prefix
     if sub(root, -1) == "/" then root = sub(root, 1, -2) end
     local fullpath = concat{ root, "/", file } 
-    return readfile(fullpath) or fullpath
+    return readfile(fullpath) or file
 end
 
 do
