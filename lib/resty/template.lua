@@ -56,7 +56,7 @@ if not ok then newtab = function() return {} end end
 local caching = true
 local template = newtab(0, 12)
 
-template._VERSION = "1.7"
+template._VERSION = "1.8"
 template.cache    = {}
 
 local function enabled(val)
@@ -186,17 +186,35 @@ function template.new(view, layout)
     assert(view, "view was not provided for template.new(view, layout).")
     local render, compile = template.render, template.compile
     if layout then
-        return setmetatable({ render = function(self, context)
-            local context = context or self
-            context.blocks = context.blocks or {}
-            context.view = compile(view)(context)
-            return render(layout, context)
-        end }, { __tostring = function(self)
-            local context = self
-            context.blocks = context.blocks or {}
-            context.view = compile(view)(context)
-            return compile(layout)(context)
-        end })
+        if type(layout) == "table" then
+            return setmetatable({ render = function(self, context)
+                local context = context or self
+                context.blocks = context.blocks or {}
+                context.view = compile(view)(context)
+                layout.blocks = context.blocks or {}
+                layout.view = context.view or ""
+                return layout:render()
+            end }, { __tostring = function(self)
+                local context = self
+                context.blocks = context.blocks or {}
+                context.view = compile(view)(context)
+                layout.blocks = context.blocks or {}
+                layout.view = context.view
+                return tostring(layout)
+            end })
+        else
+            return setmetatable({ render = function(self, context)
+                local context = context or self
+                context.blocks = context.blocks or {}
+                context.view = compile(view)(context)
+                return render(layout, context)
+            end }, { __tostring = function(self)
+                local context = self
+                context.blocks = context.blocks or {}
+                context.view = compile(view)(context)
+                return compile(layout)(context)
+            end })
+        end
     end
     return setmetatable({ render = function(self, context)
         return render(view, context or self)
