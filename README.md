@@ -662,9 +662,9 @@ Layouts (or Master Pages) can be used to wrap a view inside another view (aka la
 ##### Lua
 ```lua
 local template = require "resty.template"
-local layout   = template.new"layout.html"
+local layout   = template.new "layout.html"
 layout.title   = "Testing lua-resty-template"
-layout.view    = template.compile("view.html"){ message = "Hello, World!" }
+layout.view    = template.compile "view.html" { message = "Hello, World!" }
 layout:render()
 -- Or like this
 template.render("layout.html", {
@@ -675,6 +675,12 @@ template.render("layout.html", {
 -- (but please remember that context.view is overwritten on rendering the layout.html)
 local view     = template.new("view.html", "layout.html")
 view.title     = "Testing lua-resty-template"
+view.message   = "Hello, World!"
+view:render()
+-- Well, maybe like this then?
+local layout   = template.new "layout.html"
+layout.title   = "Testing lua-resty-template"
+local view     = template.new("view.html", layout)
 view.message   = "Hello, World!"
 view:render()
 ```
