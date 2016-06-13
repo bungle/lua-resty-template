@@ -669,7 +669,7 @@ layout:render()
 -- Or like this
 template.render("layout.html", {
   title = "Testing lua-resty-template",
-  view  = template.compile("view.html"){ message = "Hello, World!" }
+  view  = template.compile "view.html" { message = "Hello, World!" }
 })
 -- Or maybe you like this style more
 -- (but please remember that context.view is overwritten on rendering the layout.html)
