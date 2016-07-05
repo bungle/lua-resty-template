@@ -13,7 +13,7 @@ local view = template.new "view.html"
 view.message = "Hello, World!"
 view:render()
 -- Using template.render
-template.render("view.html", { message = "Hello, World!" })
+template.render("view.html", { message = "Hello, World!" })G
 ```
 
 ##### view.html
@@ -71,6 +71,7 @@ template.render([[
   * [Template Including](#template-including)
   * [Views with Layouts](#views-with-layouts)
   * [Using Blocks](#using-blocks)
+  * [Grandfather-Father-Son Inheritance](#grandfather-father-son-inheritance)
   * [Macros](#macros)
   * [Calling Methods in Templates](#calling-methods-in-templates)
   * [Embedding Angular or other tags / templating inside the Templates](#embedding-angular-or-other-tags--templating-inside-the-templates)
@@ -822,94 +823,106 @@ view:render()
 </body>
 </html>
 ```
-### Grandfather-father-son Inheritance
+### Grandfather-Father-Son Inheritance
 
 Say you have `base.html`, `layout1.html`, `layout2.html` and `page.html`. You want an inheritance like this:
-`base.html -> layout1.html -> page.html` or `base.html -> layout2.html -> page.html`.
+`base.html -> layout1.html -> page.html` or `base.html -> layout2.html -> page.html` (actually this nesting is not limited to three levels).
 
 ##### Lua
-```
+
+```lua
 local res = require"resty.template".compile("page.html"){} 
 ```
+
 ##### base.html
 
-    <html lang='zh'>
-       <head>
-       <link href="css/bootstrap.min.css" rel="stylesheet">
-       {* blocks.page_css *}
-       </head>
-       <body>
-       {* blocks.main *}
-       <script src="js/jquery.js"></script>
-       <script src="js/bootstrap.min.js"></script>
-       {* blocks.page_js *}
-       </body>
-    </html>
+```html
+<html lang='zh'>
+   <head>
+   <link href="css/bootstrap.min.css" rel="stylesheet">
+   {* blocks.page_css *}
+   </head>
+   <body>
+   {* blocks.main *}
+   <script src="js/jquery.js"></script>
+   <script src="js/bootstrap.min.js"></script>
+   {* blocks.page_js *}
+   </body>
+</html>
+```
 
 ##### layout1.html
 
-    {% layout = "base.html" %}
-    {-main-}
-        <div class="sidebar-1">
-          {* blocks.sidebar *}
-        </div>
-        <div class="content-1">
-          {* blocks.content *}
-        </div>
-    {-main-}
+```html
+{% layout = "base.html" %}
+{-main-}
+    <div class="sidebar-1">
+      {* blocks.sidebar *}
+    </div>
+    <div class="content-1">
+      {* blocks.content *}
+    </div>
+{-main-}
+```
     
 ##### layout2.html
 
-    {% layout = "base.html" %}
-    {-main-}
-        <div class="sidebar-2">
-          {* blocks.sidebar *}
-        </div>
-        <div class="content-2">
-          {* blocks.content *}
-        </div>
-        <div>I am different from layout1 </div>
-    {-main-}
-    
+```html
+{% layout = "base.html" %}
+{-main-}
+    <div class="sidebar-2">
+      {* blocks.sidebar *}
+    </div>
+    <div class="content-2">
+      {* blocks.content *}
+    </div>
+    <div>I am different from layout1 </div>
+{-main-}
+```
+
 ##### page.html 
 
-    {% layout = "layout1.html" %}
-    {-sidebar-}
-      this is sidebar
-    {-sidebar-}
+```html
+{% layout = "layout1.html" %}
+{-sidebar-}
+  this is sidebar
+{-sidebar-}
 
-    {-content-}
-      this is content
-    {-content-}
+{-content-}
+  this is content
+{-content-}
 
-    {-page_css-}
-      <link href="css/page.css" rel="stylesheet">
-    {-page_css-}
-    
-    {-page_js-}
-      <script src="js/page.js"></script>
-    {-page_js-}
+{-page_css-}
+  <link href="css/page.css" rel="stylesheet">
+{-page_css-}
+
+{-page_js-}
+  <script src="js/page.js"></script>
+{-page_js-}
+```
 
 Or:
 
 ##### page.html
 
-    {% layout = "layout2.html" %}
-    {-sidebar-}
-      this is sidebar
-    {-sidebar-}
+```html
+{% layout = "layout2.html" %}
+{-sidebar-}
+  this is sidebar
+{-sidebar-}
 
-    {-content-}
-      this is content
-    {-content-}
+{-content-}
+  this is content
+{-content-}
 
-    {-page_css-}
-      <link href="css/page.css" rel="stylesheet">
-    {-page_css-}
-    
-    {-page_js-}
-      <script src="js/page.js"></script>
-    {-page_js-}
+{-page_css-}
+  <link href="css/page.css" rel="stylesheet">
+{-page_css-}
+
+{-page_js-}
+  <script src="js/page.js"></script>
+{-page_js-}
+```
     
 ### Macros
 
