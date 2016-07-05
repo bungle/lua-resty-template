@@ -822,7 +822,95 @@ view:render()
 </body>
 </html>
 ```
+### Grandfather-father-son Inheritance
 
+Say you have `base.html`, `layout1.html`, `layout2.html` and `page.html`. You want an inheritance like this:
+`base.html -> layout1.html -> page.html` or `base.html -> layout2.html -> page.html`.
+
+##### Lua
+```
+local res = require"resty.template".compile("page.html"){} 
+```
+##### base.html
+
+    <html lang='zh'>
+       <head>
+       <link href="css/bootstrap.min.css" rel="stylesheet">
+       {* blocks.page_css *}
+       </head>
+       <body>
+       {* blocks.main *}
+       <script src="js/jquery.js"></script>
+       <script src="js/bootstrap.min.js"></script>
+       {* blocks.page_js *}
+       </body>
+    </html>
+
+##### layout1.html
+
+    {% layout = "base.html" %}
+    {-main-}
+        <div class="sidebar-1">
+          {* blocks.sidebar *}
+        </div>
+        <div class="content-1">
+          {* blocks.content *}
+        </div>
+    {-main-}
+    
+##### layout2.html
+
+    {% layout = "base.html" %}
+    {-main-}
+        <div class="sidebar-2">
+          {* blocks.sidebar *}
+        </div>
+        <div class="content-2">
+          {* blocks.content *}
+        </div>
+        <div>I am different from layout1 </div>
+    {-main-}
+    
+##### page.html 
+
+    {% layout = "layout1.html" %}
+    {-sidebar-}
+      this is sidebar
+    {-sidebar-}
+
+    {-content-}
+      this is content
+    {-content-}
+
+    {-page_css-}
+      <link href="css/page.css" rel="stylesheet">
+    {-page_css-}
+    
+    {-page_js-}
+      <script src="js/page.js"></script>
+    {-page_js-}
+
+Or:
+
+##### page.html
+
+    {% layout = "layout2.html" %}
+    {-sidebar-}
+      this is sidebar
+    {-sidebar-}
+
+    {-content-}
+      this is content
+    {-content-}
+
+    {-page_css-}
+      <link href="css/page.css" rel="stylesheet">
+    {-page_css-}
+    
+    {-page_js-}
+      <script src="js/page.js"></script>
+    {-page_js-}
+    
 ### Macros
 
 [@DDarko](https://github.com/DDarko) mentioned in an [issue #5](https://github.com/bungle/lua-resty-template/issues/5) that he has a use case where he needs to have macros or parameterized views. That is a nice feature that you can use with `lua-resty-template`.
