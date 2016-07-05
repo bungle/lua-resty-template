@@ -826,7 +826,7 @@ view:render()
 ### Grandfather-Father-Son Inheritance
 
 Say you have `base.html`, `layout1.html`, `layout2.html` and `page.html`. You want an inheritance like this:
-`base.html -> layout1.html -> page.html` or `base.html -> layout2.html -> page.html` (actually this nesting is not limited to three levels).
+`base.html ➧ layout1.html ➧ page.html` or `base.html ➧ layout2.html ➧ page.html` (actually this nesting is not limited to three levels).
 
 ##### Lua
 
