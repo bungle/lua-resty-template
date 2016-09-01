@@ -1302,6 +1302,9 @@ You may also look at these (as alternatives, or to mix them with `lua-resty-temp
 There is a small microbenchmark located here:
 https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template/microbenchmark.lua
 
+There is also a regression in LuaJIT that affects the results. If you want your LuaJIT patched against this,
+you need to merge this pull request: https://github.com/LuaJIT/LuaJIT/pull/174.
+
 ##### Lua
 
 ```lua
