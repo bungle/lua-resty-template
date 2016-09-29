@@ -56,7 +56,7 @@ if not ok then newtab = function() return {} end end
 local caching = true
 local template = newtab(0, 12)
 
-template._VERSION = "1.8"
+template._VERSION = "1.9"
 template.cache    = {}
 
 local function enabled(val)
@@ -144,7 +144,7 @@ do
         end }
         if jit then
             loadchunk = function(view)
-                return assert(load(view, nil, "tb", setmetatable({ template = template }, context)))
+                return assert(load(view, nil, nil, setmetatable({ template = template }, context)))
             end
         else
             loadchunk = function(view)
@@ -158,7 +158,7 @@ do
             return t.context[k] or t.template[k] or _ENV[k]
         end }
         loadchunk = function(view)
-            return assert(load(view, nil, "tb", setmetatable({ template = template }, context)))
+            return assert(load(view, nil, nil, setmetatable({ template = template }, context)))
         end
     end
 end
