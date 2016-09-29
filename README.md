@@ -54,6 +54,7 @@ template.render([[
 * [Template Syntax](#template-syntax)
   * [Reserved Context Keys and Remarks](#reserved-context-keys-and-remarks)
 * [Installation](#installation)
+  * [Using OpenResty Package Manager (opm)](#using-openresty-package-manager-opm)
   * [Using LuaRocks or Moonrocks](#using-luarocks-or-moonrocks)
 * [Nginx / OpenResty Configuration](#nginx--openresty-configuration)
 * [Lua API](#lua-api)
