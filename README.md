@@ -249,25 +249,16 @@ Just place [`template.lua`](https://github.com/bungle/lua-resty-template/blob/ma
 ### Using OpenResty Package Manager (opm)
 
 ```Shell
-$ opm get bungle/lua-resty-prettycjson
+$ opm get bungle/lua-resty-template
 ```
 
-### Using LuaRocks or MoonRocks
-
-If you are using LuaRocks >= 2.2:
+### Using LuaRocks
 
 ```Shell
 $ luarocks install lua-resty-template
 ```
 
-If you are using LuaRocks < 2.2:
-
-```Shell
-$ luarocks install --server=http://rocks.moonscript.org moonrocks
-$ moonrocks install lua-resty-template
-```
-
-MoonRocks repository for `lua-resty-template`  is located here: https://rocks.moonscript.org/modules/bungle/lua-resty-template.
+LuaRocks repository for `lua-resty-template` is located at https://luarocks.org/modules/bungle/lua-resty-template.
 
 ## Nginx / OpenResty Configuration
 
