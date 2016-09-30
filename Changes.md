@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to `lua-resty-validation` will be documented in this file.
+All notable changes to `lua-resty-template` will be documented in this file.
 
 ## [1.9] - 2016-09-29
 ### Added
