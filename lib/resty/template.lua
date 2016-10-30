@@ -250,7 +250,7 @@ function template.parse(view, plain)
     assert(view, "view was not provided for template.parse(view, plain).")
     if not plain then
         view = template.load(view)
-        if byte(sub(view, 1, 1)) == 27 then return view end
+        if byte(view, 1, 1) == 27 then return view end
     end
     local j = 2
     local c = {[[
