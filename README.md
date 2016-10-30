@@ -1303,6 +1303,8 @@ https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template/micr
 There is also a regression in LuaJIT that affects the results. If you want your LuaJIT patched against this,
 you need to merge this pull request: https://github.com/LuaJIT/LuaJIT/pull/174.
 
+Others have [reported](issues/21#issuecomment-226786051) that in simple benchmarks running this template engine actually beats Nginx serving static files by a factor of three. So I guess this engine is quite fast. 
+
 ##### Lua
 
 ```lua
