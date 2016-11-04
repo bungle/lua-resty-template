@@ -13,7 +13,7 @@ local view = template.new "view.html"
 view.message = "Hello, World!"
 view:render()
 -- Using template.render
-template.render("view.html", { message = "Hello, World!" })G
+template.render("view.html", { message = "Hello, World!" })
 ```
 
 ##### view.html
