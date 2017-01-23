@@ -1070,7 +1070,7 @@ or (see the `{(head.html)}` is processed by lua-resty-template):
 </html>
 ```
 
-You may also use short escaping syntax (currently implemented in development version:
+You may also use short escaping syntax:
 
 ```html
 ...
