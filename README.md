@@ -82,6 +82,7 @@ template.render([[
 * [Alternatives](#alternatives)
 * [Benchmarks](#benchmarks)
 * [Changes](#changes)
+* [See Also](#see-also)
 * [License](#license)
 
 ## Template Syntax
