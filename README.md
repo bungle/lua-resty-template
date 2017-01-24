@@ -1418,12 +1418,19 @@ I have not yet compared the results against the alternatives.
 
 The changes of every release of this module is recorded in [Changes.md](https://github.com/bungle/lua-resty-template/blob/master/Changes.md) file.
 
+## See Also
+
+* [lua-resty-route](https://github.com/bungle/lua-resty-route) — Routing library
+* [lua-resty-reqargs](https://github.com/bungle/lua-resty-reqargs) — Request arguments parser
+* [lua-resty-session](https://github.com/bungle/lua-resty-session) — Session library
+* [lua-resty-validation](https://github.com/bungle/lua-resty-validation) — Validation and filtering library
+
 ## License
 
 `lua-resty-template` uses three clause BSD license (because it was originally forked from one that uses it).
 
 ```
-Copyright (c) 2014 - 2016, Aapo Talvensaari
+Copyright (c) 2014 - 2017, Aapo Talvensaari
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
