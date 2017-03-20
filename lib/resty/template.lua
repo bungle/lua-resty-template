@@ -257,7 +257,7 @@ function template.parse(view, plain)
 context=... or {}
 local function include(v, c) return template.compile(v)(c or context) end
 local ___,blocks,layout={},blocks or {}
-local function echo(s) ___[#___+1] = s end
+local function echo(s) ___[#___+1] = tostring(s) end
 ]] }
     local i, s = 1, find(view, "{", 1, true)
     while s do
