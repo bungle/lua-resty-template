@@ -104,6 +104,8 @@ local function loadlua(path)
 end
 
 local function loadngx(path)
+    local content = readfile(path)
+	if content then return content end
     local vars = VAR_PHASES[phase()]
     local file, location = path, vars and var.template_location
     if sub(file, 1)  == "/" then file = sub(file, 2) end
