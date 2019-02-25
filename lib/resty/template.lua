@@ -27,6 +27,7 @@ local var
 local _VERSION = _VERSION
 local _ENV = _ENV
 local _G = _G
+local ENOENT = 2
 
 local HTML_ENTITIES = {
     ["&"] = "&amp;",
@@ -92,10 +93,16 @@ local function escaped(view, s)
 end
 
 local function readfile(path)
-    local file = open(path, "rb")
+    local file, err, errno = open(path, "rb")
+    if err and errno ~= ENOENT then
+      error(err)
+    end
     if not file then return nil end
-    local content = file:read "*a"
+    local content, read_err = file:read "*a"
     file:close()
+    if not content then
+      error(read_err)
+    end
     return content
 end
 
