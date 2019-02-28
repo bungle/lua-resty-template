@@ -1,32 +1,19 @@
+local fio = require('fio')
+
 local setmetatable = setmetatable
-local loadstring = loadstring
 local loadchunk
 local tostring = tostring
-local setfenv = setfenv
-local require = require
-local capture
 local concat = table.concat
 local assert = assert
-local prefix
-local write = io.write
-local pcall = pcall
-local phase
-local open = io.open
+local open = fio.open
 local load = load
 local type = type
 local dump = string.dump
 local find = string.find
 local gsub = string.gsub
 local byte = string.byte
-local null
 local sub = string.sub
-local ngx = ngx
-local jit = jit
-local var
 
-local _VERSION = _VERSION
-local _ENV = _ENV
-local _G = _G
 
 local HTML_ENTITIES = {
     ["&"] = "&amp;",
@@ -48,21 +35,11 @@ local CODE_ENTITIES = {
     ["/"] = "&#47;"
 }
 
-local VAR_PHASES
-
-local ok, newtab = pcall(require, "table.new")
-if not ok then newtab = function() return {} end end
-
 local caching = true
-local template = newtab(0, 12)
+local template = table.new(0, 12)
 
 template._VERSION = "1.9"
 template.cache    = {}
-
-local function enabled(val)
-    if val == nil then return true end
-    return val == true or (val == "1" or val == "true" or val == "on")
-end
 
 local function trim(s)
     return gsub(gsub(s, "^%s+", ""), "%s+$", "")
@@ -92,9 +69,9 @@ local function escaped(view, s)
 end
 
 local function readfile(path)
-    local file = open(path, "rb")
+    local file = open(path, {'O_RDONLY'})
     if not file then return nil end
-    local content = file:read "*a"
+    local content = file:read()
     file:close()
     return content
 end
@@ -103,63 +80,20 @@ local function loadlua(path)
     return readfile(path) or path
 end
 
-local function loadngx(path)
-    local vars = VAR_PHASES[phase()]
-    local file, location = path, vars and var.template_location
-    if sub(file, 1)  == "/" then file = sub(file, 2) end
-    if location and location ~= "" then
-        if sub(location, -1) == "/" then location = sub(location, 1, -2) end
-        local res = capture(concat{ location, '/', file})
-        if res.status == 200 then return res.body end
-    end
-    local root = vars and (var.template_root or var.document_root) or prefix
-    if sub(root, -1) == "/" then root = sub(root, 1, -2) end
-    return readfile(concat{ root, "/", file }) or path
-end
-
 do
-    if ngx then
-        VAR_PHASES = {
-            set           = true,
-            rewrite       = true,
-            access        = true,
-            content       = true,
-            header_filter = true,
-            body_filter   = true,
-            log           = true
-        }
-        template.print = ngx.print or write
-        template.load  = loadngx
-        prefix, var, capture, null, phase = ngx.config.prefix(), ngx.var, ngx.location.capture, ngx.null, ngx.get_phase
-        if VAR_PHASES[phase()] then
-            caching = enabled(var.template_cache)
-        end
-    else
-        template.print = write
-        template.load  = loadlua
-    end
-    if _VERSION == "Lua 5.1" then
-        local context = { __index = function(t, k)
-            return t.context[k] or t.template[k] or _G[k]
-        end }
-        if jit then
-            loadchunk = function(view)
-                return assert(load(view, nil, nil, setmetatable({ template = template }, context)))
-            end
-        else
-            loadchunk = function(view)
-                local func = assert(loadstring(view))
-                setfenv(func, setmetatable({ template = template }, context))
-                return func
-            end
-        end
-    else
-        local context = { __index = function(t, k)
-            return t.context[k] or t.template[k] or _ENV[k]
-        end }
-        loadchunk = function(view)
-            return assert(load(view, nil, nil, setmetatable({ template = template }, context)))
-        end
+    template.print = io.write
+    template.load  = loadlua
+
+    local context = { __index = function(t, k)
+        return t.context[k] or t.template[k]
+    end }
+    loadchunk = function(view)
+        return assert(load(view, nil, nil,
+                setmetatable({
+                    template = template,
+                    table = table,
+                    ipairs = ipairs,
+                }, context)))
     end
 end
 
@@ -169,7 +103,7 @@ function template.caching(enable)
 end
 
 function template.output(s)
-    if s == nil or s == null then return "" end
+    if s == nil then return "" end
     if type(s) == "function" then return template.output(s()) end
     return tostring(s)
 end
@@ -226,7 +160,7 @@ end
 function template.precompile(view, path, strip)
     local chunk = dump(template.compile(view), strip ~= false)
     if path then
-        local file = open(path, "wb")
+        local file = open(path, {'O_WRONLY'})
         file:write(chunk)
         file:close()
     end
@@ -256,7 +190,7 @@ function template.parse(view, plain)
     local c = {[[
 context=... or {}
 local function include(v, c) return template.compile(v)(c or context) end
-local ___,blocks,layout={},blocks or {}
+local ___,blocks,layout={},{}
 ]] }
     local i, s = 1, find(view, "{", 1, true)
     while s do
