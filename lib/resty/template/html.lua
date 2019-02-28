@@ -1,4 +1,4 @@
-local template = require "resty.template"
+local template = require('resty.template')
 local setmetatable = setmetatable
 local escape = template.escape
 local concat = table.concat

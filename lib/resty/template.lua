@@ -84,15 +84,18 @@ do
     template.print = io.write
     template.load  = loadlua
 
-    local context = { __index = function(t, k)
-        return t.context[k] or t.template[k]
-    end }
+    local context = {
+        __index = function(t, k)
+            return t.context[k] or t.template[k]
+        end,
+    }
     loadchunk = function(view)
         return assert(load(view, nil, nil,
                 setmetatable({
                     template = template,
                     table = table,
                     ipairs = ipairs,
+                    html = require('resty.template.html'),
                 }, context)))
     end
 end
@@ -400,7 +403,8 @@ local ___,blocks,layout={},{}
         c[j+2] = "]=]\n"
         j=j+3
     end
-    c[j] = "return layout and include(layout,setmetatable({view=table.concat(___),blocks=blocks},{__index=context})) or table.concat(___)"
+    c[j] = "return layout and include(layout,setmetatable({view=table.concat(___),blocks=blocks},\
+                                                          {__index=context})) or table.concat(___)"
     return concat(c)
 end
 
