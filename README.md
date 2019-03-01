@@ -54,9 +54,7 @@ template.render([[
 * [Template Syntax](#template-syntax)
   * [Reserved Context Keys and Remarks](#reserved-context-keys-and-remarks)
 * [Installation](#installation)
-  * [Using OpenResty Package Manager (opm)](#using-openresty-package-manager-opm)
   * [Using LuaRocks or Moonrocks](#using-luarocks-or-moonrocks)
-* [Nginx / OpenResty Configuration](#nginx--openresty-configuration)
 * [Lua API](#lua-api)
   * [template.caching](#boolean-templatecachingboolean-or-nil)
   * [template.new](#table-templatenewview-layout)
@@ -155,7 +153,7 @@ template.render([[
 
 ##### A Word About HTML Escaping
 
-Only strings are escaped, functions are called without arguments (recursively) and results are returned as is, other types are `tostring`ified. `nil`s and `ngx.null`s are converted to empty strings `""`.
+Only strings are escaped, functions are called without arguments (recursively) and results are returned as is, other types are `tostring`ified. `nil`s are converted to empty strings `""`.
 
 Escaped HTML characters:
 
@@ -261,76 +259,6 @@ $ luarocks install lua-resty-template
 
 LuaRocks repository for `lua-resty-template` is located at https://luarocks.org/modules/bungle/lua-resty-template.
 
-## Nginx / OpenResty Configuration
-
-When `lua-resty-template` is used in context of Nginx / OpenResty there are a few configuration directives that you need to be aware:
-
-* `template_root` (`set $template_root /var/www/site/templates`)
-* `template_location` (`set $template_location /templates`)
-
-If none of these are set in Nginx configuration, `ngx.var.document_root` (aka root-directive) value is used. If `template_location` is set, it will be used first, and if the location returns anything but `200` as a status code, we do fallback to either `template_root` (if defined) or `document_root`.
-
-##### Using `document_root`
-
-This one tries to load file content with Lua code from `html` directory (relative to Nginx prefix).
-
-```nginx
-http {
-  server {
-    location / {
-      root html;
-      content_by_lua '
-        local template = require "resty.template"
-        template.render("view.html", { message = "Hello, World!" })
-      ';      
-    }
-  }
-}
-```
-
-##### Using `template_root`
-
-This one tries to load file content with Lua code from `/usr/local/openresty/nginx/html/templates` directory.
-
-```nginx
-http {
-  server {
-    set $template_root /usr/local/openresty/nginx/html/templates;
-    location / {
-      root html;
-      content_by_lua '
-        local template = require "resty.template"
-        template.render("view.html", { message = "Hello, World!" })
-      ';      
-    }
-  }
-}
-```
-
-##### Using `template_location`
-
-This one tries to load content with `ngx.location.capture` from `/templates` location (in this case this is served with `ngx_static` module).
-
-```nginx
-http {
-  server {
-    set $template_location /templates;
-    location / {
-      root html;
-      content_by_lua '
-        local template = require "resty.template"
-        template.render("view.html", { message = "Hello, World!" })
-      ';      
-    }
-    location /templates {
-      internal;
-      alias html/templates/;
-    }    
-  }
-}
-```
-
-**See also [`template.load`](#templateload).**
 
 ## Lua API
 
@@ -1149,95 +1077,6 @@ Testing Markdown with "SmartyPants"...
 
 You may also want to add caching layer for your Markdowns, or a helper functions instead of placing Hoedown library directly  as a template helper function in `template`.   
 
-### Lua Server Pages (LSP) with OpenResty
-
-Lua Server Pages or LSPs is similar to traditional PHP or Microsoft Active Server Pages (ASP) where you can just place source code files in your document root (of your web server) and have them processed by compilers of the respective languages (PHP, VBScript, JScript, etc.). You can emulate quite closely this, sometimes called spaghetti-style of develoment, easily with `lua-resty-template`. Those that have been doing ASP.NET Web Forms development, know a concept of Code Behind files. There is something similar, but this time we call it Layout in Front here (you may include Lua modules with normal `require` calls if you wish in LSPs). To help you understand the concepts, let's have a small example:
-
-##### nginx.conf:
-
-```nginx
-http {
-  init_by_lua '
-    require "resty.core"
-    template = require "resty.template"
-    template.caching(false); -- you may remove this on production
-  ';
-  server {
-    location ~ \.lsp$ {
-      default_type text/html;
-      content_by_lua 'template.render(ngx.var.uri)';
-    }
-  }
-}
-```
-
-The above configuration creates a global `template` variable in Lua environment (you may not want that).
-We also created location to match all `.lsp` files (or locations), and then we just render the template.
-
-Let's imagine that the request is for `index.lsp`.
-
-##### index.lsp
-
-```html
-{%
-layout = "layouts/default.lsp"
-local title = "Hello, World!"
-%}
-<h1>{{title}}</h1>
-```
-
-Here you can see that this file includes a little bit of a view (`<h1>{{title}}</h1>`) in addition to some Lua code that we want to run. If you want to have a pure code file with Layout in Front, then just don't write any view code in this file. The `layout` variable is already defined in views as documented else where in this documentation. Now let's see the other files too.
-
-##### layouts/default.lsp
-
-```html
-<html>
-{(include/header.lsp)}
-<body>
-{*view*}
-</body>
-</html>
-```
-
-Here we have a layout to decorate the `index.lsp`, but we also have include here, so let's look at it.
-
-##### include/header.lsp
-
-```html
-<head>
-  <title>Testing Lua Server Pages</title>
-</head>
-```
-
-Static stuff here only.
-
-##### Output
-
-The final output will look like this:
-
-```html
-<html>
-<head>
-  <title>Testing Lua Server Pages</title>
-</head>
-<body>
-  <h1>Hello, World!</h1>
-</body>
-</html>
-```
-
-As you can see, `lua-resty-template` can be quite flexibile and easy to start with. Just place files under your document root and use the normal save-and-refresh style of development. The server will automatically pick the new files and reload the templates (if the caching is turned of) on save.
-
-If you want to pass variables to layouts or includes you can add stuff to context table (in the example below see `context.title`):
-
-```html
-{%
-layout = "layouts/default.lsp"
-local title = "Hello, World!"
-context.title = 'My Application - ' .. title
-%}
-<h1>{{title}}</h1>
-```
 
 ## FAQ
 
@@ -1395,22 +1234,6 @@ Compilation Time: 0.000182 (template cached)
   Execution Time: 0.071506 (different template, different context)
   Execution Time: 0.007749 (different template, different context cached)
       Total Time: 0.227972
-```
-
-##### resty (resty 0.01, nginx version: openresty/1.7.7.2)
-
-```
-Running 1000 iterations in each test
-    Parsing Time: 0.003726
-Compilation Time: 0.035392 (template)
-Compilation Time: 0.000112 (template cached)
-  Execution Time: 0.037252 (same template)
-  Execution Time: 0.003590 (same template cached)
-  Execution Time: 0.058258 (different template)
-  Execution Time: 0.009501 (different template cached)
-  Execution Time: 0.059082 (different template, different context)
-  Execution Time: 0.006612 (different template, different context cached)
-      Total Time: 0.213525
 ```
 
 I have not yet compared the results against the alternatives.
