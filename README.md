@@ -209,7 +209,7 @@ template.render("view.html", {
 
 #### Reserved Context Keys and Remarks
 
-It is adviced that you do not use these keys in your context tables:
+It is advised that you do not use these keys in your context tables:
 
 * `___`, holds the compiled template, if set you need to use `{{context.___}}`
 * `context`, holds the current context, if set you need to use `{{context.context}}`
@@ -510,7 +510,7 @@ end
 
 ## Template Precompilation
 
-`lua-resty-template` supports template precompilation. This can be useful when you want to skip template parsing (and Lua interpretation) in production or if you do not want your templates distributed as plain text files on production servers. Also by precompiling, you can ensure that your templates do not contain something, that cannot be compiled (they are syntactically valid Lua). Although templates are cached (even without precompilation), there are some perfomance (and memory) gains. You could integrate template precompilation in your build (or deployment) scripts (maybe as Gulp, Grunt or Ant tasks).
+`lua-resty-template` supports template precompilation. This can be useful when you want to skip template parsing (and Lua interpretation) in production or if you do not want your templates distributed as plain text files on production servers. Also by precompiling, you can ensure that your templates do not contain something, that cannot be compiled (they are syntactically valid Lua). Although templates are cached (even without precompilation), there are some performance (and memory) gains. You could integrate template precompilation in your build (or deployment) scripts (maybe as Gulp, Grunt or Ant tasks).
 
 ##### Precompiling template, and output it as a binary file
 
