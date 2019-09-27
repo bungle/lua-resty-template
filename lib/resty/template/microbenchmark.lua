@@ -6,7 +6,12 @@ if not ok then
 end
 
 local function run(iterations)
-    local gc, total, print, parse, compile, iterations, clock, format = collectgarbage, 0, ngx and ngx.say or print, template.parse, template.compile, iterations or 1000, os.clock, string.format
+
+    local gc, total, print, parse, compile, clock, format = collectgarbage, 0, ngx and ngx.say or print, template.parse,
+                                                            template.compile, os.clock, string.format
+
+    iterations = iterations or 1000
+
     local view = [[
     <ul>
     {% for _, v in ipairs(context) do %}

@@ -25,7 +25,7 @@ local jit = jit
 local var
 
 local _VERSION = _VERSION
-local _ENV = _ENV
+local _ENV = _ENV -- luacheck: globals _ENV
 local _G = _G
 
 local HTML_ENTITIES = {
@@ -48,6 +48,24 @@ local CODE_ENTITIES = {
     ["/"] = "&#47;"
 }
 
+local ESC    = byte("\27")
+local NUL    = byte("\0")
+local HT     = byte("\t")
+local VT     = byte("\v")
+local LF     = byte("\n")
+local SOL    = byte("/")
+local BSOL   = byte("\\")
+local SP     = byte(" ")
+local AST    = byte("*")
+local NUM    = byte("#")
+local LPAR   = byte("(")
+local LSQB   = byte("[")
+local LCUB   = byte("{")
+local MINUS  = byte("-")
+local PERCNT = byte("%")
+
+local EMPTY  = ""
+
 local VAR_PHASES
 
 local ok, newtab = pcall(require, "table.new")
@@ -56,7 +74,7 @@ if not ok then newtab = function() return {} end end
 local caching = true
 local template = newtab(0, 12)
 
-template._VERSION = "1.9"
+template._VERSION = "2.0"
 template.cache    = {}
 
 local function enabled(val)
@@ -65,13 +83,13 @@ local function enabled(val)
 end
 
 local function trim(s)
-    return gsub(gsub(s, "^%s+", ""), "%s+$", "")
+    return gsub(gsub(s, "^%s+", EMPTY), "%s+$", EMPTY)
 end
 
 local function rpos(view, s)
     while s > 0 do
-        local c = sub(view, s, s)
-        if c == " " or c == "\t" or c == "\0" or c == "\x0B" then
+        local c = byte(view, s, s)
+        if c == SP or c == HT or c == VT or c == NUL then
             s = s - 1
         else
             break
@@ -81,8 +99,8 @@ local function rpos(view, s)
 end
 
 local function escaped(view, s)
-    if s > 1 and sub(view, s - 1, s - 1) == "\\" then
-        if s > 2 and sub(view, s - 2, s - 2) == "\\" then
+    if s > 1 and byte(view, s - 1, s - 1) == BSOL then
+        if s > 2 and byte(view, s - 2, s - 2) == BSOL then
             return false, 1
         else
             return true, 1
@@ -106,14 +124,14 @@ end
 local function loadngx(path)
     local vars = VAR_PHASES[phase()]
     local file, location = path, vars and var.template_location
-    if sub(file, 1)  == "/" then file = sub(file, 2) end
-    if location and location ~= "" then
-        if sub(location, -1) == "/" then location = sub(location, 1, -2) end
-        local res = capture(concat{ location, '/', file})
+    if byte(file, 1)  == SOL then file = sub(file, 2) end
+    if location and location ~= EMPTY then
+        if byte(location, -1) == SOL then location = sub(location, 1, -2) end
+        local res = capture(concat{ location, "/", file})
         if res.status == 200 then return res.body end
     end
     local root = vars and (var.template_root or var.document_root) or prefix
-    if sub(root, -1) == "/" then root = sub(root, 1, -2) end
+    if byte(root, -1) == SOL then root = sub(root, 1, -2) end
     return readfile(concat{ root, "/", file }) or path
 end
 
@@ -169,7 +187,7 @@ function template.caching(enable)
 end
 
 function template.output(s)
-    if s == nil or s == null then return "" end
+    if s == nil or s == null then return EMPTY end
     if type(s) == "function" then return template.output(s()) end
     return tostring(s)
 end
@@ -188,11 +206,11 @@ function template.new(view, layout)
     if layout then
         if type(layout) == "table" then
             return setmetatable({ render = function(self, context)
-                local context = context or self
+                context = context or self
                 context.blocks = context.blocks or {}
                 context.view = compile(view)(context)
                 layout.blocks = context.blocks or {}
-                layout.view = context.view or ""
+                layout.view = context.view or EMPTY
                 return layout:render()
             end }, { __tostring = function(self)
                 local context = self
@@ -204,7 +222,7 @@ function template.new(view, layout)
             end })
         else
             return setmetatable({ render = function(self, context)
-                local context = context or self
+                context = context or self
                 context.blocks = context.blocks or {}
                 context.view = compile(view)(context)
                 return render(layout, context)
@@ -250,7 +268,7 @@ function template.parse(view, plain)
     assert(view, "view was not provided for template.parse(view, plain).")
     if not plain then
         view = template.load(view)
-        if byte(view, 1, 1) == 27 then return view end
+        if byte(view, 1, 1) == ESC then return view end
     end
     local j = 2
     local c = {[[
@@ -260,8 +278,8 @@ local ___,blocks,layout={},blocks or {}
 ]] }
     local i, s = 1, find(view, "{", 1, true)
     while s do
-        local t, p = sub(view, s + 1, s + 1), s + 2
-        if t == "{" then
+        local t, p = byte(view, s + 1, s + 1), s + 2
+        if t == LCUB then
             local e = find(view, "}}", p, true)
             if e then
                 local z, w = escaped(view, s)
@@ -281,7 +299,7 @@ local ___,blocks,layout={},blocks or {}
                     s, i = e + 1, e + 2
                 end
             end
-        elseif t == "*" then
+        elseif t == AST then
             local e = find(view, "*}", p, true)
             if e then
                 local z, w = escaped(view, s)
@@ -301,7 +319,7 @@ local ___,blocks,layout={},blocks or {}
                     s, i = e + 1, e + 2
                 end
             end
-        elseif t == "%" then
+        elseif t == PERCNT then
             local e = find(view, "%}", p, true)
             if e then
                 local z, w = escaped(view, s)
@@ -315,7 +333,7 @@ local ___,blocks,layout={},blocks or {}
                     i = s
                 else
                     local n = e + 2
-                    if sub(view, n, n) == "\n" then
+                    if byte(view, n, n) == LF then
                         n = n + 1
                     end
                     local r = rpos(view, s - 1)
@@ -331,7 +349,7 @@ local ___,blocks,layout={},blocks or {}
                     s, i = n - 1, n
                 end
             end
-        elseif t == "(" then
+        elseif t == LPAR then
             local e = find(view, ")}", p, true)
             if e then
                 local z, w = escaped(view, s)
@@ -362,7 +380,7 @@ local ___,blocks,layout={},blocks or {}
                     s, i = e + 1, e + 2
                 end
             end
-        elseif t == "[" then
+        elseif t == LSQB then
             local e = find(view, "]}", p, true)
             if e then
                 local z, w = escaped(view, s)
@@ -382,7 +400,7 @@ local ___,blocks,layout={},blocks or {}
                     s, i = e + 1, e + 2
                 end
             end
-        elseif t == "-" then
+        elseif t == MINUS then
             local e = find(view, "-}", p, true)
             if e then
                 local x, y = find(view, sub(view, s, e + 1), e + 2, true)
@@ -399,7 +417,7 @@ local ___,blocks,layout={},blocks or {}
                     else
                         y = y + 1
                         x = x - 1
-                        if sub(view, y, y) == "\n" then
+                        if byte(view, y, y) == LF then
                             y = y + 1
                         end
                         local b = trim(sub(view, p, e - 1))
@@ -415,7 +433,7 @@ local ___,blocks,layout={},blocks or {}
                             c[j+2] = "]=]\n"
                             j=j+3
                         else
-                            if sub(view, x, x) == "\n" then
+                            if byte(view, x, x) == LF then
                                 x = x - 1
                             end
                             local r = rpos(view, s - 1)
@@ -436,7 +454,7 @@ local ___,blocks,layout={},blocks or {}
                     end
                 end
             end
-        elseif t == "#" then
+        elseif t == NUM then
             local e = find(view, "#}", p, true)
             if e then
                 local z, w = escaped(view, s)
@@ -450,7 +468,7 @@ local ___,blocks,layout={},blocks or {}
                     i = s
                 else
                     e = e + 2
-                    if sub(view, e, e) == "\n" then
+                    if byte(view, e, e) == LF then
                         e = e + 1
                     end
                     s, i = e - 1, e
@@ -460,13 +478,13 @@ local ___,blocks,layout={},blocks or {}
         s = find(view, "{", s + 1, true)
     end
     s = sub(view, i)
-    if s and s ~= "" then
+    if s and s ~= EMPTY then
         c[j] = "___[#___+1]=[=[\n"
         c[j+1] = s
         c[j+2] = "]=]\n"
         j=j+3
     end
-    c[j] = "return layout and include(layout,setmetatable({view=table.concat(___),blocks=blocks},{__index=context})) or table.concat(___)"
+    c[j] = "return layout and include(layout,setmetatable({view=table.concat(___),blocks=blocks},{__index=context})) or table.concat(___)" -- luacheck: ignore
     return concat(c)
 end
 

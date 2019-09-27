@@ -6,7 +6,8 @@ local pairs = pairs
 local type = type
 
 local function tag(name, content, attr)
-    local r, a, content = {}, {}, content or attr
+    local r, a = {}, {}
+    content = content or attr
     r[#r + 1] = "<"
     r[#r + 1] = name
     if attr then
