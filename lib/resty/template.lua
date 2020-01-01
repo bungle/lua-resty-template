@@ -110,8 +110,8 @@ local function escaped(view, s)
 end
 
 local function readfile(path)
-    local file = open(path, "rb")
-    if not file then return nil end
+    local file, err = open(path, "rb")
+    if not file then return err end
     local content = file:read "*a"
     file:close()
     return content
