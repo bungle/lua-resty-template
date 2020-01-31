@@ -72,10 +72,20 @@ local ok, newtab = pcall(require, "table.new")
 if not ok then newtab = function() return {} end end
 
 local caching = true
-local template = newtab(0, 12)
+local template = newtab(0, 14)
 
 template._VERSION = "2.0"
 template.cache    = {}
+template.tag_types = {
+  AST = AST,
+  NUM = NUM,
+  LPAR = LPAR,
+  LSQB = LSQB,
+  LCUB = LCUB,
+  MINUS = MINUS,
+  PERCNT = PERCNT,
+}
+
 
 local function enabled(val)
     if val == nil then return true end
@@ -181,6 +191,10 @@ do
     end
 end
 
+function template.tag_hook(type, ...)
+  return ...
+end
+
 function template.caching(enable)
     if enable ~= nil then caching = enable == true end
     return caching
@@ -277,6 +291,8 @@ local function include(v, c) return template.compile(v)(c or context) end
 local ___,blocks,layout={},blocks or {}
 ]] }
     local i, s = 1, find(view, "{", 1, true)
+    local hook = template.tag_hook
+    local ctx
     while s do
         local t, p = byte(view, s + 1, s + 1), s + 2
         if t == LCUB then
@@ -292,11 +308,12 @@ local ___,blocks,layout={},blocks or {}
                 if z then
                     i = s
                 else
-                    c[j] = "___[#___+1]=template.escape("
-                    c[j+1] = trim(sub(view, p, e - 1))
-                    c[j+2] = ")\n"
-                    j=j+3
-                    s, i = e + 1, e + 2
+                  ctx = trim(sub(view, p, e - 1))
+                  c[j] = "___[#___+1]=template.escape("
+                  c[j+1] = hook(LCUB, ctx)
+                  c[j+2] = ")\n"
+                  j=j+3
+                  s, i = e + 1, e + 2
                 end
             end
         elseif t == AST then
@@ -312,8 +329,9 @@ local ___,blocks,layout={},blocks or {}
                 if z then
                     i = s
                 else
+                    ctx = trim(sub(view, p, e - 1))
                     c[j] = "___[#___+1]=template.output("
-                    c[j+1] = trim(sub(view, p, e - 1))
+                    c[j+1] = hook(AST, ctx)
                     c[j+2] = ")\n"
                     j=j+3
                     s, i = e + 1, e + 2
@@ -343,7 +361,8 @@ local ___,blocks,layout={},blocks or {}
                         c[j+2] = "]=]\n"
                         j=j+3
                     end
-                    c[j] = trim(sub(view, p, e - 1))
+                    ctx = trim(sub(view, p, e - 1))
+                    c[j] = hook(PERCNT, ctx)
                     c[j+1] = "\n"
                     j=j+2
                     s, i = n - 1, n
@@ -365,15 +384,17 @@ local ___,blocks,layout={},blocks or {}
                     local f = sub(view, p, e - 1)
                     local x = find(f, ",", 2, true)
                     if x then
+                        f, x = hook(LPAR, trim(sub(f, 1, x - 1)), trim(sub(f, x + 1)))
                         c[j] = "___[#___+1]=include([=["
-                        c[j+1] = trim(sub(f, 1, x - 1))
+                        c[j+1] = f
                         c[j+2] = "]=],"
-                        c[j+3] = trim(sub(f, x + 1))
+                        c[j+3] = x
                         c[j+4] = ")\n"
                         j=j+5
                     else
+                        ctx = trim(f)
                         c[j] = "___[#___+1]=include([=["
-                        c[j+1] = trim(f)
+                        c[j+1] = hook(LPAR, ctx)
                         c[j+2] = "]=])\n"
                         j=j+3
                     end
@@ -393,8 +414,9 @@ local ___,blocks,layout={},blocks or {}
                 if z then
                     i = s
                 else
+                    ctx = trim(sub(view, p, e - 1))
                     c[j] = "___[#___+1]=include("
-                    c[j+1] = trim(sub(view, p, e - 1))
+                    c[j+1] = hook(LSQB, ctx)
                     c[j+2] = ")\n"
                     j=j+3
                     s, i = e + 1, e + 2
