@@ -77,7 +77,6 @@ local template = newtab(0, 13)
 template._VERSION = "2.0"
 template.cache    = {}
 
-
 local function enabled(val)
     if val == nil then return true end
     return val == true or (val == "1" or val == "true" or val == "on")
