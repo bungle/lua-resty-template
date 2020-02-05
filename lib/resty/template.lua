@@ -72,19 +72,10 @@ local ok, newtab = pcall(require, "table.new")
 if not ok then newtab = function() return {} end end
 
 local caching = true
-local template = newtab(0, 14)
+local template = newtab(0, 13)
 
 template._VERSION = "2.0"
 template.cache    = {}
-template.tag_types = {
-  AST = AST,
-  NUM = NUM,
-  LPAR = LPAR,
-  LSQB = LSQB,
-  LCUB = LCUB,
-  MINUS = MINUS,
-  PERCNT = PERCNT,
-}
 
 
 local function enabled(val)
@@ -191,7 +182,7 @@ do
     end
 end
 
-function template.tag_hook(type, ...)
+function template.eval(type, ...)
   return ...
 end
 
@@ -291,7 +282,7 @@ local function include(v, c) return template.compile(v)(c or context) end
 local ___,blocks,layout={},blocks or {}
 ]] }
     local i, s = 1, find(view, "{", 1, true)
-    local hook = template.tag_hook
+    local eval = template.eval
     local ctx
     while s do
         local t, p = byte(view, s + 1, s + 1), s + 2
@@ -310,7 +301,7 @@ local ___,blocks,layout={},blocks or {}
                 else
                   ctx = trim(sub(view, p, e - 1))
                   c[j] = "___[#___+1]=template.escape("
-                  c[j+1] = hook(LCUB, ctx)
+                  c[j+1] = eval("{", ctx)
                   c[j+2] = ")\n"
                   j=j+3
                   s, i = e + 1, e + 2
@@ -331,7 +322,7 @@ local ___,blocks,layout={},blocks or {}
                 else
                     ctx = trim(sub(view, p, e - 1))
                     c[j] = "___[#___+1]=template.output("
-                    c[j+1] = hook(AST, ctx)
+                    c[j+1] = eval("*", ctx)
                     c[j+2] = ")\n"
                     j=j+3
                     s, i = e + 1, e + 2
@@ -362,7 +353,7 @@ local ___,blocks,layout={},blocks or {}
                         j=j+3
                     end
                     ctx = trim(sub(view, p, e - 1))
-                    c[j] = hook(PERCNT, ctx)
+                    c[j] = eval("%", ctx)
                     c[j+1] = "\n"
                     j=j+2
                     s, i = n - 1, n
@@ -384,7 +375,7 @@ local ___,blocks,layout={},blocks or {}
                     local f = sub(view, p, e - 1)
                     local x = find(f, ",", 2, true)
                     if x then
-                        f, x = hook(LPAR, trim(sub(f, 1, x - 1)), trim(sub(f, x + 1)))
+                        f, x = eval("(", trim(sub(f, 1, x - 1)), trim(sub(f, x + 1)))
                         c[j] = "___[#___+1]=include([=["
                         c[j+1] = f
                         c[j+2] = "]=],"
@@ -394,7 +385,7 @@ local ___,blocks,layout={},blocks or {}
                     else
                         ctx = trim(f)
                         c[j] = "___[#___+1]=include([=["
-                        c[j+1] = hook(LPAR, ctx)
+                        c[j+1] = eval("(", ctx)
                         c[j+2] = "]=])\n"
                         j=j+3
                     end
@@ -416,7 +407,7 @@ local ___,blocks,layout={},blocks or {}
                 else
                     ctx = trim(sub(view, p, e - 1))
                     c[j] = "___[#___+1]=include("
-                    c[j+1] = hook(LSQB, ctx)
+                    c[j+1] = eval("[", ctx)
                     c[j+2] = ")\n"
                     j=j+3
                     s, i = e + 1, e + 2

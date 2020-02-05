@@ -66,7 +66,7 @@ template.render([[
   * [template.precompile](#string-templateprecompileview-path-strip)
   * [template.load](#templateload)
   * [template.print](#templateprint)
-  * [template.tag_hook](#templatetag-hook)
+  * [template.eval](#templateeval)
 * [Template Precompilation](#template-precompilation)
 * [Template Helpers](#template-helpers)
 * [Usage Examples](#usage-examples)
@@ -509,9 +509,9 @@ template.print = function(s)
 end
 ```
 
-#### template.tag_hook(type, arg, ctx)
+#### template.eval(type, arg, ctx)
 
-This field is used to intercept expressions pre-execution in order to extend or change behavior.  The first argument `type` contains the byte representation of the current expressions delimiter.  Type can be inferred by running `string.char(type)`, or by comparing directly to the `template.tag_types` table. `arg` is a string representation of the primary argument of the expression, for `{{ }}`, `{* *}`, and `{()}` delimiters this will be the only argument. `ctx` represents the string representation of additional context for the expression. `{()}` and `{[]}` expressions can take a ctx argument in particular. `template.tag_hook` should return `arg` and optionally `ctx` as strings.
+This field is used to intercept expressions pre-execution in order to extend or change behavior.  The first argument `type` contains the string representation of the current expressions delimiter.  `arg` is a string representation of the primary argument of the expression, for `{{ }}` and `{* *}` delimiters this will be the only argument. `ctx` represents the string representation of additional context for the expression. `{()}` and `{[]}` expressions can take a ctx argument in particular. `template.eval` should return `arg` and optionally `ctx` as strings.
 
 ```lua
 -- setup "safe" function, allowing for expression to evaluate safely
@@ -525,10 +525,9 @@ template.safe = function(cb)
   return res
 end
 
-template.tag_hook = function(type, ...)
-  local tags = template.tag_types
+template.eval = function(type, ...)
   -- only run when '{{ }}' or '{* *}' delimiter types
-  if type == tags.LCUB or type == tags.AST then
+  if type == "{" or type == "*" then
     local exp = ...
     -- call helper function established above
     return "template.safe(function() return " .. exp .. " end)"
