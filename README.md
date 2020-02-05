@@ -509,7 +509,7 @@ template.print = function(s)
 end
 ```
 
-#### template.eval(exp, ctx)
+#### template.eval(exp)
 
 This field is used to intercept expressions pre-execution in order to extend or change behavior. This function is only called for expressions within `{{ }}` and `{* *}` delimiters.  `exp` is the string representation of the expression. `template.eval` should return a valid lua expression represented as a string.
 
