@@ -509,9 +509,9 @@ template.print = function(s)
 end
 ```
 
-#### template.eval(type, arg, ctx)
+#### template.eval(exp, ctx)
 
-This field is used to intercept expressions pre-execution in order to extend or change behavior.  The first argument `type` contains the string representation of the current expressions delimiter.  `arg` is a string representation of the primary argument of the expression, for `{{ }}` and `{* *}` delimiters this will be the only argument. `ctx` represents the string representation of additional context for the expression. `{()}` and `{[]}` expressions can take a ctx argument in particular. `template.eval` should return `arg` and optionally `ctx` as strings.
+This field is used to intercept expressions pre-execution in order to extend or change behavior. `exp` is a string representation of the primary argument of the expression, for `{{ }}` and `{* *}` delimiters this will be the only argument. `ctx` represents the string representation of additional context for the expression. `{[]}` expressions can take a ctx argument in particular. `template.eval` should return `arg` and optionally `ctx` as strings.
 
 ```lua
 -- setup "safe" function, allowing for expression to evaluate safely
@@ -525,15 +525,13 @@ template.safe = function(cb)
   return res
 end
 
-template.eval = function(type, ...)
-  -- only run when '{{ }}' or '{* *}' delimiter types
-  if type == "{" or type == "*" then
-    local exp = ...
+template.eval = function(exp, ctx)
+  if not ctx then
     -- call helper function established above
     return "template.safe(function() return " .. exp .. " end)"
   end
 
-  return ...
+  return exp, ctx
 end
 ```
 

@@ -181,7 +181,7 @@ do
     end
 end
 
-function template.eval(type, ...)
+function template.eval(...)
   return ...
 end
 
@@ -282,7 +282,6 @@ local ___,blocks,layout={},blocks or {}
 ]] }
     local i, s = 1, find(view, "{", 1, true)
     local eval = template.eval
-    local ctx
     while s do
         local t, p = byte(view, s + 1, s + 1), s + 2
         if t == LCUB then
@@ -298,9 +297,9 @@ local ___,blocks,layout={},blocks or {}
                 if z then
                     i = s
                 else
-                  ctx = trim(sub(view, p, e - 1))
+                  local exp = trim(sub(view, p, e - 1))
                   c[j] = "___[#___+1]=template.escape("
-                  c[j+1] = eval("{", ctx)
+                  c[j+1] = eval(exp)
                   c[j+2] = ")\n"
                   j=j+3
                   s, i = e + 1, e + 2
@@ -319,9 +318,9 @@ local ___,blocks,layout={},blocks or {}
                 if z then
                     i = s
                 else
-                    ctx = trim(sub(view, p, e - 1))
+                    local exp = trim(sub(view, p, e - 1))
                     c[j] = "___[#___+1]=template.output("
-                    c[j+1] = eval("*", ctx)
+                    c[j+1] = eval(exp)
                     c[j+2] = ")\n"
                     j=j+3
                     s, i = e + 1, e + 2
@@ -351,8 +350,7 @@ local ___,blocks,layout={},blocks or {}
                         c[j+2] = "]=]\n"
                         j=j+3
                     end
-                    ctx = trim(sub(view, p, e - 1))
-                    c[j] = eval("%", ctx)
+                    c[j] = trim(sub(view, p, e - 1))
                     c[j+1] = "\n"
                     j=j+2
                     s, i = n - 1, n
@@ -374,17 +372,16 @@ local ___,blocks,layout={},blocks or {}
                     local f = sub(view, p, e - 1)
                     local x = find(f, ",", 2, true)
                     if x then
-                        f, x = eval("(", trim(sub(f, 1, x - 1)), trim(sub(f, x + 1)))
                         c[j] = "___[#___+1]=include([=["
-                        c[j+1] = f
+                        c[j+1] = trim(sub(f, 1, x - 1))
                         c[j+2] = "]=],"
-                        c[j+3] = x
+                        c[j+3] = trim(sub(f, x + 1))
                         c[j+4] = ")\n"
                         j=j+5
                     else
                         ctx = trim(f)
                         c[j] = "___[#___+1]=include([=["
-                        c[j+1] = eval("(", ctx)
+                        c[j+1] = trim(f)
                         c[j+2] = "]=])\n"
                         j=j+3
                     end
@@ -404,9 +401,9 @@ local ___,blocks,layout={},blocks or {}
                 if z then
                     i = s
                 else
-                    ctx = trim(sub(view, p, e - 1))
+                    local exp = trim(sub(view, p, e - 1))
                     c[j] = "___[#___+1]=include("
-                    c[j+1] = eval("[", ctx)
+                    c[j+1] = eval("[", exp)
                     c[j+2] = ")\n"
                     j=j+3
                     s, i = e + 1, e + 2
