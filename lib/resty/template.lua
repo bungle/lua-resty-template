@@ -181,9 +181,7 @@ do
     end
 end
 
-function template.eval(...)
-  return ...
-end
+function template.eval(exp) return exp end
 
 function template.caching(enable)
     if enable ~= nil then caching = enable == true end
@@ -379,7 +377,6 @@ local ___,blocks,layout={},blocks or {}
                         c[j+4] = ")\n"
                         j=j+5
                     else
-                        ctx = trim(f)
                         c[j] = "___[#___+1]=include([=["
                         c[j+1] = trim(f)
                         c[j+2] = "]=])\n"
@@ -401,9 +398,8 @@ local ___,blocks,layout={},blocks or {}
                 if z then
                     i = s
                 else
-                    local exp = trim(sub(view, p, e - 1))
                     c[j] = "___[#___+1]=include("
-                    c[j+1] = eval("[", exp)
+                    c[j+1] = trim(sub(view, p, e - 1))
                     c[j+2] = ")\n"
                     j=j+3
                     s, i = e + 1, e + 2

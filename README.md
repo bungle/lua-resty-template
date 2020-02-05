@@ -511,7 +511,7 @@ end
 
 #### template.eval(exp, ctx)
 
-This field is used to intercept expressions pre-execution in order to extend or change behavior. `exp` is a string representation of the primary argument of the expression, for `{{ }}` and `{* *}` delimiters this will be the only argument. `ctx` represents the string representation of additional context for the expression. `{[]}` expressions can take a ctx argument in particular. `template.eval` should return `arg` and optionally `ctx` as strings.
+This field is used to intercept expressions pre-execution in order to extend or change behavior. This function is only called for expressions within `{{ }}` and `{* *}` delimiters.  `exp` is the string representation of the expression. `template.eval` should return a valid lua expression represented as a string.
 
 ```lua
 -- setup "safe" function, allowing for expression to evaluate safely
@@ -525,13 +525,8 @@ template.safe = function(cb)
   return res
 end
 
-template.eval = function(exp, ctx)
-  if not ctx then
-    -- call helper function established above
-    return "template.safe(function() return " .. exp .. " end)"
-  end
-
-  return exp, ctx
+template.eval = function(exp)
+  return "template.safe(function() return " .. exp .. " end)"
 end
 ```
 
