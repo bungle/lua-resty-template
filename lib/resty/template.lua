@@ -1,13 +1,10 @@
 local setmetatable = setmetatable
 local loadstring = loadstring
-local loadchunk
 local tostring = tostring
 local setfenv = setfenv
 local require = require
-local capture
 local concat = table.concat
 local assert = assert
-local prefix
 local write = io.write
 local pcall = pcall
 local phase
@@ -48,6 +45,8 @@ local CODE_ENTITIES = {
     ["/"] = "&#47;"
 }
 
+local VAR_PHASES
+
 local ESC    = byte("\27")
 local NUL    = byte("\0")
 local HT     = byte("\t")
@@ -66,16 +65,23 @@ local PERCNT = byte("%")
 
 local EMPTY  = ""
 
-local VAR_PHASES
+local VIEW_ENV
+if _VERSION == "Lua 5.1" then
+    VIEW_ENV = { __index = function(t, k)
+        return t.context[k] or t.template[k] or _G[k]
+    end }
+else
+    VIEW_ENV = { __index = function(t, k)
+        return t.context[k] or t.template[k] or _ENV[k]
+    end }
+end
 
-local ok, newtab = pcall(require, "table.new")
-if not ok then newtab = function() return {} end end
-
-local caching = true
-local template = newtab(0, 12)
-
-template._VERSION = "2.0"
-template.cache    = {}
+local newtab
+do
+    local ok
+    ok, newtab = pcall(require, "table.new")
+    if not ok then newtab = function() return {} end end
+end
 
 local function enabled(val)
     if val == nil then return true end
@@ -109,395 +115,574 @@ local function escaped(view, s)
     return false, 0
 end
 
-local function readfile(path)
-    local file = open(path, "rb")
-    if not file then return nil end
-    local content = file:read "*a"
+local function read_file(path)
+    local file, err = open(path, "rb")
+    if not file then return nil, err end
+    local content
+    content, err = file:read "*a"
     file:close()
+    return content, err
+end
+
+local print_view
+local load_view
+if ngx then
+    print_view = ngx.print or write
+
+    var = ngx.var
+    null = ngx.null
+    phase = ngx.get_phase
+
+    VAR_PHASES = {
+        set           = true,
+        rewrite       = true,
+        access        = true,
+        content       = true,
+        header_filter = true,
+        body_filter   = true,
+        log           = true,
+        preread       = true
+    }
+
+    local capture = ngx.location.capture
+    local prefix = ngx.config.prefix()
+    load_view = function(template)
+        return function(view, plain)
+            if plain == true then return view end
+            local vars = VAR_PHASES[phase()]
+            local path = view
+            local root = template.location
+            if (not root or root == EMPTY) and vars then
+                root = var.template_location
+            end
+            if root and root ~= EMPTY then
+                if byte(root, -1) == SOL then root = sub(root, 1, -2) end
+                if byte(path,  1) == SOL then path = sub(path, 2) end
+                path = root .. "/" .. path
+                local res = capture(path)
+                if res.status == 200 then return res.body end
+            end
+            path = view
+            root = template.root
+            if (not root or root == EMPTY) and vars then
+                root = var.template_root
+                if not root or root == EMPTY then root = var.document_root or prefix end
+            end
+            if root and root ~= EMPTY then
+                if byte(root, -1) == SOL then root = sub(root, 1, -2) end
+                if byte(path,  1) == SOL then path = sub(path, 2) end
+                path = root .. "/" .. path
+            end
+            return plain == false and assert(read_file(path)) or read_file(path) or view
+        end
+    end
+else
+    print_view = write
+    load_view = function(template)
+        return function(view, plain)
+            if plain == true then return view end
+            local path, root = view, template.root
+            if root and root ~= EMPTY then
+                if byte(root, -1) == SOL then root = sub(root, 1, -2) end
+                if byte(view,  1) == SOL then path = sub(view, 2) end
+                path = root .. "/" .. path
+            end
+            return plain == false and assert(read_file(path)) or read_file(path) or view
+        end
+    end
+end
+
+local function load_file(func)
+    return function(view) return func(view, false) end
+end
+
+local function load_string(func)
+    return function(view) return func(view, true) end
+end
+
+local loader
+if jit or _VERSION ~= "Lua 5.1" then
+    loader = function(template)
+        return function(view)
+            return assert(load(view, nil, nil, setmetatable({ template = template }, VIEW_ENV)))
+        end
+    end
+else
+    loader = function(template)
+        return function(view)
+            local func = assert(loadstring(view))
+            setfenv(func, setmetatable({ template = template }, VIEW_ENV))
+            return func
+        end
+    end
+end
+
+local function visit(visitors, content, tag, name)
+    if not visitors then
+        return content
+    end
+
+    for i = 1, visitors.n do
+        content = visitors[i](content, tag, name)
+    end
+
     return content
 end
 
-local function loadlua(path)
-    return readfile(path) or path
-end
+local function new(template, safe)
+    template = template or newtab(0, 26)
 
-local function loadngx(path)
-    local vars = VAR_PHASES[phase()]
-    local file, location = path, vars and var.template_location
-    if byte(file, 1)  == SOL then file = sub(file, 2) end
-    if location and location ~= EMPTY then
-        if byte(location, -1) == SOL then location = sub(location, 1, -2) end
-        local res = capture(concat{ location, "/", file})
-        if res.status == 200 then return res.body end
-    end
-    local root = vars and (var.template_root or var.document_root) or prefix
-    if byte(root, -1) == SOL then root = sub(root, 1, -2) end
-    return readfile(concat{ root, "/", file }) or path
-end
+    template._VERSION    = "2.0"
+    template.cache       = {}
+    template.load        = load_view(template)
+    template.load_file   = load_file(template.load)
+    template.load_string = load_string(template.load)
+    template.print       = print_view
 
-do
-    if ngx then
-        VAR_PHASES = {
-            set           = true,
-            rewrite       = true,
-            access        = true,
-            content       = true,
-            header_filter = true,
-            body_filter   = true,
-            log           = true
-        }
-        template.print = ngx.print or write
-        template.load  = loadngx
-        prefix, var, capture, null, phase = ngx.config.prefix(), ngx.var, ngx.location.capture, ngx.null, ngx.get_phase
-        if VAR_PHASES[phase()] then
-            caching = enabled(var.template_cache)
-        end
+    local load_chunk = loader(template)
+
+    local caching
+    if VAR_PHASES and VAR_PHASES[phase()] then
+        caching = enabled(var.template_cache)
     else
-        template.print = write
-        template.load  = loadlua
+        caching = true
     end
-    if _VERSION == "Lua 5.1" then
-        local context = { __index = function(t, k)
-            return t.context[k] or t.template[k] or _G[k]
-        end }
-        if jit then
-            loadchunk = function(view)
-                return assert(load(view, nil, nil, setmetatable({ template = template }, context)))
+
+    local visitors
+    function template.visit(func)
+        if not visitors then
+            visitors = { func, n = 1 }
+            return
+        end
+        visitors.n = visitors.n + 1
+        visitors[visitors.n] = func
+    end
+
+    function template.caching(enable)
+        if enable ~= nil then caching = enable == true end
+        return caching
+    end
+
+    function template.output(s)
+        if s == nil or s == null then return EMPTY end
+        if type(s) == "function" then return template.output(s()) end
+        return tostring(s)
+    end
+
+    function template.escape(s, c)
+        if type(s) == "string" then
+            if c then return gsub(s, "[}{\">/<'&]", CODE_ENTITIES) end
+            return gsub(s, "[\">/<'&]", HTML_ENTITIES)
+        end
+        return template.output(s)
+    end
+
+    function template.new(view, layout)
+        local vt = type(view)
+
+        if vt == "boolean" then return new(nil,  view) end
+        if vt == "table"   then return new(view, safe) end
+        if vt == "nil"     then return new(nil,  safe) end
+
+        local render
+        local process
+        if layout then
+            if type(layout) == "table" then
+                render = function(self, context)
+                    context = context or self
+                    context.blocks = context.blocks or {}
+                    context.view = template.process(view, context)
+                    layout.blocks = context.blocks or {}
+                    layout.view = context.view or EMPTY
+                    layout:render()
+                end
+                process = function(self, context)
+                    context = context or self
+                    context.blocks = context.blocks or {}
+                    context.view = template.process(view, context)
+                    layout.blocks = context.blocks or {}
+                    layout.view = context.view
+                    return tostring(layout)
+                end
+            else
+                render = function(self, context)
+                    context = context or self
+                    context.blocks = context.blocks or {}
+                    context.view = template.process(view, context)
+                    template.render(layout, context)
+                end
+                process = function(self, context)
+                    context = context or self
+                    context.blocks = context.blocks or {}
+                    context.view = template.process(view, context)
+                    return template.process(layout, context)
+                end
             end
         else
-            loadchunk = function(view)
-                local func = assert(loadstring(view))
-                setfenv(func, setmetatable({ template = template }, context))
-                return func
+            render = function(self, context)
+                return template.render(view, context or self)
+            end
+            process = function(self, context)
+                return template.process(view, context or self)
             end
         end
-    else
-        local context = { __index = function(t, k)
-            return t.context[k] or t.template[k] or _ENV[k]
-        end }
-        loadchunk = function(view)
-            return assert(load(view, nil, nil, setmetatable({ template = template }, context)))
-        end
-    end
-end
 
-function template.caching(enable)
-    if enable ~= nil then caching = enable == true end
-    return caching
-end
-
-function template.output(s)
-    if s == nil or s == null then return EMPTY end
-    if type(s) == "function" then return template.output(s()) end
-    return tostring(s)
-end
-
-function template.escape(s, c)
-    if type(s) == "string" then
-        if c then return gsub(s, "[}{\">/<'&]", CODE_ENTITIES) end
-        return gsub(s, "[\">/<'&]", HTML_ENTITIES)
-    end
-    return template.output(s)
-end
-
-function template.new(view, layout)
-    assert(view, "view was not provided for template.new(view, layout).")
-    local render, compile = template.render, template.compile
-    if layout then
-        if type(layout) == "table" then
-            return setmetatable({ render = function(self, context)
-                context = context or self
-                context.blocks = context.blocks or {}
-                context.view = compile(view)(context)
-                layout.blocks = context.blocks or {}
-                layout.view = context.view or EMPTY
-                return layout:render()
-            end }, { __tostring = function(self)
-                local context = self
-                context.blocks = context.blocks or {}
-                context.view = compile(view)(context)
-                layout.blocks = context.blocks or {}
-                layout.view = context.view
-                return tostring(layout)
-            end })
-        else
-            return setmetatable({ render = function(self, context)
-                context = context or self
-                context.blocks = context.blocks or {}
-                context.view = compile(view)(context)
-                return render(layout, context)
-            end }, { __tostring = function(self)
-                local context = self
-                context.blocks = context.blocks or {}
-                context.view = compile(view)(context)
-                return compile(layout)(context)
+        if safe then
+            return setmetatable({
+                render = function(...)
+                    local ok, err = pcall(render, ...)
+                    if not ok then
+                        return nil, err
+                    end
+                end,
+                process = function(...)
+                    local ok, output = pcall(process, ...)
+                    if not ok then
+                        return nil, output
+                    end
+                    return output
+                end,
+             }, {
+                __tostring = function(...)
+                    local ok, output = pcall(process, ...)
+                    if not ok then
+                        return ""
+                    end
+                    return output
             end })
         end
-    end
-    return setmetatable({ render = function(self, context)
-        return render(view, context or self)
-    end }, { __tostring = function(self)
-        return compile(view)(self)
-    end })
-end
 
-function template.precompile(view, path, strip)
-    local chunk = dump(template.compile(view), strip ~= false)
-    if path then
-        local file = open(path, "wb")
-        file:write(chunk)
-        file:close()
+        return setmetatable({
+            render = render,
+            process = process
+        }, {
+            __tostring = process
+        })
     end
-    return chunk
-end
 
-function template.compile(view, key, plain)
-    assert(view, "view was not provided for template.compile(view, key, plain).")
-    if key == "no-cache" then
-        return loadchunk(template.parse(view, plain)), false
+    function template.precompile(view, path, strip, plain)
+        local chunk = dump(template.compile(view, nil, plain), strip ~= false)
+        if path then
+            local file = open(path, "wb")
+            file:write(chunk)
+            file:close()
+        end
+        return chunk
     end
-    key = key or view
-    local cache = template.cache
-    if cache[key] then return cache[key], true end
-    local func = loadchunk(template.parse(view, plain))
-    if caching then cache[key] = func end
-    return func, false
-end
 
-function template.parse(view, plain)
-    assert(view, "view was not provided for template.parse(view, plain).")
-    if not plain then
-        view = template.load(view)
-        if byte(view, 1, 1) == ESC then return view end
+    function template.precompile_string(view, path, strip)
+        return template.precompile(view, path, strip, true)
     end
-    local j = 2
-    local c = {[[
+
+    function template.precompile_file(view, path, strip)
+        return template.precompile(view, path, strip, false)
+    end
+
+    function template.compile(view, cache_key, plain)
+        assert(view, "view was not provided for template.compile(view, cache_key, plain)")
+        if cache_key == "no-cache" then
+            return load_chunk(template.parse(view, plain)), false
+        end
+        cache_key = cache_key or view
+        local cache = template.cache
+        if cache[cache_key] then return cache[cache_key], true end
+        local func = load_chunk(template.parse(view, plain))
+        if caching then cache[cache_key] = func end
+        return func, false
+    end
+
+    function template.compile_file(view, cache_key)
+        return template.compile(view, cache_key, false)
+    end
+
+    function template.compile_string(view, cache_key)
+        return template.compile(view, cache_key, true)
+    end
+
+    function template.parse(view, plain)
+        assert(view, "view was not provided for template.parse(view, plain)")
+        if plain ~= true then
+            view = template.load(view, plain)
+            if byte(view, 1, 1) == ESC then return view end
+        end
+        local j = 2
+        local c = {[[
 context=... or {}
-local function include(v, c) return template.compile(v)(c or context) end
 local ___,blocks,layout={},blocks or {}
-local function echo(...) 
-    local args = {...}
-    for i=1,select("#", ...) do 
-        args[i] = tostring(args[i])
-    end
-    ___[#___+1] = table.concat(args) 
-end
+local function include(v, c) return template.process(v, c or context) end
+local function echo(...) for i=1,select("#", ...) do ___[#___+1] = tostring(select(i, ...)) end end
 ]] }
-    local i, s = 1, find(view, "{", 1, true)
-    while s do
-        local t, p = byte(view, s + 1, s + 1), s + 2
-        if t == LCUB then
-            local e = find(view, "}}", p, true)
-            if e then
-                local z, w = escaped(view, s)
-                if i < s - w then
-                    c[j] = "___[#___+1]=[=[\n"
-                    c[j+1] = sub(view, i, s - 1 - w)
-                    c[j+2] = "]=]\n"
-                    j=j+3
-                end
-                if z then
-                    i = s
-                else
-                    c[j] = "___[#___+1]=template.escape("
-                    c[j+1] = trim(sub(view, p, e - 1))
-                    c[j+2] = ")\n"
-                    j=j+3
-                    s, i = e + 1, e + 2
-                end
-            end
-        elseif t == AST then
-            local e = find(view, "*}", p, true)
-            if e then
-                local z, w = escaped(view, s)
-                if i < s - w then
-                    c[j] = "___[#___+1]=[=[\n"
-                    c[j+1] = sub(view, i, s - 1 - w)
-                    c[j+2] = "]=]\n"
-                    j=j+3
-                end
-                if z then
-                    i = s
-                else
-                    c[j] = "___[#___+1]=template.output("
-                    c[j+1] = trim(sub(view, p, e - 1))
-                    c[j+2] = ")\n"
-                    j=j+3
-                    s, i = e + 1, e + 2
-                end
-            end
-        elseif t == PERCNT then
-            local e = find(view, "%}", p, true)
-            if e then
-                local z, w = escaped(view, s)
-                if z then
+        local i, s = 1, find(view, "{", 1, true)
+        while s do
+            local t, p = byte(view, s + 1, s + 1), s + 2
+            if t == LCUB then
+                local e = find(view, "}}", p, true)
+                if e then
+                    local z, w = escaped(view, s)
                     if i < s - w then
                         c[j] = "___[#___+1]=[=[\n"
-                        c[j+1] = sub(view, i, s - 1 - w)
+                        c[j+1] = visit(visitors, sub(view, i, s - 1 - w))
                         c[j+2] = "]=]\n"
                         j=j+3
                     end
-                    i = s
-                else
-                    local n = e + 2
-                    if byte(view, n, n) == LF then
-                        n = n + 1
-                    end
-                    local r = rpos(view, s - 1)
-                    if i <= r then
-                        c[j] = "___[#___+1]=[=[\n"
-                        c[j+1] = sub(view, i, r)
-                        c[j+2] = "]=]\n"
-                        j=j+3
-                    end
-                    c[j] = trim(sub(view, p, e - 1))
-                    c[j+1] = "\n"
-                    j=j+2
-                    s, i = n - 1, n
-                end
-            end
-        elseif t == LPAR then
-            local e = find(view, ")}", p, true)
-            if e then
-                local z, w = escaped(view, s)
-                if i < s - w then
-                    c[j] = "___[#___+1]=[=[\n"
-                    c[j+1] = sub(view, i, s - 1 - w)
-                    c[j+2] = "]=]\n"
-                    j=j+3
-                end
-                if z then
-                    i = s
-                else
-                    local f = sub(view, p, e - 1)
-                    local x = find(f, ",", 2, true)
-                    if x then
-                        c[j] = "___[#___+1]=include([=["
-                        c[j+1] = trim(sub(f, 1, x - 1))
-                        c[j+2] = "]=],"
-                        c[j+3] = trim(sub(f, x + 1))
-                        c[j+4] = ")\n"
-                        j=j+5
+                    if z then
+                        i = s
                     else
-                        c[j] = "___[#___+1]=include([=["
-                        c[j+1] = trim(f)
-                        c[j+2] = "]=])\n"
+                        c[j] = "___[#___+1]=template.escape("
+                        c[j+1] = visit(visitors, trim(sub(view, p, e - 1)), "{")
+                        c[j+2] = ")\n"
+                        j=j+3
+                        s, i = e + 1, e + 2
+                    end
+                end
+            elseif t == AST then
+                local e = find(view, "*}", p, true)
+                if e then
+                    local z, w = escaped(view, s)
+                    if i < s - w then
+                        c[j] = "___[#___+1]=[=[\n"
+                        c[j+1] = visit(visitors, sub(view, i, s - 1 - w))
+                        c[j+2] = "]=]\n"
                         j=j+3
                     end
-                    s, i = e + 1, e + 2
+                    if z then
+                        i = s
+                    else
+                        c[j] = "___[#___+1]=template.output("
+                        c[j+1] = visit(visitors, trim(sub(view, p, e - 1)), "*")
+                        c[j+2] = ")\n"
+                        j=j+3
+                        s, i = e + 1, e + 2
+                    end
                 end
-            end
-        elseif t == LSQB then
-            local e = find(view, "]}", p, true)
-            if e then
-                local z, w = escaped(view, s)
-                if i < s - w then
-                    c[j] = "___[#___+1]=[=[\n"
-                    c[j+1] = sub(view, i, s - 1 - w)
-                    c[j+2] = "]=]\n"
-                    j=j+3
-                end
-                if z then
-                    i = s
-                else
-                    c[j] = "___[#___+1]=include("
-                    c[j+1] = trim(sub(view, p, e - 1))
-                    c[j+2] = ")\n"
-                    j=j+3
-                    s, i = e + 1, e + 2
-                end
-            end
-        elseif t == MINUS then
-            local e = find(view, "-}", p, true)
-            if e then
-                local x, y = find(view, sub(view, s, e + 1), e + 2, true)
-                if x then
+            elseif t == PERCNT then
+                local e = find(view, "%}", p, true)
+                if e then
                     local z, w = escaped(view, s)
                     if z then
                         if i < s - w then
                             c[j] = "___[#___+1]=[=[\n"
-                            c[j+1] = sub(view, i, s - 1 - w)
+                            c[j+1] = visit(visitors, sub(view, i, s - 1 - w))
                             c[j+2] = "]=]\n"
                             j=j+3
                         end
                         i = s
                     else
-                        y = y + 1
-                        x = x - 1
-                        if byte(view, y, y) == LF then
-                            y = y + 1
+                        local n = e + 2
+                        if byte(view, n, n) == LF then
+                            n = n + 1
                         end
-                        local b = trim(sub(view, p, e - 1))
-                        if b == "verbatim" or b == "raw" then
-                            if i < s - w then
-                                c[j] = "___[#___+1]=[=[\n"
-                                c[j+1] = sub(view, i, s - 1 - w)
-                                c[j+2] = "]=]\n"
-                                j=j+3
-                            end
-                            c[j] = "___[#___+1]=[=["
-                            c[j+1] = sub(view, e + 2, x)
+                        local r = rpos(view, s - 1)
+                        if i <= r then
+                            c[j] = "___[#___+1]=[=[\n"
+                            c[j+1] = visit(visitors, sub(view, i, r))
                             c[j+2] = "]=]\n"
                             j=j+3
+                        end
+                        c[j] = visit(visitors, trim(sub(view, p, e - 1)), "%")
+                        c[j+1] = "\n"
+                        j=j+2
+                        s, i = n - 1, n
+                    end
+                end
+            elseif t == LPAR then
+                local e = find(view, ")}", p, true)
+                if e then
+                    local z, w = escaped(view, s)
+                    if i < s - w then
+                        c[j] = "___[#___+1]=[=[\n"
+                        c[j+1] = visit(visitors, sub(view, i, s - 1 - w))
+                        c[j+2] = "]=]\n"
+                        j=j+3
+                    end
+                    if z then
+                        i = s
+                    else
+                        local f = visit(visitors, sub(view, p, e - 1), "(")
+                        local x = find(f, ",", 2, true)
+                        if x then
+                            c[j] = "___[#___+1]=include([=["
+                            c[j+1] = trim(sub(f, 1, x - 1))
+                            c[j+2] = "]=],"
+                            c[j+3] = trim(sub(f, x + 1))
+                            c[j+4] = ")\n"
+                            j=j+5
                         else
-                            if byte(view, x, x) == LF then
-                                x = x - 1
-                            end
-                            local r = rpos(view, s - 1)
-                            if i <= r then
+                            c[j] = "___[#___+1]=include([=["
+                            c[j+1] = trim(f)
+                            c[j+2] = "]=])\n"
+                            j=j+3
+                        end
+                        s, i = e + 1, e + 2
+                    end
+                end
+            elseif t == LSQB then
+                local e = find(view, "]}", p, true)
+                if e then
+                    local z, w = escaped(view, s)
+                    if i < s - w then
+                        c[j] = "___[#___+1]=[=[\n"
+                        c[j+1] = visit(visitors, sub(view, i, s - 1 - w))
+                        c[j+2] = "]=]\n"
+                        j=j+3
+                    end
+                    if z then
+                        i = s
+                    else
+                        c[j] = "___[#___+1]=include("
+                        c[j+1] = visit(visitors, trim(sub(view, p, e - 1)), "[")
+                        c[j+2] = ")\n"
+                        j=j+3
+                        s, i = e + 1, e + 2
+                    end
+                end
+            elseif t == MINUS then
+                local e = find(view, "-}", p, true)
+                if e then
+                    local x, y = find(view, sub(view, s, e + 1), e + 2, true)
+                    if x then
+                        local z, w = escaped(view, s)
+                        if z then
+                            if i < s - w then
                                 c[j] = "___[#___+1]=[=[\n"
-                                c[j+1] = sub(view, i, r)
+                                c[j+1] = visit(visitors, sub(view, i, s - 1 - w))
                                 c[j+2] = "]=]\n"
                                 j=j+3
                             end
-                            c[j] = 'blocks["'
-                            c[j+1] = b
-                            c[j+2] = '"]=include[=['
-                            c[j+3] = sub(view, e + 2, x)
-                            c[j+4] = "]=]\n"
-                            j=j+5
+                            i = s
+                        else
+                            y = y + 1
+                            x = x - 1
+                            if byte(view, y, y) == LF then
+                                y = y + 1
+                            end
+                            local b = trim(sub(view, p, e - 1))
+                            if b == "verbatim" or b == "raw" then
+                                if i < s - w then
+                                    c[j] = "___[#___+1]=[=[\n"
+                                    c[j+1] = visit(visitors, sub(view, i, s - 1 - w))
+                                    c[j+2] = "]=]\n"
+                                    j=j+3
+                                end
+                                c[j] = "___[#___+1]=[=["
+                                c[j+1] = visit(visitors, sub(view, e + 2, x))
+                                c[j+2] = "]=]\n"
+                                j=j+3
+                            else
+                                if byte(view, x, x) == LF then
+                                    x = x - 1
+                                end
+                                local r = rpos(view, s - 1)
+                                if i <= r then
+                                    c[j] = "___[#___+1]=[=[\n"
+                                    c[j+1] = visit(visitors, sub(view, i, r))
+                                    c[j+2] = "]=]\n"
+                                    j=j+3
+                                end
+                                c[j] = 'blocks["'
+                                c[j+1] = b
+                                c[j+2] = '"]=include[=['
+                                c[j+3] = visit(visitors, sub(view, e + 2, x), "-", b)
+                                c[j+4] = "]=]\n"
+                                j=j+5
+                            end
+                            s, i = y - 1, y
                         end
-                        s, i = y - 1, y
+                    end
+                end
+            elseif t == NUM then
+                local e = find(view, "#}", p, true)
+                if e then
+                    local z, w = escaped(view, s)
+                    if i < s - w then
+                        c[j] = "___[#___+1]=[=[\n"
+                        c[j+1] = visit(visitors, sub(view, i, s - 1 - w))
+                        c[j+2] = "]=]\n"
+                        j=j+3
+                    end
+                    if z then
+                        i = s
+                    else
+                        e = e + 2
+                        if byte(view, e, e) == LF then
+                            e = e + 1
+                        end
+                        s, i = e - 1, e
                     end
                 end
             end
-        elseif t == NUM then
-            local e = find(view, "#}", p, true)
-            if e then
-                local z, w = escaped(view, s)
-                if i < s - w then
-                    c[j] = "___[#___+1]=[=[\n"
-                    c[j+1] = sub(view, i, s - 1 - w)
-                    c[j+2] = "]=]\n"
-                    j=j+3
-                end
-                if z then
-                    i = s
-                else
-                    e = e + 2
-                    if byte(view, e, e) == LF then
-                        e = e + 1
-                    end
-                    s, i = e - 1, e
-                end
-            end
+            s = find(view, "{", s + 1, true)
         end
-        s = find(view, "{", s + 1, true)
+        s = sub(view, i)
+        if s and s ~= EMPTY then
+            c[j] = "___[#___+1]=[=[\n"
+            c[j+1] = visit(visitors, s)
+            c[j+2] = "]=]\n"
+            j=j+3
+        end
+        c[j] = "return layout and include(layout,setmetatable({view=table.concat(___),blocks=blocks},{__index=context})) or table.concat(___)" -- luacheck: ignore
+        return concat(c)
     end
-    s = sub(view, i)
-    if s and s ~= EMPTY then
-        c[j] = "___[#___+1]=[=[\n"
-        c[j+1] = s
-        c[j+2] = "]=]\n"
-        j=j+3
+
+    function template.parse_file(view)
+        return template.parse(view, false)
     end
-    c[j] = "return layout and include(layout,setmetatable({view=table.concat(___),blocks=blocks},{__index=context})) or table.concat(___)" -- luacheck: ignore
-    return concat(c)
+
+    function template.parse_string(view)
+        return template.parse(view, true)
+    end
+
+    function template.process(view, context, cache_key, plain)
+        assert(view, "view was not provided for template.process(view, context, cache_key, plain)")
+        return template.compile(view, cache_key, plain)(context)
+    end
+
+    function template.process_file(view, context, cache_key)
+        assert(view, "view was not provided for template.process_file(view, context, cache_key)")
+        return template.compile(view, cache_key, false)(context)
+    end
+
+    function template.process_string(view, context, cache_key)
+        assert(view, "view was not provided for template.process_string(view, context, cache_key)")
+        return template.compile(view, cache_key, true)(context)
+    end
+
+    function template.render(view, context, cache_key, plain)
+        assert(view, "view was not provided for template.render(view, context, cache_key, plain)")
+        template.print(template.process(view, context, cache_key, plain))
+    end
+
+    function template.render_file(view, context, cache_key)
+        assert(view, "view was not provided for template.render_file(view, context, cache_key)")
+        template.render(view, context, cache_key, false)
+    end
+
+    function template.render_string(view, context, cache_key)
+        assert(view, "view was not provided for template.render_string(view, context, cache_key)")
+        template.render(view, context, cache_key, true)
+    end
+
+    if safe then
+        return setmetatable({}, {
+            __index = function(_, k)
+                if type(template[k]) == "function" then
+                    return function(...)
+                        local ok, a, b = pcall(template[k], ...)
+                        if not ok then
+                            return nil, a
+                        end
+                        return a, b
+                    end
+                end
+                return template[k]
+            end,
+            __new_index = function(_, k, v)
+                template[k] = v
+            end,
+        })
+    end
+
+    return template
 end
 
-function template.render(view, context, key, plain)
-    assert(view, "view was not provided for template.render(view, context, key, plain).")
-    return template.print(template.compile(view, key, plain)(context))
-end
-
-return template
+return new()

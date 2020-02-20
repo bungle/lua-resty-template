@@ -17,6 +17,7 @@ build = {
     type = "builtin",
     modules = {
         ["resty.template"]                = "lib/resty/template.lua",
+        ["resty.template.safe"]           = "lib/resty/template/safe.lua",
         ["resty.template.html"]           = "lib/resty/template/html.lua",
         ["resty.template.microbenchmark"] = "lib/resty/template/microbenchmark.lua"
     }
