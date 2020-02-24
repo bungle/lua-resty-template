@@ -2,12 +2,18 @@
 
 **lua-resty-template** is a compiling (1) (HTML) templating engine for Lua and OpenResty.
 
-(1) with compilation we mean that templates are translated to Lua functions that you may call or `string.dump` as a binary bytecode blobs to disk that can be later utilized with `lua-resty-template` or basic `load` and `loadfile` standard Lua functions (see also [Template Precompilation](#template-precompilation)). Although, generally you don't need to do that as `lua-resty-template` handles this behind the scenes.
+(1) with compilation we mean that templates are translated to Lua functions that you may call or `string.dump`
+as a binary bytecode blobs to disk that can be later utilized with `lua-resty-template` or basic `load` and
+`loadfile` standard Lua functions (see also [Template Precompilation](#template-precompilation)). Although,
+generally you don't need to do that as `lua-resty-template` handles this behind the scenes.
+
 
 ## Hello World with lua-resty-template
 
 ```lua
-local template = require "resty.template"
+local template = require "resty.template"      -- OR
+local template = require "resty.template.safe" -- return nil, err on errors
+
 -- Using template.new
 local view = template.new "view.html"
 view.message = "Hello, World!"
@@ -15,6 +21,7 @@ view:render()
 -- Using template.render
 template.render("view.html", { message = "Hello, World!" })
 ```
+
 
 ##### view.html
 ```html
@@ -25,6 +32,7 @@ template.render("view.html", { message = "Hello, World!" })
 </body>
 </html>
 ```
+
 
 ##### Output
 ```html
@@ -49,41 +57,65 @@ template.render([[
 </html>]], { message = "Hello, World!" })
 ```
 
+
 ## Contents
 
-* [Template Syntax](#template-syntax)
-  * [Reserved Context Keys and Remarks](#reserved-context-keys-and-remarks)
-* [Installation](#installation)
-  * [Using OpenResty Package Manager (opm)](#using-openresty-package-manager-opm)
-  * [Using LuaRocks or Moonrocks](#using-luarocks-or-moonrocks)
-* [Nginx / OpenResty Configuration](#nginx--openresty-configuration)
-* [Lua API](#lua-api)
-  * [template.caching](#boolean-templatecachingboolean-or-nil)
-  * [template.new](#table-templatenewview-layout)
-  * [template.compile](#function-boolean-templatecompileview-key)
-  * [template.render](#templaterenderview-context-key)
-  * [template.parse](#string-templateparseview)
-  * [template.precompile](#string-templateprecompileview-path-strip)
-  * [template.load](#templateload)
-  * [template.print](#templateprint)
-* [Template Precompilation](#template-precompilation)
-* [Template Helpers](#template-helpers)
-* [Usage Examples](#usage-examples)
-  * [Template Including](#template-including)
-  * [Views with Layouts](#views-with-layouts)
-  * [Using Blocks](#using-blocks)
-  * [Grandfather-Father-Son Inheritance](#grandfather-father-son-inheritance)
-  * [Macros](#macros)
-  * [Calling Methods in Templates](#calling-methods-in-templates)
-  * [Embedding Angular or other tags / templating inside the Templates](#embedding-angular-or-other-tags--templating-inside-the-templates)
-  * [Embedding Markdown inside the Templates](#embedding-markdown-inside-the-templates)
-  * [Lua Server Pages (LSP) with OpenResty](#lua-server-pages-lsp-with-openresty)
-* [FAQ](#faq)
-* [Alternatives](#alternatives)
-* [Benchmarks](#benchmarks)
-* [Changes](#changes)
-* [See Also](#see-also)
-* [License](#license)
+- [Template Syntax](#template-syntax)
+  - [Example](#example)
+  - [Reserved Context Keys and Remarks](#reserved-context-keys-and-remarks)
+- [Installation](#installation)
+  - [Using OpenResty Package Manager (opm)](#using-openresty-package-manager-opm)
+  - [Using LuaRocks](#using-luarocks)
+- [Nginx / OpenResty Configuration](#nginx--openresty-configuration)
+- [Lua API](#lua-api)
+  - [template.root](#templateroot)
+  - [template.location](#templatelocation)
+  - [table template.new(view, layout)](#table-templatenewview-layout)
+  - [boolean template.caching(boolean or nil)](#boolean-templatecachingboolean-or-nil)
+  - [function, boolean template.compile(view, cache_key, plain)](#function-boolean-templatecompileview-cache_key-plain)
+  - [function, boolean template.compile_string(view, cache_key)](#function-boolean-templatecompile_stringview-cache_key)
+  - [function, boolean template.compile_file(view, cache_key)](#function-boolean-templatecompile_fileview-cache_key)
+  - [template.visit(func)](#templatevisitfunc)
+  - [string template.process(view, context, cache_key, plain)](#string-templateprocessview-context-cache_key-plain)
+  - [string template.process_string(view, context, cache_key)](#string-templateprocess_stringview-context-cache_key)
+  - [string template.process_file(view, context, cache_key)](#string-templateprocess_fileview-context-cache_key)  
+  - [template.render(view, context, cache_key, plain)](#templaterenderview-context-cache_key-plain)
+  - [template.render_string(view, context, cache_key)](#templaterender_stringview-context-cache_key)
+  - [template.render_file(view, context, cache_key)](#templaterender_fileview-context-cache_key)
+  - [string template.parse(view, plain)](#string-templateparseview-plain)
+  - [string template.parse_string(view, plain)](#string-templateparse_stringview-plain)
+  - [string template.parse_file(view, plain)](#string-templateparse_fileview-plain)
+  - [string template.precompile(view, path, strip)](#string-templateprecompileview-path-strip)
+  - [string template.precompile_string(view, path, strip)](#string-templateprecompile_stringview-path-strip)
+  - [string template.precompile_file(view, path, strip)](#string-templateprecompile_fileview-path-strip)  
+  - [string template.load(view, plain)](#string-templateloadview-plain)
+  - [string template.load_string(view)](#string-templateload_stringview)
+  - [string template.load_file(view)](#string-templateload_fileview)
+  - [template.print](#templateprint)
+- [Template Precompilation](#template-precompilation)
+- [Template Helpers](#template-helpers)
+  - [Built-in Helpers](#built-in-helpers)
+    - [echo(...)](#echo)
+    - [include(view, context)](#includeview-context)
+  - [Other Ways to Extend](#other-ways-to-extend)
+- [Usage Examples](#usage-examples)
+   - [Template Including](#template-including)
+   - [Views with Layouts](#views-with-layouts)
+   - [Using Blocks](#using-blocks)
+   - [Grandfather-Father-Son Inheritance](#grandfather-father-son-inheritance)
+   - [Macros](#macros)
+   - [Calling Methods in Templates](#calling-methods-in-templates)
+   - [Embedding Angular or other tags / templating inside the Templates](#embedding-angular-or-other-tags--templating-inside-the-templates)
+   - [Embedding Markdown inside the Templates](#embedding-markdown-inside-the-templates)
+   - [Lua Server Pages (LSP) with OpenResty](#lua-server-pages-lsp-with-openresty)
+- [FAQ](#faq)
+- [Alternatives](#alternatives)
+- [Benchmarks](#benchmarks)
+- [Changes](#changes)
+- [Roadmap](#roadmap)
+- [See Also](#see-also)
+- [License](#license)
+
 
 ## Template Syntax
 
@@ -92,17 +124,19 @@ You may use the following tags in templates:
 * `{{expression}}`, writes result of expression - html escaped
 * `{*expression*}`, writes result of expression 
 * `{% lua code %}`, executes Lua code
-* `{(template)}`, includes `template` file, you may also supply context for include file `{(file.html, { message = "Hello, World" } )}`
+* `{(template)}`, includes `template` file, you may also supply context for include file `{(file.html, { message = "Hello, World" } )}` (NOTE: you cannot use comma (`,`) in `file.html`, in that case use `{["file,with,comma"]}` instead)
 * `{[expression]}`, includes `expression` file (the result of expression), you may also supply context for include file `{["file.html", { message = "Hello, World" } ]}`
 * `{-block-}...{-block-}`, wraps inside of a `{-block-}` to a value stored in a `blocks` table with a key `block` (in this case), see [using blocks](https://github.com/bungle/lua-resty-template#using-blocks). Don't use predefined block names `verbatim` and `raw`.
 * `{-verbatim-}...{-verbatim-}` and `{-raw-}...{-raw-}` are predefined blocks whose inside is not processed by the `lua-resty-template` but the content is outputted as is.
 * `{# comments #}` everything between `{#` and `#}` is considered to be commented out (i.e. not outputted or executed)
 
-From templates you may access everything in `context` table, and everything in `template` table. In templates you can also access `context` and `template` by prefixing keys.
+From templates you may access everything in `context` table, and everything in `template` table.
+In templates you can also access `context` and `template` by prefixing keys.
 
 ```html
 <h1>{{message}}</h1> == <h1>{{context.message}}</h1>
 ```
+
 
 ##### Short Escaping Syntax
 
@@ -130,6 +164,7 @@ This will output:
 <h1>\[message-variables-content-here]</h1>
 ```
 
+
 ##### A Word About Complex Keys in Context Table
 
 Say you have this kind of a context table:
@@ -138,7 +173,8 @@ Say you have this kind of a context table:
 local ctx = {["foo:bar"] = "foobar"}
 ```
 
-And you want to render the `ctx["foo:bar"]`'s value `foobar` in your template.  You have to specify it explicitly by referencing the `context` in your template:
+And you want to render the `ctx["foo:bar"]`'s value `foobar` in your template.  You have to specify it explicitly
+by referencing the `context` in your template:
 
 ```html
 {# {*["foo:bar"]*} won't work, you need to use: #}
@@ -153,9 +189,11 @@ template.render([[
 ]], {["foo:bar"] = "foobar"})
 ```
 
+
 ##### A Word About HTML Escaping
 
-Only strings are escaped, functions are called without arguments (recursively) and results are returned as is, other types are `tostring`ified. `nil`s and `ngx.null`s are converted to empty strings `""`.
+Only strings are escaped, functions are called without arguments (recursively) and results are returned as is,
+other types are `tostring`ified. `nil`s and `ngx.null`s are converted to empty strings `""`.
 
 Escaped HTML characters:
 
@@ -166,7 +204,9 @@ Escaped HTML characters:
 * `'` becomes `&#39;`
 * `/` becomes `&#47;`
 
+
 #### Example
+
 ##### Lua
 ```lua
 local template = require "resty.template"
@@ -177,6 +217,7 @@ template.render("view.html", {
   jquery  = '<script src="js/jquery.min.js"></script>' 
 })
 ```
+
 
 ##### view.html
 ```html
@@ -190,6 +231,7 @@ template.render("view.html", {
 {(footer.html)}
 ```
 
+
 ##### header.html
 ```html
 <!DOCTYPE html>
@@ -201,11 +243,13 @@ template.render("view.html", {
 <body>
 ```
 
+
 ##### footer.html
 ```html
 </body>
 </html>
 ```
+
 
 #### Reserved Context Keys and Remarks
 
@@ -213,6 +257,7 @@ It is advised that you do not use these keys in your context tables:
 
 * `___`, holds the compiled template, if set you need to use `{{context.___}}`
 * `context`, holds the current context, if set you need to use `{{context.context}}`
+* `echo`, holds the echo helper function, if set you need to use `{{context.echo}}`
 * `include`, holds the include helper function, if set you need to use `{{context.include}}`
 * `layout`, holds the layout by which the view will be decorated, if set you need to use `{{context.layout}}`
 * `blocks`, holds the blocks, if set you need to use `{{context.blocks}}` (see: [using blocks](#using-blocks))
@@ -224,10 +269,12 @@ In addition to that with `template.new` you should not overwrite:
 
 You should also not `{(view.html)}` recursively:
 
+
 ##### Lua
 ```lua
 template.render "view.html"
 ```
+
 
 ##### view.html
 ```html
@@ -236,22 +283,30 @@ template.render "view.html"
 
 You can  load templates from "sub-directories" as well with `{(syntax)}`:
 
+
 ##### view.html
 ```html
 {(users/list.html)}
 ```
 
-**Also note that you can provide template either as a file path or as a string. If the file exists, it will be used, otherwise the string is used. See also [`template.load`](#templateload).**
+**Also note that you can provide template either as a file path or as a string. If the file exists,
+it will be used, otherwise the string is used. See also [`template.load`](#templateload).**
+
 
 ## Installation
 
-Just place [`template.lua`](https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template.lua) and [`template`](https://github.com/bungle/lua-resty-template/tree/master/lib/resty/template) directory somewhere in your `package.path`, under `resty` directory. If you are using OpenResty, the default location would be `/usr/local/openresty/lualib/resty`.
+Just place [`template.lua`](https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template.lua) and
+[`template`](https://github.com/bungle/lua-resty-template/tree/master/lib/resty/template) directory somewhere in
+your `package.path`, under `resty` directory. If you are using OpenResty, the default location would
+be `/usr/local/openresty/lualib/resty`.
+
 
 ### Using OpenResty Package Manager (opm)
 
 ```Shell
 $ opm get bungle/lua-resty-template
 ```
+
 
 ### Using LuaRocks
 
@@ -261,14 +316,29 @@ $ luarocks install lua-resty-template
 
 LuaRocks repository for `lua-resty-template` is located at https://luarocks.org/modules/bungle/lua-resty-template.
 
+
 ## Nginx / OpenResty Configuration
 
-When `lua-resty-template` is used in context of Nginx / OpenResty there are a few configuration directives that you need to be aware:
+When `lua-resty-template` is used in context of Nginx / OpenResty there are a few configuration directives
+that you need to be aware:
 
 * `template_root` (`set $template_root /var/www/site/templates`)
 * `template_location` (`set $template_location /templates`)
 
-If none of these are set in Nginx configuration, `ngx.var.document_root` (aka root-directive) value is used. If `template_location` is set, it will be used first, and if the location returns anything but `200` as a status code, we do fallback to either `template_root` (if defined) or `document_root`.
+If none of these are set in Nginx configuration, `ngx.var.document_root` (aka root-directive) value is used.
+If `template_location` is set, it will be used first, and if the location returns anything but `200` as
+a status code, we do fallback to either `template_root` (if defined) or `document_root`.
+
+With `lua-resty-template` `2.0` it is possible to override `$template_root` and `$template_location` with
+`Lua` code:
+
+```lua
+local template = require "resty.template".new({
+  root     = "/templates",
+  location = "/templates" 
+})
+```
+
 
 ##### Using `document_root`
 
@@ -287,6 +357,7 @@ http {
   }
 }
 ```
+
 
 ##### Using `template_root`
 
@@ -307,9 +378,11 @@ http {
 }
 ```
 
+
 ##### Using `template_location`
 
-This one tries to load content with `ngx.location.capture` from `/templates` location (in this case this is served with `ngx_static` module).
+This one tries to load content with `ngx.location.capture` from `/templates` location (in this case this is
+served with `ngx_static` module).
 
 ```nginx
 http {
@@ -332,23 +405,37 @@ http {
 
 **See also [`template.load`](#templateload).**
 
+
 ## Lua API
 
-#### boolean template.caching(boolean or nil)
+#### template.root
 
-This function enables or disables template caching, or if no parameters are passed, returns current state of template caching. By default template caching is enabled, but you may want to disable it on development or low-memory situations.
+You can setup template root by setting this variable which will be looked for template files:
 
 ```lua
-local template = require "resty.template"   
--- Get current state of template caching
-local enabled = template.caching()
--- Disable template caching
-template.caching(false)
--- Enable template caching
-template.caching(true)
+local template = require "resty.template".new({
+  root = "/templates"
+})
+template.render_file("test.html")
 ```
 
-Please note that if the template was already cached when compiling a template, the cached version will be returned. You may want to flush cache with `template.cache = {}` to ensure that your template really gets recompiled.
+This property overrides the one set in Nginx configuration (`set $template_root /my-templates;`)
+
+
+#### template.location
+
+This is what you can use with OpenResty as that will use `ngx.location.capture` to fetch templates
+files in non-blocking fashion.
+
+```lua
+local template = require "resty.template".new({
+  location = "/templates"
+})
+template.render_file("test.html")
+```
+
+This property overrides the one set in Nginx configuration (`set $template_location /my-templates;`)
+
 
 #### table template.new(view, layout)
 
@@ -356,6 +443,47 @@ Creates a new template instance that is used as a (default) context when `render
 only one method `render`, but the table also has metatable with `__tostring` defined. See the example below. Both
 `view` and `layout` arguments can either be strings or file paths, but layout can also be a table created previously
 with `template.new`.
+
+With 2.0 the new can also be used without arguments, which creates a new template instance:
+
+```lua
+local template = require "resty.template".new()
+```
+
+You can also pass a table that is then modified to be a template:
+
+```lua
+local config = {
+  root = "/templates"
+}
+
+local template = require "resty.template".new(config)
+```
+
+This is handy as the `template` created by `new` does not share the cache with the global template returned
+by `require "resty.template"` (this was reported with issue [#25](https://github.com/bungle/lua-resty-template/issues/25)).
+
+You can also pass a boolean `true` or `false` as a `view` parameter which means that either `safe` or `un-safe`
+version of template is returned:
+
+```lua
+local unsafe = require "resty.template"
+local safe   = unsafe.new(true)
+```
+
+There is also a default `safe` implementation available:
+
+```lua
+local safe = require "resty.template.safe"
+-- you can create instance of safe too:
+local safe_instance = safe.new()
+```
+
+`safe` version uses `return nil, err` Lua error handling pattern and `unsafe` just throws the errors, which you
+can catch with `pcall`, `xpcall` or `coroutine.wrap`.
+
+
+Here are examples of using `new` with arguments:
 
 ```lua
 local view = template.new"template.html"              -- or
@@ -369,6 +497,7 @@ local view = template.new([[<h1>{{message}}</h1>]], [[
 </html>
 ]])
 ```
+
 
 ##### Example
 ```lua
@@ -384,16 +513,47 @@ view:render(setmetatable({ title = "Testing lua-resty-template" }, { __index = v
 local result = tostring(view)
 ```
 
-#### function, boolean template.compile(view, key, plain)
 
-Parses, compiles and caches (if caching is enabled) a template and returns the compiled template as a function that takes context as a parameter and returns rendered template as a string. Optionally you may pass `key` that is used as a cache key. If cache key is not provided `view` wil be used as a cache key. If cache key is `no-cache` the template cache will not be checked and the resulting function will not be cached. You may also optionally pass `plain` with a value of `true` if the `view` is plain text string (this will skip `template.load` and binary chunk detection in `template.parse` phase).
+#### boolean template.caching(boolean or nil)
+
+This function enables or disables template caching, or if no parameters are passed, returns current state of
+template caching. By default template caching is enabled, but you may want to disable it on development or
+low-memory situations.
+
+```lua
+local template = require "resty.template"   
+-- Get current state of template caching
+local enabled = template.caching()
+-- Disable template caching
+template.caching(false)
+-- Enable template caching
+template.caching(true)
+```
+
+Please note that if the template was already cached when compiling a template, the cached version will be returned.
+You may want to flush cache with `template.cache = {}` to ensure that your template really gets recompiled.
+
+
+#### function, boolean template.compile(view, cache_key, plain)
+
+Parses, compiles and caches (if caching is enabled) a template and returns the compiled template as a function
+that takes context as a parameter and returns rendered template as a string. Optionally you may pass `cache_key` that
+is used as a cache key. If cache key is not provided `view` wil be used as a cache key. If cache key is `no-cache`
+the template cache will not be checked and the resulting function will not be cached. You may also optionally
+pass `plain` with a value of `true` if the `view` is plain text string (this will skip `template.load` and binary
+chunk detection in `template.parse` phase). If `plain` is `false` the template is considered to be a file,
+and all the issues with file reading are considered as errors. If the `plain` is set to `nil` (the default)
+the template does not consider file reading errors as fatal, and returns back the `view` (usually the path of
+the template).
 
 ```lua
 local func = template.compile("template.html")          -- or
 local func = template.compile([[<h1>{{message}}</h1>]])
 ```
 
+
 ##### Example
+
 ```lua
 local template = require "resty.template"
 local func     = template.compile("view.html")
@@ -402,36 +562,253 @@ local universe = func{ message = "Hello, Universe!" }
 print(world, universe)
 ```
 
-Also note the second return value which is a boolean. You may discard it, or use it to determine if the returned function was cached.
+Also note the second return value which is a boolean. You may discard it, or use it to determine if
+the returned function was cached.
 
-#### template.render(view, context, key, plain)
 
-Parses, compiles, caches (if caching is enabled) and outputs template either with `ngx.print` if available, or `print`. You may optionally also pass `key` that is used as a cache key. If `plain` evaluates to `true`, the `view` is considered to be plain string template (`template.load` and binary chunk detection is skipped on `template.parse`).
+#### function, boolean template.compile_string(view, cache_key)
+
+This just calls `template.compile(view, cache_key, true)`
+
+
+#### function, boolean template.compile_file(view, cache_key)
+
+This just calls `template.compile(view, cache_key, false)`
+
+
+#### template.visit(func)
+
+Allows you to register template parser visitor functions. Visitors are called in the order they
+are registered. And once registered, cannot be removed from parser. Perhaps it is easier to show
+how it works:
+
+```lua
+local template = require "resty.template.safe".new()
+
+local i = 0
+
+template.visit(function(content, type, name)
+  local trimmed = content:gsub("^%s+", ""):gsub("%s+$", "")
+  if trimmed == "" then return content end
+  i = i + 1
+  print("  visit: ", i)
+  if type then print("   type: ", type) end
+  if name then print("   name: ", name) end
+  print("content: ", trimmed)
+  print()
+  return content
+end)
+
+local func = template.compile([[
+How are you, {{user.name}}?
+
+Here is a new cooking recipe for you!
+
+{% for i, ingredient in ipairs(ingredients) do %}
+  {*i*}. {{ingredient}}
+{% end %}
+{-ad-}`lua-resty-template` the templating engine for OpenResty!{-ad-}
+]])
+
+local content = func{
+  user = {
+    name = "bungle"
+  },
+  ingredients = {
+    "potatoes",
+    "sausages"
+  }
+}
+
+print(content)
+```
+
+This will output the following:
+
+```
+  visit: 1
+content: How are you,
+
+  visit: 2
+   type: {
+content: user.name
+
+  visit: 3
+content: ?
+
+Here is a new cooking recipe for you!
+
+  visit: 4
+   type: %
+content: for i, ingredient in ipairs(ingredients) do
+
+  visit: 5
+   type: *
+content: i
+
+  visit: 6
+content: .
+
+  visit: 7
+   type: {
+content: ingredient
+
+  visit: 8
+   type: %
+content: end
+
+  visit: 9
+   type: -
+   name: ad
+content: `lua-resty-template` the templating engine for OpenResty!
+
+  visit: 10
+content: `lua-resty-template` the templating engine for OpenResty!
+
+How are you, bungle?
+
+Here is a new cooking recipe for you!
+
+  1. potatoes
+  2. sausages
+```
+
+The visitor functions should have this signature:
+```
+string function(content, type, name)
+```
+
+If the function doesn't modify the `content` it should return the `content` back, like the visitor
+above does.
+
+Here is a bit more advanced visitor example that handles run-time errors on expressions:
+
+```lua
+local template = require "resty.template".new()
+
+template.render "Calculation: {{i*10}}"
+```
+
+This will runtime error with:
+```
+ERROR: [string "context=... or {}..."]:7: attempt to perform arithmetic on global 'i' (a nil value)
+stack traceback:
+	resty/template.lua:652: in function 'render'
+	a.lua:52: in function 'file_gen'
+	init_worker_by_lua:45: in function <init_worker_by_lua:43>
+	[C]: in function 'xpcall'
+	init_worker_by_lua:52: in function <init_worker_by_lua:50>
+```
+
+Now let's add a visitor that handles this error:
+
+```lua
+local template = require "resty.template".new()
+
+template.visit(function(content, type)
+  if type == "*" or type == "{" then
+    return "select(3, pcall(function() return nil, " .. content .. " end)) or ''"
+  end
+
+  return content
+end)
+
+template.render "Calculation: {{i*10}}\n"
+template.render("Calculation: {{i*10}}\n", { i = 1 })
+```
+
+This will output:
+
+```
+Calculation: 
+Calculation: 10
+```
+
+
+#### string template.process(view, context, cache_key, plain)
+
+Parses, compiles, caches (if caching is enabled) and returns output as string. You may optionally also
+pass `cache_key` that is used as a cache key. If `plain` evaluates to `true`, the `view` is considered
+to be plain string template (`template.load` and binary chunk detection is skipped on `template.parse`).
+If `plain` is `false"` the template is considered to be a file, and all the issues with file reading are
+considered as errors. If the `plain` is set to `nil` (the default) the template does not consider file
+reading errors as fatal, and returns back the `view`.
+
+```lua
+local output = template.process("template.html", { message = "Hello, World!" })          -- or
+local output = template.process([[<h1>{{message}}</h1>]], { message = "Hello, World!" })
+```
+
+#### string template.process_string(view, context, cache_key)
+
+This just calls `template.process(view, context, cache_key, true)`
+
+
+#### string template.process_file(view, context, cache_key)
+
+This just calls `template.process(view, context, cache_key, false)`
+
+
+#### template.render(view, context, cache_key, plain)
+
+Parses, compiles, caches (if caching is enabled) and outputs template either with `ngx.print` if available,
+or `print`. You may optionally also pass `cache_key` that is used as a cache key. If `plain` evaluates to
+`true`, the `view` is considered to be plain string template (`template.load` and binary chunk detection
+is skipped on `template.parse`). If `plain` is `false"` the template is considered to be a file, and
+all the issues with file reading are considered as errors. If the `plain` is set to `nil` (the default)
+the template does not consider file reading errors as fatal, and returns back the `view`.
 
 ```lua
 template.render("template.html", { message = "Hello, World!" })          -- or
 template.render([[<h1>{{message}}</h1>]], { message = "Hello, World!" })
 ```
 
-##### Example
-```lua
-local template = require "resty.template"
-template.render("view.html", { message = "Hello, World!" })
-template.render("view.html", { message = "Hello, Universe!" })
-```
+
+#### template.render_string(view, context, cache_key)
+
+This just calls `template.render(view, context, cache_key, true)`
+
+
+#### template.render_file(view, context, cache_key)
+
+This just calls `template.render(view, context, cache_key, false)`
+
 
 #### string template.parse(view, plain)
 
-Parses template file or string, and generates a parsed template string. This may come useful when debugging templates. You should note that if you are trying to parse a binary chunk (e.g. one returned with `template.compile`), `template.parse` will return that binary chunk as is. If optional parameter `plain` evaluates to `true`, the `view` is considered to be plain string, and the `template.load` and binary chunk detection is skipped.
+Parses template file or string, and generates a parsed template string. This may come useful when debugging
+templates. You should note that if you are trying to parse a binary chunk (e.g. one returned with
+`template.compile`), `template.parse` will return that binary chunk as is. If `plain` evaluates to
+`true`, the `view` is considered to be plain string template (`template.load` and binary chunk detection
+is skipped on `template.parse`). If `plain` is `false"` the template is considered to be a file, and
+all the issues with file reading are considered as errors. If the `plain` is set to `nil` (the default)
+the template does not consider file reading errors as fatal, and returns back the `view`.
 
 ```lua
 local t1 = template.parse("template.html")
 local t2 = template.parse([[<h1>{{message}}</h1>]])
 ```
 
-#### string template.precompile(view, path, strip)
 
-Precompiles template as a binary chunk. This binary chunk can be written out as a file (and you may use it directly with Lua's `load` and `loadfile`). For convenience you may optionally specify `path` argument to output binary chunk to file. You may also supply `strip` parameter with value of `false` to make precompiled templates to have debug information as well (defaults to `true`).
+#### string template.parse_string(view, plain)
+
+This just calls `template.parse(view, plain, true)`
+
+
+#### string template.parse_file(view, plain)
+
+This just calls `template.parse(view, plain, false)`
+
+
+#### string template.precompile(view, path, strip, plain)
+
+Precompiles template as a binary chunk. This binary chunk can be written out as a file (and you may use it
+directly with Lua's `load` and `loadfile`). For convenience you may optionally specify `path` argument to
+output binary chunk to file. You may also supply `strip` parameter with value of `false` to make precompiled
+templates to have debug information as well (defaults to `true`). The last parameter `plain` means that
+should complilation treat the `view` as `string` (`plain = true`) or as `file path` (`plain = false`) or
+try first as a file, and fallback to `string` (`plain = nil`). In case the `plain=false` (a file) and there
+is error with `file io` the function will also error with an assertion failure. 
 
 ```lua
 local view = [[
@@ -457,47 +834,109 @@ template.render("precompiled-bin.html", {
 })
 ```
 
-#### template.load
 
-This field is used to load templates. `template.parse` calls this function before it starts parsing the template (assuming that optional `plain` argument in `template.parse` evaluates false (the default). By default there are two loaders in `lua-resty-template`: one for Lua and the other for Nginx / OpenResty. Users can overwrite this field with their own function. For example you may want to write a template loader function that loads templates from a database.
+#### string template.precompile_string(view, path, strip)
 
-Default `template.load` for Lua (attached as template.load when used directly with Lua):
+This just calls `template.precompile(view, path, strip, true)`.
+
+
+#### string template.precompile_file(view, path, strip)
+
+This just calls `template.precompile(view, path, strip, false)`.
+
+
+#### string template.load(view, plain)
+
+This field is used to load templates. `template.parse` calls this function before it starts parsing the template
+(assuming that optional `plain` argument in `template.parse` evaluates to `false` or `nil` (the default).
+By default there are two loaders in `lua-resty-template`: one for Lua and the other for Nginx / OpenResty.
+Users can overwrite this field with their own function. For example you may want to write a template loader
+function that loads templates from a database.
+
+The default `template.load` for Lua (attached as template.load when used directly with Lua):
 
 ```lua
-local function load_lua(path)
-    -- read_file tries to open file from path, and return its content.
-    return read_file(path) or path
+function(view, plain)
+    if plain == true then return view end
+    local path, root = view, template.root
+    if root and root ~= EMPTY then
+        if byte(root, -1) == SOL then root = sub(root, 1, -2) end
+        if byte(view,  1) == SOL then path = sub(view, 2) end
+        path = root .. "/" .. path
+    end
+    return plain == false and assert(read_file(path)) or read_file(path) or view
 end
 ```
 
-Default `template.load` for Nginx / OpenResty (attached as template.load when used in context of Nginx / OpenResty):
+The default `template.load` for Nginx / OpenResty (attached as template.load when used in context
+of Nginx / OpenResty):
 
 ```lua
-local function load_ngx(path)
-    local file, location = path, ngx.var.template_location
-    if file:sub(1)  == "/" then file = file:sub(2) end
-    if location and location ~= "" then
-        if location:sub(-1) == "/" then location = location:sub(1, -2) end
-        local res = ngx.location.capture(location .. '/' .. file)
+function(view, plain)
+    if plain == true then return view end
+    local vars = VAR_PHASES[phase()]
+    local path = view
+    local root = template.location
+    if (not root or root == EMPTY) and vars then
+        root = var.template_location
+    end
+    if root and root ~= EMPTY then
+        if byte(root, -1) == SOL then root = sub(root, 1, -2) end
+        if byte(path,  1) == SOL then path = sub(path, 2) end
+        path = root .. "/" .. path
+        local res = capture(path)
         if res.status == 200 then return res.body end
     end
-    local root = ngx.var.template_root or ngx.var.document_root
-    if root:sub(-1) == "/" then root = root:sub(1, -2) end
-    -- read_file tries to open file from path, and return its content.
-    return read_file(root .. "/" .. file) or path
+    path = view
+    root = template.root
+    if (not root or root == EMPTY) and vars then
+        root = var.template_root
+        if not root or root == EMPTY then root = var.document_root or prefix end
+    end
+    if root and root ~= EMPTY then
+        if byte(root, -1) == SOL then root = sub(root, 1, -2) end
+        if byte(path,  1) == SOL then path = sub(path, 2) end
+        path = root .. "/" .. path
+    end
+    return plain == false and assert(read_file(path)) or read_file(path) or view
 end
 ```
 
-As you can see, `lua-resty-template` always tries (by default) to load a template from a file (or with `ngx.location.capture`) even if you provided template as a string. `lua-resty-template`. But if you know that your templates are always strings, and not file paths, you may use `plain` argument in `template.compile`, `template.render`, and `template.parse` OR replace `template.load` with the simplest possible template loader there is (but be aware that if your templates use `{(file.html)}` includes, those are considered as strings too, in this case `file.html` will be the template string that is parsed) - you could also setup a loader that finds templates in some database system, e.g. Redis:
+As you can see, `lua-resty-template` always tries (by default) to load a template from a file
+(or with `ngx.location.capture`) even if you provided template as a string. `lua-resty-template`.
+But if you know that your templates are always strings, and not file paths, you may use `plain`
+argument in `template.compile`, `template.render`, and `template.parse` OR replace `template.load`
+with the simplest possible template loader there is (but be aware that if your templates use
+`{(file.html)}` includes, those are considered as strings too, in this case `file.html` will
+be the template string that is parsed) - you could also setup a loader that finds templates in
+some database system, e.g. Redis:
 
 ```lua
 local template = require "resty.template"
-template.load = function(s) return s end
+template.load = function(view, plain) return view end
 ```
+
+If the `plain` parameter is `false` (`nil` is not treated as `false`), all the issues with file
+io are considered assertion errors.
+
+
+#### string template.load_string(view)
+
+This just calls `template.load(view, true)`
+
+
+#### string template.load_file(view)
+
+This just calls `template.load(view, false)`
+
 
 #### template.print
 
-This field contains a function that is used on `template.render()` or `template.new("example.html"):render()` to output the results. By default this holds either `ngx.print` (if available) or `print`. You may want to (and are allowed to) overwrite this field, if you want to use your own output function instead. This is also useful if you are using some other framework, e.g. Turbo.lua (http://turbolua.org/).
+This field contains a function that is used on `template.render()` or
+`template.new("example.html"):render()` to output the results. By default this holds either
+`ngx.print` (if available) or `print`. You may want to (and are allowed to) overwrite this
+field, if you want to use your own output function instead. This is also useful if you are
+using some other framework, e.g. Turbo.lua (http://turbolua.org/).
 
 ```lua
 local template = require "resty.template"
@@ -508,9 +947,17 @@ template.print = function(s)
 end
 ```
 
+
 ## Template Precompilation
 
-`lua-resty-template` supports template precompilation. This can be useful when you want to skip template parsing (and Lua interpretation) in production or if you do not want your templates distributed as plain text files on production servers. Also by precompiling, you can ensure that your templates do not contain something, that cannot be compiled (they are syntactically valid Lua). Although templates are cached (even without precompilation), there are some performance (and memory) gains. You could integrate template precompilation in your build (or deployment) scripts (maybe as Gulp, Grunt or Ant tasks).
+`lua-resty-template` supports template precompilation. This can be useful when you want to
+skip template parsing (and Lua interpretation) in production or if you do not want your
+templates distributed as plain text files on production servers. Also by precompiling,
+you can ensure that your templates do not contain something, that cannot be compiled
+(they are syntactically valid Lua). Although templates are cached (even without precompilation),
+there are some performance (and memory) gains. You could integrate template precompilation in
+your build (or deployment) scripts (maybe as Gulp, Grunt or Ant tasks).
+
 
 ##### Precompiling template, and output it as a binary file
 
@@ -519,6 +966,7 @@ local template = require "resty.template"
 local compiled = template.precompile("example.html", "example-bin.html")
 ```
 
+
 ##### Load precompiled template file, and run it with context parameters
 
 ```lua
@@ -526,9 +974,69 @@ local template = require "resty.template"
 template.render("example-bin.html", { "Jack", "Mary" })
 ```
 
+
 ## Template Helpers
 
-While `lua-resty-template` does not have much infrastucture or ways to extend it, you still have a few possibilities that you may try.
+### Built-in Helpers
+
+#### echo(...)
+
+Echoes output. This is useful with `{% .. %}`:
+
+```lua
+require "resty.template".render[[
+begin
+{%
+for i=1, 10 do
+  echo("\tline: ", i, "\n")
+end
+%}
+end
+]]
+```
+
+This will output:
+
+```
+begin
+	line: 1
+	line: 2
+	line: 3
+	line: 4
+	line: 5
+	line: 6
+	line: 7
+	line: 8
+	line: 9
+	line: 10
+end
+```
+
+This can also be written as but `echo` might come handy in some cases:
+
+```lua
+require "resty.template".render[[
+begin
+{% for i=1, 10 do %}
+  line: {* i *}
+{% end %}
+end
+]]
+```
+
+
+#### include(view, context)
+
+This is mainly used with internally with `{(view.hmtl)}`, `{["view.hmtl"]}` and
+with blocks `{-block-name-}..{-block-name-}`. If `context` is not given the context
+used to compile parent view is used. This function will compile the `view` and call
+the resulting function with `context` (or the `context` of parent view if not given).
+
+
+### Other Ways to Extend
+
+While `lua-resty-template` does not have much infrastucture or ways to extend it,
+you still have a few possibilities that you may try.
 
 * Adding methods to global `string`, and `table` types (not encouraged, though)
 * Wrap your values with something before adding them in context (e.g. proxy-table)
@@ -536,13 +1044,15 @@ While `lua-resty-template` does not have much infrastucture or ways to extend it
 * Add local functions either to `template` table or `context` table
 * Use metamethods in your tables
 
-While modifying global types seems convenient, it can have nasty side effects. That's why I suggest you to look at these libraries, and articles first:
+While modifying global types seems convenient, it can have nasty side effects.
+That's why I suggest you to look at these libraries, and articles first:
 
 * Method Chaining Wrapper (http://lua-users.org/wiki/MethodChainingWrapper)
 * Moses (https://github.com/Yonaba/Moses)
 * underscore-lua (https://github.com/jtarchie/underscore-lua)
 
 You could for example add Moses' or Underscore's `_` to template table or context table.
+
 
 ##### Example
 
@@ -552,8 +1062,10 @@ local template = require "resty.template"
 template._ = _
 ```
 
-Then you can use `_` inside your templates. I created one example template helper that can be found from here:
+Then you can use `_` inside your templates. I created one example template helper
+that can be found from here:
 https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template/html.lua
+
 
 ##### Lua
 
@@ -581,6 +1093,7 @@ template.render([[
 })
 ```
 
+
 ##### Output
 
 ```html
@@ -606,11 +1119,15 @@ template.render([[
 </table>
 ```
 
+
 ## Usage Examples
 
 ### Template Including
 
-You may include templates inside templates with `{(template)}` and `{(template, context)}` syntax. The first one uses the current context as a context for included template, and the second one replaces it with a new context. Here is example of using includes and passing a different context to include file:
+You may include templates inside templates with `{(template)}` and `{(template, context)}` syntax.
+The first one uses the current context as a context for included template, and the second one replaces
+it with a new context. Here is example of using includes and passing a different context to include file:
+
 
 ##### Lua
 
@@ -655,11 +1172,14 @@ template.render("include.html", { users = {
 </html>
 ```
 
+
 ### Views with Layouts
 
 Layouts (or Master Pages) can be used to wrap a view inside another view (aka layout).
 
+
 ##### Lua
+
 ```lua
 local template = require "resty.template"
 local layout   = template.new "layout.html"
@@ -685,7 +1205,9 @@ view.message   = "Hello, World!"
 view:render()
 ```
 
+
 ##### view.html
+
 ```html
 <h1>{{message}}</h1>
 ```
@@ -703,9 +1225,11 @@ view:render()
 </html>
 ```
 
+
 ##### Alternatively you can define the layout in a view as well:
 
 ##### Lua
+
 ```lua
 local view     = template.new("view.html", "layout.html")
 view.title     = "Testing lua-resty-template"
@@ -713,20 +1237,26 @@ view.message   = "Hello, World!"
 view:render()
 ```
 
+
 ##### view.html
+
 ```html
 {% layout="section.html" %}
 <h1>{{message}}</h1>
 ```
 
+
 ##### section.html
+
 ```html
 <div id="section">
     {*view*}
 </div>
 ```
 
+
 ##### layout.html
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -739,7 +1269,9 @@ view:render()
 </html>
 ```
 
+
 ##### Output
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -754,11 +1286,15 @@ view:render()
 </html>
 ```
 
+
 ### Using Blocks
 
-Blocks can be used to move different parts of the views to specific places in layouts. Layouts have placeholders for blocks.
+Blocks can be used to move different parts of the views to specific places in layouts. Layouts have placeholders
+for blocks.
+
 
 ##### Lua
+
 ```lua
 local view     = template.new("view.html", "layout.html")
 view.title     = "Testing lua-resty-template blocks"
@@ -767,7 +1303,9 @@ view.keywords  = { "test", "lua", "template", "blocks" }
 view:render()
 ```
 
+
 ##### view.html
+
 ```html
 <h1>{{message}}</h1>
 {-aside-}
@@ -779,7 +1317,9 @@ view:render()
 {-aside-}
 ```
 
+
 ##### layout.html
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -798,6 +1338,7 @@ view:render()
 </body>
 </html>
 ```
+
 
 ##### Output
 
@@ -822,16 +1363,21 @@ view:render()
 </body>
 </html>
 ```
+
+
 ### Grandfather-Father-Son Inheritance
 
 Say you have `base.html`, `layout1.html`, `layout2.html` and `page.html`. You want an inheritance like this:
-`base.html ➡ layout1.html ➡ page.html` or `base.html ➡ layout2.html ➡ page.html` (actually this nesting is not limited to three levels).
+`base.html ➡ layout1.html ➡ page.html` or `base.html ➡ layout2.html ➡ page.html` (actually this nesting is
+not limited to three levels).
+
 
 ##### Lua
 
 ```lua
 local res = require"resty.template".compile("page.html"){} 
 ```
+
 
 ##### base.html
 
@@ -850,6 +1396,7 @@ local res = require"resty.template".compile("page.html"){}
 </html>
 ```
 
+
 ##### layout1.html
 
 ```html
@@ -864,6 +1411,7 @@ local res = require"resty.template".compile("page.html"){}
 {-main-}
 ```
     
+
 ##### layout2.html
 
 ```html
@@ -878,6 +1426,7 @@ local res = require"resty.template".compile("page.html"){}
     <div>I am different from layout1 </div>
 {-main-}
 ```
+
 
 ##### page.html 
 
@@ -902,6 +1451,7 @@ local res = require"resty.template".compile("page.html"){}
 
 Or:
 
+
 ##### page.html
 
 ```html
@@ -923,9 +1473,12 @@ Or:
 {-page_js-}
 ```
     
+
 ### Macros
 
-[@DDarko](https://github.com/DDarko) mentioned in an [issue #5](https://github.com/bungle/lua-resty-template/issues/5) that he has a use case where he needs to have macros or parameterized views. That is a nice feature that you can use with `lua-resty-template`.
+[@DDarko](https://github.com/DDarko) mentioned in an [issue #5](https://github.com/bungle/lua-resty-template/issues/5)
+that he has a use case where he needs to have macros or parameterized views. That is a nice feature that you can
+use with `lua-resty-template`.
 
 To use macros, let's first define some Lua code:
 
@@ -1010,13 +1563,18 @@ This will output:
 <div>b-from-new-context</div>
 ```
 
-Macros are really flexible. You may have form-renderers and other helper-macros to have a reusable and parameterized template output. One thing you should know is that inside code blocks (between `{%` and `%}`) you cannot have `%}`, but you can work around this using string concatenation `"%" .. "}"`.
+Macros are really flexible. You may have form-renderers and other helper-macros to have a reusable and
+parameterized template output. One thing you should know is that inside code blocks (between `{%` and `%}`)
+you cannot have `%}`, but you can work around this using string concatenation `"%" .. "}"`.
+
 
 ### Calling Methods in Templates
 
 You can call string methods (or other table functions) in templates too.
 
+
 ##### Lua
+
 ```lua
 local template = require "resty.template"
 template.render([[
@@ -1024,10 +1582,14 @@ template.render([[
 ]], { header = "hello, world!" })
 ```
 
+
 ##### Output
+
 ```html
 <h1>HELLO, WORLD!</h1>
 ```
+
+
 ### Embedding Angular or other tags / templating inside the Templates
  
 Sometimes you need to mix and match other templates (say client side Javascript templates like Angular) with
@@ -1079,9 +1641,13 @@ You may also use short escaping syntax:
 ...
 ```
 
+
 ### Embedding Markdown inside the Templates
 
-If you want to embed Markdown (and SmartyPants) syntax inside your templates you can do it by using for example [`lua-resty-hoedown`](https://github.com/bungle/lua-resty-hoedown) (it depends on LuaJIT). Here is an example of using that:
+If you want to embed Markdown (and SmartyPants) syntax inside your templates you can do it by using for example
+[`lua-resty-hoedown`](https://github.com/bungle/lua-resty-hoedown) (it depends on LuaJIT). Here is an example of
+using that:
+
 
 ##### Lua
 
@@ -1102,6 +1668,7 @@ Testing Markdown.
 ]=]
 ```
 
+
 ##### Output
 
 ```html
@@ -1114,7 +1681,9 @@ Testing Markdown.
 </html>
 ```
 
-You may also add config parameters that are documented in `lua-resty-hoedown` project. Say you want also to use SmartyPants:
+You may also add config parameters that are documented in `lua-resty-hoedown` project.
+Say you want also to use SmartyPants:
+
 
 ##### Lua
 
@@ -1135,6 +1704,7 @@ Testing Markdown with "SmartyPants"...
 ]=]
 ```
 
+
 ##### Output
 
 ```html
@@ -1147,11 +1717,21 @@ Testing Markdown with "SmartyPants"...
 </html>
 ```
 
-You may also want to add caching layer for your Markdowns, or a helper functions instead of placing Hoedown library directly  as a template helper function in `template`.   
+You may also want to add caching layer for your Markdowns, or a helper functions instead of placing
+Hoedown library directly  as a template helper function in `template`.   
+
 
 ### Lua Server Pages (LSP) with OpenResty
 
-Lua Server Pages or LSPs is similar to traditional PHP or Microsoft Active Server Pages (ASP) where you can just place source code files in your document root (of your web server) and have them processed by compilers of the respective languages (PHP, VBScript, JScript, etc.). You can emulate quite closely this, sometimes called spaghetti-style of develoment, easily with `lua-resty-template`. Those that have been doing ASP.NET Web Forms development, know a concept of Code Behind files. There is something similar, but this time we call it Layout in Front here (you may include Lua modules with normal `require` calls if you wish in LSPs). To help you understand the concepts, let's have a small example:
+Lua Server Pages or LSPs is similar to traditional PHP or Microsoft Active Server Pages (ASP)
+where you can just place source code files in your document root (of your web server) and have
+them processed by compilers of the respective languages (PHP, VBScript, JScript, etc.).
+You can emulate quite closely this, sometimes called spaghetti-style of develoment, easily with
+`lua-resty-template`. Those that have been doing ASP.NET Web Forms development, know a concept
+of Code Behind files. There is something similar, but this time we call it Layout in Front here
+(you may include Lua modules with normal `require` calls if you wish in LSPs). To help you
+understand the concepts, let's have a small example:
+
 
 ##### nginx.conf:
 
@@ -1176,6 +1756,7 @@ We also created location to match all `.lsp` files (or locations), and then we j
 
 Let's imagine that the request is for `index.lsp`.
 
+
 ##### index.lsp
 
 ```html
@@ -1186,7 +1767,11 @@ local title = "Hello, World!"
 <h1>{{title}}</h1>
 ```
 
-Here you can see that this file includes a little bit of a view (`<h1>{{title}}</h1>`) in addition to some Lua code that we want to run. If you want to have a pure code file with Layout in Front, then just don't write any view code in this file. The `layout` variable is already defined in views as documented else where in this documentation. Now let's see the other files too.
+Here you can see that this file includes a little bit of a view (`<h1>{{title}}</h1>`) in addition to some
+Lua code that we want to run. If you want to have a pure code file with Layout in Front, then just don't
+write any view code in this file. The `layout` variable is already defined in views as documented else
+where in this documentation. Now let's see the other files too.
+
 
 ##### layouts/default.lsp
 
@@ -1201,6 +1786,7 @@ Here you can see that this file includes a little bit of a view (`<h1>{{title}}<
 
 Here we have a layout to decorate the `index.lsp`, but we also have include here, so let's look at it.
 
+
 ##### include/header.lsp
 
 ```html
@@ -1210,6 +1796,7 @@ Here we have a layout to decorate the `index.lsp`, but we also have include here
 ```
 
 Static stuff here only.
+
 
 ##### Output
 
@@ -1226,9 +1813,13 @@ The final output will look like this:
 </html>
 ```
 
-As you can see, `lua-resty-template` can be quite flexibile and easy to start with. Just place files under your document root and use the normal save-and-refresh style of development. The server will automatically pick the new files and reload the templates (if the caching is turned of) on save.
+As you can see, `lua-resty-template` can be quite flexibile and easy to start with. Just place
+files under your document root and use the normal save-and-refresh style of development. The
+server will automatically pick the new files and reload the templates (if the caching is turned
+of) on save.
 
-If you want to pass variables to layouts or includes you can add stuff to context table (in the example below see `context.title`):
+If you want to pass variables to layouts or includes you can add stuff to context table (in the
+example below see `context.title`):
 
 ```html
 {%
@@ -1239,17 +1830,22 @@ context.title = 'My Application - ' .. title
 <h1>{{title}}</h1>
 ```
 
+
 ## FAQ
 
 ### How Do I Clear the Template Cache
 
-`lua-resty-template` automatically caches (if caching is enabled) the resulting template functions in `template.cache` table. You can clear the cache by issuing `template.cache = {}`.
+`lua-resty-template` automatically caches (if caching is enabled) the resulting template functions
+in `template.cache` table. You can clear the cache by issuing `template.cache = {}`.
+
 
 ### Where is `lua-resty-template` Used
 
-* [jd.com](http://www.jd.com/) – Jingdong Mall (Chinese: 京东商城; pinyin: Jīngdōng Shāngchéng), formerly 360Buy, is a Chinese electronic commerce company
+* [jd.com](http://www.jd.com/) – Jingdong Mall (Chinese: 京东商城; pinyin: Jīngdōng Shāngchéng),
+formerly 360Buy, is a Chinese electronic commerce company
 
 Please let me know if there are errors or old information in this list. 
+
 
 ## Alternatives
 
@@ -1294,7 +1890,10 @@ You may also look at these (as alternatives, or to mix them with `lua-resty-temp
 * mod_pLua (https://sourceforge.net/p/modplua/wiki/Home/)
 * lapis html generation (http://leafo.net/lapis/reference.html#html-generation)
 
-`lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thank you Tor, and Zed for your earlier contributions.*
+`lua-resty-template` *was originally forked from Tor Hveem's* `tirtemplate.lua` *that he had extracted
+from Zed Shaw's Tir web framework (http://tir.mongrel2.org/). Thank you Tor, and Zed for your earlier
+contributions.*
+
 
 ## Benchmarks
 
@@ -1304,7 +1903,10 @@ https://github.com/bungle/lua-resty-template/blob/master/lib/resty/template/micr
 There is also a regression in LuaJIT that affects the results. If you want your LuaJIT patched against this,
 you need to merge this pull request: https://github.com/LuaJIT/LuaJIT/pull/174.
 
-Others have [reported](https://github.com/bungle/lua-resty-template/issues/21#issuecomment-226786051) that in simple benchmarks running this template engine actually beats Nginx serving static files by a factor of three. So I guess this engine is quite fast. 
+Others have [reported](https://github.com/bungle/lua-resty-template/issues/21#issuecomment-226786051)
+that in simple benchmarks running this template engine actually beats Nginx serving static files by
+a factor of three. So I guess this engine is quite fast. 
+
 
 ##### Lua
 
@@ -1315,109 +1917,139 @@ benchmark.run()
 benchmark.run(100)
 ```
 
-Here are some results from my laptop.
+Here are some results from my desktop (old 2010 Mac Pro):
+```
+<lua|luajit|resty> -e 'require "resty.template.microbenchmark".run()'
+```
+`
+
 
 ##### Lua 5.1.5  Copyright (C) 1994-2012 Lua.org, PUC-Rio
 
 ```
 Running 1000 iterations in each test
-    Parsing Time: 0.015122
-Compilation Time: 0.056889 (template)
-Compilation Time: 0.000283 (template cached)
-  Execution Time: 0.065662 (same template)
-  Execution Time: 0.007642 (same template cached)
-  Execution Time: 0.089193 (different template)
-  Execution Time: 0.012040 (different template cached)
-  Execution Time: 0.089345 (different template, different context)
-  Execution Time: 0.009352 (different template, different context cached)
-      Total Time: 0.345528
+    Parsing Time: 0.010759
+Compilation Time: 0.054640 (template)
+Compilation Time: 0.000213 (template, cached)
+  Execution Time: 0.061851 (same template)
+  Execution Time: 0.006722 (same template, cached)
+  Execution Time: 0.092698 (different template)
+  Execution Time: 0.009537 (different template, cached)
+  Execution Time: 0.092452 (different template, different context)
+  Execution Time: 0.010106 (different template, different context, cached)
+      Total Time: 0.338978
 ```
 
-##### Lua 5.2.3  Copyright (C) 1994-2013 Lua.org, PUC-Rio
 
-```
-Running 1000 iterations in each test
-    Parsing Time: 0.018174
-Compilation Time: 0.057711 (template)
-Compilation Time: 0.000641 (template cached)
-  Execution Time: 0.073134 (same template)
-  Execution Time: 0.008268 (same template cached)
-  Execution Time: 0.073124 (different template)
-  Execution Time: 0.009122 (different template cached)
-  Execution Time: 0.076488 (different template, different context)
-  Execution Time: 0.010532 (different template, different context cached)
-      Total Time: 0.327194
-```
-
-##### Lua 5.3.0  Copyright (C) 1994-2015 Lua.org, PUC-Rio
+##### Lua 5.2.4  Copyright (C) 1994-2015 Lua.org, PUC-Rio
 
 ```
 Running 1000 iterations in each test
-    Parsing Time: 0.018946
-Compilation Time: 0.056762 (template)
-Compilation Time: 0.000529 (template cached)
-  Execution Time: 0.073199 (same template)
-  Execution Time: 0.007849 (same template cached)
-  Execution Time: 0.065949 (different template)
-  Execution Time: 0.008555 (different template cached)
-  Execution Time: 0.076584 (different template, different context)
-  Execution Time: 0.009687 (different template, different context cached)
-      Total Time: 0.318060
+    Parsing Time: 0.011633
+Compilation Time: 0.060598 (template)
+Compilation Time: 0.000243 (template, cached)
+  Execution Time: 0.068009 (same template)
+  Execution Time: 0.007307 (same template, cached)
+  Execution Time: 0.071339 (different template)
+  Execution Time: 0.007150 (different template, cached)
+  Execution Time: 0.066766 (different template, different context)
+  Execution Time: 0.006940 (different template, different context, cached)
+      Total Time: 0.299985
 ```
 
-##### LuaJIT 2.0.2 -- Copyright (C) 2005-2013 Mike Pall. http://luajit.org/
 
-```
-Running 1000 iterations in each test
-    Parsing Time: 0.009124
-Compilation Time: 0.029342 (template)
-Compilation Time: 0.000149 (template cached)
-  Execution Time: 0.035011 (same template)
-  Execution Time: 0.003697 (same template cached)
-  Execution Time: 0.066440 (different template)
-  Execution Time: 0.009159 (different template cached)
-  Execution Time: 0.062997 (different template, different context)
-  Execution Time: 0.005843 (different template, different context cached)
-      Total Time: 0.221762
-```
-
-##### LuaJIT 2.1.0-alpha -- Copyright (C) 2005-2014 Mike Pall. http://luajit.org/
+##### Lua 5.3.5  Copyright (C) 1994-2018 Lua.org, PUC-Rio
 
 ```
 Running 1000 iterations in each test
-    Parsing Time: 0.003742
-Compilation Time: 0.028227 (template)
-Compilation Time: 0.000182 (template cached)
-  Execution Time: 0.034940 (same template)
-  Execution Time: 0.002974 (same template cached)
-  Execution Time: 0.067101 (different template)
-  Execution Time: 0.011551 (different template cached)
-  Execution Time: 0.071506 (different template, different context)
-  Execution Time: 0.007749 (different template, different context cached)
-      Total Time: 0.227972
+    Parsing Time: 0.012458
+Compilation Time: 0.050013 (template)
+Compilation Time: 0.000249 (template, cached)
+  Execution Time: 0.057579 (same template)
+  Execution Time: 0.006959 (same template, cached)
+  Execution Time: 0.065352 (different template)
+  Execution Time: 0.007133 (different template, cached)
+  Execution Time: 0.060965 (different template, different context)
+  Execution Time: 0.007726 (different template, different context, cached)
+      Total Time: 0.268434
 ```
 
-##### resty (resty 0.01, nginx version: openresty/1.7.7.2)
+
+##### Lua 5.4.0  Copyright (C) 1994-2019 Lua.org, PUC-Rio
 
 ```
 Running 1000 iterations in each test
-    Parsing Time: 0.003726
-Compilation Time: 0.035392 (template)
-Compilation Time: 0.000112 (template cached)
-  Execution Time: 0.037252 (same template)
-  Execution Time: 0.003590 (same template cached)
-  Execution Time: 0.058258 (different template)
-  Execution Time: 0.009501 (different template cached)
-  Execution Time: 0.059082 (different template, different context)
-  Execution Time: 0.006612 (different template, different context cached)
-      Total Time: 0.213525
+    Parsing Time: 0.009466
+Compilation Time: 0.053116 (template)
+Compilation Time: 0.000209 (template, cached)
+  Execution Time: 0.059017 (same template)
+  Execution Time: 0.006129 (same template, cached)
+  Execution Time: 0.061882 (different template)
+  Execution Time: 0.006613 (different template, cached)
+  Execution Time: 0.059104 (different template, different context)
+  Execution Time: 0.005761 (different template, different context, cached)
+      Total Time: 0.261297
+```
+
+
+##### LuaJIT 2.0.5 -- Copyright (C) 2005-2017 Mike Pall. http://luajit.org/
+
+```
+Running 1000 iterations in each test
+    Parsing Time: 0.005198
+Compilation Time: 0.029687 (template)
+Compilation Time: 0.000082 (template, cached)
+  Execution Time: 0.033824 (same template)
+  Execution Time: 0.003130 (same template, cached)
+  Execution Time: 0.075899 (different template)
+  Execution Time: 0.007027 (different template, cached)
+  Execution Time: 0.070269 (different template, different context)
+  Execution Time: 0.007456 (different template, different context, cached)
+      Total Time: 0.232572
+```
+
+
+##### LuaJIT 2.1.0-beta3 -- Copyright (C) 2005-2017 Mike Pall. http://luajit.org/
+
+```
+Running 1000 iterations in each test
+    Parsing Time: 0.003647
+Compilation Time: 0.027145 (template)
+Compilation Time: 0.000083 (template, cached)
+  Execution Time: 0.034685 (same template)
+  Execution Time: 0.002801 (same template, cached)
+  Execution Time: 0.073466 (different template)
+  Execution Time: 0.010836 (different template, cached)
+  Execution Time: 0.068790 (different template, different context)
+  Execution Time: 0.009818 (different template, different context, cached)
+      Total Time: 0.231271
+```
+
+
+##### resty (resty 0.23, nginx version: openresty/1.15.8.2)
+
+```
+Running 1000 iterations in each test
+    Parsing Time: 0.003980
+Compilation Time: 0.025983 (template)
+Compilation Time: 0.000066 (template, cached)
+  Execution Time: 0.032752 (same template)
+  Execution Time: 0.002740 (same template, cached)
+  Execution Time: 0.036111 (different template)
+  Execution Time: 0.005559 (different template, cached)
+  Execution Time: 0.032453 (different template, different context)
+  Execution Time: 0.006057 (different template, different context, cached)
+      Total Time: 0.145701
 ```
 
 I have not yet compared the results against the alternatives.
 
+
 ## Changes
 
-The changes of every release of this module is recorded in [Changes.md](https://github.com/bungle/lua-resty-template/blob/master/Changes.md) file.
+The changes of every release of this module is recorded in
+[Changes.md](https://github.com/bungle/lua-resty-template/blob/master/Changes.md) file.
+
 
 ## See Also
 
@@ -1426,12 +2058,21 @@ The changes of every release of this module is recorded in [Changes.md](https://
 * [lua-resty-session](https://github.com/bungle/lua-resty-session) — Session library
 * [lua-resty-validation](https://github.com/bungle/lua-resty-validation) — Validation and filtering library
 
+
+## Roadmap
+
+Some things I and the community wishes to be added:
+
+- Better debugging capabilities and better error messages
+- Proper sandboxing
+
+
 ## License
 
 `lua-resty-template` uses three clause BSD license (because it was originally forked from one that uses it).
 
 ```
-Copyright (c) 2014 - 2017, Aapo Talvensaari
+Copyright (c) 2014 - 2020, Aapo Talvensaari
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
