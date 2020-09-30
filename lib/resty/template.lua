@@ -291,7 +291,7 @@ local function new(template, safe)
                 render = function(self, context)
                     context = context or self
                     context.blocks = context.blocks or {}
-                    context.view = function() return template.process(view, context) end
+                    context.view = function(ctx) return template.process(view, ctx or context) end
                     layout.blocks = context.blocks or {}
                     layout.view = context.view or EMPTY
                     layout:render()
