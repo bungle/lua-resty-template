@@ -314,7 +314,7 @@ local function new(template, safe)
                 process = function(self, context)
                     context = context or self
                     context.blocks = context.blocks or {}
-                    context.view = function() return template.process(view, context) end
+                    context.view = function(ctx) return template.process(view, ctx or context) end
                     return template.process(layout, context)
                 end
             end
