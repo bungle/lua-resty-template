@@ -2066,7 +2066,7 @@ Some things I and the community wishes to be added:
 `lua-resty-template` uses three clause BSD license (because it was originally forked from one that uses it).
 
 ```
-Copyright (c) 2014 - 2020, Aapo Talvensaari
+Copyright (c) 2014 - 2022, Aapo Talvensaari
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
