@@ -1159,7 +1159,7 @@ template.render("include.html", { users = {
 <li>User {{name}} is of age {{age}}</li>
 ```
 
-##### Outut
+##### Output
 
 ```html
 <html>
