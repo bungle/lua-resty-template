@@ -649,7 +649,9 @@ local function echo(...) for i=1,select("#", ...) do ___[#___+1] = tostring(sele
 
     function template.render(view, context, cache_key, plain)
         assert(view, "view was not provided for template.render(view, context, cache_key, plain)")
-        template.print(template.process(view, context, cache_key, plain))
+        local body = template.process(view, context, cache_key, plain)
+        ngx.header["Content-Length"] = #body
+        template.print(body)
     end
 
     function template.render_file(view, context, cache_key)
