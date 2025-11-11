@@ -1,29 +1,54 @@
+-- FUNCTION POLLUTION PROTECTION
+local getmetatable = getmetatable
 local setmetatable = setmetatable
-local loadstring = loadstring
 local tostring = tostring
-local setfenv = setfenv
-local require = require
 local concat = table.concat
 local assert = assert
-local write = io.write
 local pcall = pcall
-local phase
-local open = io.open
-local load = load
 local type = type
-local dump = string.dump
 local find = string.find
 local gsub = string.gsub
 local byte = string.byte
-local null
 local sub = string.sub
 local ngx = ngx
-local jit = jit
-local var
 
-local _VERSION = _VERSION
+-- NOT SANDBOX-PROTECTED:
+local loadstring = loadstring
+local setfenv = setfenv
+local load = load
+
+-- SANDBOX-PROTECTED: STUBBED LATER
+local require = require
+local dump = string.dump
 local _ENV = _ENV -- luacheck: globals _ENV
 local _G = _G
+
+-- SANDBOXING: PRESENCE CHECKS
+local function is_callable(value)
+    if type(value) == "function" then
+        return true
+    end
+    local mt = getmetatable(mt.__call)
+    return mt and type(mt.__call) == "function"
+end
+local IO_WRITE_PRESENT    = io and is_callable(io.write)
+local IO_OPEN_PRESENT     = io and is_callable(io.open)
+local SETFENV_PRESENT     = is_callable(setfenv)
+local LOADSTRING_PRESENT  = is_callable(loadstring)
+local LOAD_PRESENT        = is_callable(load)
+local REQUIRE_PRESENT     = is_callable(require)
+local STRING_DUMP_PRESENT = is_callable(dump)
+local _ENV_PRESENT        = not not _ENV
+local _G_PRESENT          = not not _G
+
+-- SANDBOX-PROTECTED: STUBBED NOW
+local write_print = (IO_WRITE_PRESENT and io.open) or function(...) print(table.concat({...}, "")) end
+local open = (IO_OPEN_PRESENT and io.open) or function(filename, mode) return nil, "io.open is not permitted in this environment" end
+
+-- NORMAL LOCALS
+local phase
+local null
+local var
 
 local HTML_ENTITIES = {
     ["&"] = "&amp;",
@@ -66,13 +91,17 @@ local PERCNT = byte("%")
 local EMPTY  = ""
 
 local VIEW_ENV
-if _VERSION == "Lua 5.1" then
+if _G_PRESENT then
     VIEW_ENV = { __index = function(t, k)
         return t.context[k] or t.template[k] or _G[k]
     end }
-else
+elseif _ENV_PRESENT
     VIEW_ENV = { __index = function(t, k)
         return t.context[k] or t.template[k] or _ENV[k]
+    end }
+else -- optimized sandboxed def
+    VIEW_ENV = { __index = function(t, k)
+        return t.context[k] or t.template[k]
     end }
 end
 
@@ -127,7 +156,7 @@ end
 local print_view
 local load_view
 if ngx then
-    print_view = ngx.print or write
+    print_view = ngx.print or write_print
 
     var = ngx.var
     null = ngx.null
@@ -177,7 +206,7 @@ if ngx then
         end
     end
 else
-    print_view = write
+    print_view = write_print
     load_view = function(template)
         return function(view, plain)
             if plain == true then return view end
@@ -201,13 +230,13 @@ local function load_string(func)
 end
 
 local loader
-if jit or _VERSION ~= "Lua 5.1" then
+if LOAD_PRESENT then
     loader = function(template)
         return function(view)
             return assert(load(view, nil, nil, setmetatable({ template = template }, VIEW_ENV)))
         end
     end
-else
+elseif LOADSTRING_PRESENT
     loader = function(template)
         return function(view)
             local func = assert(loadstring(view))
@@ -215,6 +244,8 @@ else
             return func
         end
     end
+else
+    error("Dynamic template loading is not supported in this Lua environment")
 end
 
 local function visit(visitors, content, tag, name)
@@ -360,22 +391,38 @@ local function new(template, safe)
         })
     end
 
-    function template.precompile(view, path, strip, plain)
-        local chunk = dump(template.compile(view, nil, plain), strip ~= false)
-        if path then
-            local file = open(path, "wb")
-            file:write(chunk)
-            file:close()
+    if STRING_DUMP_PRESENT then
+        if IO_OPEN_PRESENT then
+            function template.precompile(view, path, strip, plain)
+                local chunk = dump(template.compile(view, nil, plain), strip ~= false)
+                if path then
+                    local file = open(path, "wb")
+                    file:write(chunk)
+                    file:close()
+                end
+                return chunk
+            end
+        
+            function template.precompile_string(view, path, strip)
+                return template.precompile(view, path, strip, true)
+            end
+        
+            function template.precompile_file(view, path, strip)
+                return template.precompile(view, path, strip, false)
+            end
+        else
+            function template.precompile(view, strip, plain)
+                return dump(template.compile(view, nil, plain), strip ~= false)
+            end
+        
+            function template.precompile_string(view, strip)
+                return template.precompile(view, strip, true)
+            end
+        
+            function template.precompile_file(view, strip)
+                return template.precompile(view, strip, false)
+            end
         end
-        return chunk
-    end
-
-    function template.precompile_string(view, path, strip)
-        return template.precompile(view, path, strip, true)
-    end
-
-    function template.precompile_file(view, path, strip)
-        return template.precompile(view, path, strip, false)
     end
 
     function template.compile(view, cache_key, plain)

@@ -1,12 +1,17 @@
 # lua-resty-template
 
-**lua-resty-template** is a compiling (1) (HTML) templating engine for Lua and OpenResty.
+**lua-resty-template** is a compiling (1, 2, 3) and transpiling (HTML) templating engine for Lua and OpenResty with sandboxing in mind (2, 3, 4).
 
-(1) with compilation we mean that templates are translated to Lua functions that you may call or `string.dump`
-as a binary bytecode blobs to disk that can be later utilized with `lua-resty-template` or basic `load` and
-`loadfile` standard Lua functions (see also [Template Precompilation](#template-precompilation)). Although,
+(1) with compilation we mean that templates are JIT- or (2) AOT-compiled to Lua functions that you may call (JIT) or `string.dump`
+as a binary bytecode blobs to disk (AOT) (2) that can be later utilized with `lua-resty-template` or basic `load` and
+`loadfile` standard Lua functions (see also [Template Precompilation](#template-precompilation) and (2) for constraints). Although,
 generally you don't need to do that as `lua-resty-template` handles this behind the scenes.
 
+(2) in sandboxed environments (such as wasm or luau), AOT-compiling (`template.precompile`) may not be possible due to the possible absence of `string.dump`. In such cases, `template.precompile` is not available and this library can just be used for its JIT-compilation or transpilation capability in your projects.
+
+(3) as this library is a JIT-based compiler, the minimum sandbox requires JIT-support with `load` (or `loadstring` with `setfenv`).
+
+(4) graceful protections and stubs for sandboxed IO are provided as file-loading/writing may be missing in your environment.
 
 ## Hello World with lua-resty-template
 
@@ -85,9 +90,9 @@ template.render([[
   - [string template.parse(view, plain)](#string-templateparseview-plain)
   - [string template.parse_string(view, plain)](#string-templateparse_stringview-plain)
   - [string template.parse_file(view, plain)](#string-templateparse_fileview-plain)
-  - [string template.precompile(view, path, strip)](#string-templateprecompileview-path-strip)
-  - [string template.precompile_string(view, path, strip)](#string-templateprecompile_stringview-path-strip)
-  - [string template.precompile_file(view, path, strip)](#string-templateprecompile_fileview-path-strip)  
+  - [string template.precompile(view, path, strip, plain) **_\*(4)_**](#string-templateprecompileview-path-strip-plain)
+  - [string template.precompile_string(view, path, strip) **_\*(4)_**](#string-templateprecompile_stringview-path-strip)
+  - [string template.precompile_file(view, path, strip) **_\*(4)_**](#string-templateprecompile_fileview-path-strip)  
   - [string template.load(view, plain)](#string-templateloadview-plain)
   - [string template.load_string(view)](#string-templateload_stringview)
   - [string template.load_file(view)](#string-templateload_fileview)
@@ -536,7 +541,7 @@ You may want to flush cache with `template.cache = {}` to ensure that your templ
 
 #### function, boolean template.compile(view, cache_key, plain)
 
-Parses, compiles and caches (if caching is enabled) a template and returns the compiled template as a function
+Parses, JIT-compiles (1) and caches (if caching is enabled) a template and returns the JIT-compiled (1) template as a function
 that takes context as a parameter and returns rendered template as a string. Optionally you may pass `cache_key` that
 is used as a cache key. If cache key is not provided `view` wil be used as a cache key. If cache key is `no-cache`
 the template cache will not be checked and the resulting function will not be cached. You may also optionally
@@ -727,7 +732,7 @@ Calculation: 10
 
 #### string template.process(view, context, cache_key, plain)
 
-Parses, compiles, caches (if caching is enabled) and returns output as string. You may optionally also
+Parses, JIT-compiles (1), caches (if caching is enabled) and returns output as string. You may optionally also
 pass `cache_key` that is used as a cache key. If `plain` evaluates to `true`, the `view` is considered
 to be plain string template (`template.load` and binary chunk detection is skipped on `template.parse`).
 If `plain` is `false"` the template is considered to be a file, and all the issues with file reading are
@@ -751,7 +756,7 @@ This just calls `template.process(view, context, cache_key, false)`
 
 #### template.render(view, context, cache_key, plain)
 
-Parses, compiles, caches (if caching is enabled) and outputs template either with `ngx.print` if available,
+Parses, JIT-compiles, caches (if caching is enabled) and outputs template either with `ngx.print` if available,
 or `print`. You may optionally also pass `cache_key` that is used as a cache key. If `plain` evaluates to
 `true`, the `view` is considered to be plain string template (`template.load` and binary chunk detection
 is skipped on `template.parse`). If `plain` is `false"` the template is considered to be a file, and
@@ -776,7 +781,7 @@ This just calls `template.render(view, context, cache_key, false)`
 
 #### string template.parse(view, plain)
 
-Parses template file or string, and generates a parsed template string. This may come useful when debugging
+Parses template file or string by transpiling it to Lua. This may come useful when debugging
 templates. You should note that if you are trying to parse a binary chunk (e.g. one returned with
 `template.compile`), `template.parse` will return that binary chunk as is. If `plain` evaluates to
 `true`, the `view` is considered to be plain string template (`template.load` and binary chunk detection
@@ -801,14 +806,15 @@ This just calls `template.parse(view, plain, false)`
 
 
 #### string template.precompile(view, path, strip, plain)
+- If `io.open` is unavailable (4): `string template.precompile(view, strip, plain)`
 
-Precompiles template as a binary chunk. This binary chunk can be written out as a file (and you may use it
+(2) AOT-compiles template to a bytecode binary chunk. This binary chunk can be written out as a file (and you may use it
 directly with Lua's `load` and `loadfile`). For convenience you may optionally specify `path` argument to
 output binary chunk to file. You may also supply `strip` parameter with value of `false` to make precompiled
 templates to have debug information as well (defaults to `true`). The last parameter `plain` means that
 should complilation treat the `view` as `string` (`plain = true`) or as `file path` (`plain = false`) or
 try first as a file, and fallback to `string` (`plain = nil`). In case the `plain=false` (a file) and there
-is error with `file io` the function will also error with an assertion failure. 
+is error with `file io` the function will also error with an assertion failure.
 
 ```lua
 local view = [[
@@ -836,11 +842,13 @@ template.render("precompiled-bin.html", {
 
 
 #### string template.precompile_string(view, path, strip)
+- If `io.open` is unavailable (4): `string template.precompile_string(view, strip)`
 
 This just calls `template.precompile(view, path, strip, true)`.
 
 
 #### string template.precompile_file(view, path, strip)
+- If `io.open` is unavailable (4): `string template.precompile_file(view, path, strip)`
 
 This just calls `template.precompile(view, path, strip, false)`.
 
@@ -949,8 +957,9 @@ end
 
 
 ## Template Precompilation
+- *see (2) for sandbox constraints*
 
-`lua-resty-template` supports template precompilation. This can be useful when you want to
+`lua-resty-template` supports template precompilation (AOT-compiling) (2). This can be useful when you want to
 skip template parsing (and Lua interpretation) in production or if you do not want your
 templates distributed as plain text files on production servers. Also by precompiling,
 you can ensure that your templates do not contain something, that cannot be compiled
