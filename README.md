@@ -108,6 +108,7 @@ template.render([[
    - [Embedding Angular or other tags / templating inside the Templates](#embedding-angular-or-other-tags--templating-inside-the-templates)
    - [Embedding Markdown inside the Templates](#embedding-markdown-inside-the-templates)
    - [Lua Server Pages (LSP) with OpenResty](#lua-server-pages-lsp-with-openresty)
+- [Editor Support](#editor-support)
 - [FAQ](#faq)
 - [Alternatives](#alternatives)
 - [Benchmarks](#benchmarks)
@@ -1829,6 +1830,17 @@ context.title = 'My Application - ' .. title
 %}
 <h1>{{title}}</h1>
 ```
+
+
+## Editor Support
+
+### Visual Studio Code
+
+* **[Lua Server Pages (lua-resty-template)](https://github.com/xnscu/vscode-lua-resty-template)** — VS Code extension providing full syntax highlighting, intelligent formatting, snippets, and hover documentation for `lua-resty-template` (`.lsp` files).
+  * **Syntax Highlighting**: Supports template expressions (`{{ ... }}`, `{* ... *}`), Lua statements and code blocks (`{% ... %}`), includes (`{( ... )}`, `{[ ... ]}`), blocks (`{-block-}`, `{-raw-}`, `{-verbatim-}`), and comments (`{# ... #}`) embedded in HTML, CSS, and JavaScript.
+  * **Intelligent Formatter / Beautifier**: Indents mixed HTML and Lua control flow (`if`, `for`, `while`, `repeat`, `else`, `end`), normalizes tag spacing, and formats multiline Lua code inside template tags.
+  * **Snippets & Hover Documentation**: Snippets for common control structures and boilerplate page templates, plus hover documentation for built-in helpers and syntax.
+  * *Contributions, feedback, and suggestions are welcome to help improve it together!*
 
 
 ## FAQ
